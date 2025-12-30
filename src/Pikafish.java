@@ -12,13 +12,24 @@ public class Pikafish {
         catch(final IOException exception){
             throw new RuntimeException(exception);
         }
-        //TODO: set # of threads and hash size by sending commands to process
         this.sendCommand("uci");
-        this.waitFor("uciok");
+        this.waitForResponseContaining("uciok");
         this.sendCommand("isready");
-        this.waitFor("readyok");
+        this.waitForResponseContaining("readyok");
         this.sendCommand("setoption name Threads value " + options.getNumThreads());
         this.sendCommand("setoption name Hash value " + options.getHashSizeMB());
+    }
+
+    /**
+     * Blocks until given keyword appears in the process's output buffer
+     * @param keyword Keyword to wait for
+     */
+    private void waitForResponseContaining(final String keyword) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        reader.lines()
+                .filter(line -> line.contains(keyword))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Keyword not found in process output"));
     }
 
     /**
@@ -26,16 +37,15 @@ public class Pikafish {
      * @param command command to send to Pikafish. See Stockfish documentation for valid commands.
      * @return full output of Pikafish in response to the given command.
      */
-    private synchronized String sendCommand(final String command){
+    private synchronized void sendCommand(final String command){
         final OutputStream outputStream = this.process.getOutputStream();
-        final PrintWriter printWriter = new PrintWriter(outputStream, true);
+        final PrintWriter printWriter = new PrintWriter(outputStream);
         printWriter.println(command);
-        printWriter.close();
-        return null;
+        printWriter.flush();
     }
 
     public synchronized Move getBestMove(final Board board){
-
+        return null;
     }
 
     public static synchronized Pikafish getInstance(){
