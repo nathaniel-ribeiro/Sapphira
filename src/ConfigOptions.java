@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.util.Properties;
 
-public class ConfigOptions {
+public final class ConfigOptions {
     private final String pathToExecutable;
     private final int numThreads;
     private final int hashSizeMB;
