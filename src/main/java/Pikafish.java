@@ -30,9 +30,9 @@ public final class Pikafish {
      */
     private void waitForResponseContaining(final String keyword) {
         final String ignored = this.bufferedReader.lines()
-                                    .filter(line -> line.contains(keyword))
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("Keyword not found in process output"));
+                                                .filter(line -> line.contains(keyword))
+                                                .findFirst()
+                                                .orElseThrow(RuntimeException::new);
     }
 
     /**
@@ -66,7 +66,8 @@ public final class Pikafish {
     }
 
     public static synchronized Pikafish getInstance(){
-        if(INSTANCE != null) return INSTANCE;
+        if(INSTANCE != null)
+            return INSTANCE;
         INSTANCE = new Pikafish(ConfigOptions.getInstance());
         return INSTANCE;
     }
