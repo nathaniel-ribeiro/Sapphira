@@ -5,7 +5,7 @@ public final class Board {
     private final String fen;
     private final Alliance alliance;
     private final int pliesSinceACapture;
-    private final int pliesSinceStart;
+    private final int fullMoveNumber;
 
     public Board(final String fen){
         // NOTE: this check for valid FEN is not rigorous.
@@ -17,31 +17,31 @@ public final class Board {
         this.fen = fen;
         this.alliance = matcher.group(2).equals("w") ? Alliance.RED : Alliance.BLACK;
         this.pliesSinceACapture = Integer.parseInt(matcher.group(3));
-        this.pliesSinceStart = Integer.parseInt(matcher.group(4));
+        this.fullMoveNumber = Integer.parseInt(matcher.group(4));
     }
 
     public String getFen() {
-        return fen;
+        return this.fen;
     }
 
     public Alliance getAlliance() {
-        return alliance;
+        return this.alliance;
     }
 
     public int getPliesSinceACapture() {
-        return pliesSinceACapture;
+        return this.pliesSinceACapture;
     }
 
-    public int getPliesSinceStart() {
-        return pliesSinceStart;
+    public int getFullMoveNumber() {
+        return this.fullMoveNumber;
     }
 
     @Override
     public String toString() {
-        return "Board{" + "fen='" + fen + '\'' +
-                ", alliance=" + alliance +
-                ", pliesSinceACapture=" + pliesSinceACapture +
-                ", pliesSinceStart=" + pliesSinceStart +
+        return "Board{" + "fen='" + this.fen + '\'' +
+                ", alliance=" + this.alliance +
+                ", pliesSinceACapture=" + this.pliesSinceACapture +
+                ", pliesSinceStart=" + this.fullMoveNumber +
                 '}';
     }
 
@@ -52,7 +52,7 @@ public final class Board {
         if(other instanceof Board otherBoard){
             return this.fen.equals(otherBoard.fen) &&
                     this.alliance == otherBoard.alliance &&
-                    this.pliesSinceStart == otherBoard.pliesSinceStart &&
+                    this.fullMoveNumber == otherBoard.fullMoveNumber &&
                     this.pliesSinceACapture == otherBoard.pliesSinceACapture;
         }
         return false;
@@ -63,7 +63,7 @@ public final class Board {
         int result = this.fen.hashCode();
         result = result * 31 + this.alliance.hashCode();
         result = result * 31 + Integer.hashCode(this.pliesSinceACapture);
-        result = result * 31 + Integer.hashCode(this.pliesSinceStart);
+        result = result * 31 + Integer.hashCode(this.fullMoveNumber);
         return result;
     }
 }
