@@ -47,19 +47,21 @@ public final class Pikafish {
         printWriter.flush();
     }
 
-    public synchronized String getBestMove(final String fen) throws IOException {
-        this.sendCommand("set position fen " + fen);
+    public synchronized Move getBestMove(final Board board) throws IOException {
+        this.sendCommand("set position fen " + board.getFen());
         //TODO: this is an arbitrary default thinking limit
         this.sendCommand("go movetime 500");
         String line;
         while ((line = this.bufferedReader.readLine()) != null) {
             if (line.startsWith("bestmove")) {
-                final Pattern pattern = Pattern.compile("bestmove (([a-i]\\d){2}) ponder (([a-i]\\d){2})");
+                final Pattern pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d) ponder ([a-i]\\d)([a-i]\\d)");
                 final Matcher matcher = pattern.matcher(line);
                 boolean b = matcher.matches();
                 // group 0 is the whole line, group 1 is the best move group
                 if (!b) throw new RuntimeException("No best move could be found");
-                return matcher.group(1);
+                final String srcSquare = matcher.group(1);
+                final String destSquare = matcher.group(2);
+                return new Move(srcSquare, destSquare);
             }
         }
         throw new RuntimeException("No best move could be found");
