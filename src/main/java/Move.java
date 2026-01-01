@@ -21,22 +21,4 @@ public record Move(String srcSquare, String destSquare) {
     public String toString() {
         return this.srcSquare + this.destSquare;
     }
-
-    @Override
-    public boolean equals(final Object other) {
-        if (other == null) return false;
-        if (this == other) return true;
-        if (other instanceof Move otherMove) {
-            return this.srcSquare.equalsIgnoreCase(otherMove.srcSquare) &&
-                    this.destSquare.equalsIgnoreCase(otherMove.destSquare);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = this.srcSquare.toLowerCase().hashCode();
-        result = result * 31 + this.destSquare.toLowerCase().hashCode();
-        return result;
-    }
 }
