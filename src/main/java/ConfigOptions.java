@@ -8,10 +8,6 @@ public final class ConfigOptions {
     private static ConfigOptions INSTANCE;
 
     private ConfigOptions(final String pathToExecutable, final int numThreads, final int hashSizeMB){
-        if(numThreads < 1 || numThreads > 1024)
-            throw new IllegalArgumentException("Num threads must be between 1 and 1024.");
-        if(hashSizeMB < 1 || hashSizeMB > 33554432)
-            throw new IllegalArgumentException("Hash size (in MB) must be between 1 and 33554432.");
         this.pathToExecutable = pathToExecutable;
         this.numThreads = numThreads;
         this.hashSizeMB = hashSizeMB;

@@ -7,8 +7,17 @@ public final class Pikafish {
     private final BufferedReader bufferedReader;
     private static Pikafish INSTANCE;
 
-    private Pikafish(final ConfigOptions options){
-        final ProcessBuilder processBuilder = new ProcessBuilder(options.getPathToExecutable());
+    private static final int MIN_THREADS = 1;
+    private static final int MAX_THREADS = 1024;
+    private static final int MIN_HASH_SIZE_MB = 1;
+    private static final int MAX_HASH_SIZE_MB = 33554432;
+
+    private Pikafish(final String pathToExecutable, final int numThreads, final int hashSizeMB){
+        if(numThreads < MIN_THREADS || numThreads > MAX_THREADS)
+            throw new IllegalArgumentException(String.format("Num threads must be between %d and %d.", MIN_THREADS, MAX_THREADS));
+        if(hashSizeMB < MIN_HASH_SIZE_MB || hashSizeMB > MAX_HASH_SIZE_MB)
+            throw new IllegalArgumentException(String.format("Hash size (in MB) must be between %d and %d.", MIN_HASH_SIZE_MB, MAX_HASH_SIZE_MB));
+        final ProcessBuilder processBuilder = new ProcessBuilder(pathToExecutable);
         try{
             this.process = processBuilder.start();
             this.bufferedReader = new BufferedReader(new InputStreamReader(this.process.getInputStream()));
@@ -20,8 +29,8 @@ public final class Pikafish {
         this.waitForResponseContaining("uciok");
         this.sendCommand("isready");
         this.waitForResponseContaining("readyok");
-        this.sendCommand("setoption name Threads value " + options.getNumThreads());
-        this.sendCommand("setoption name Hash value " + options.getHashSizeMB());
+        this.sendCommand("setoption name Threads value " + numThreads);
+        this.sendCommand("setoption name Hash value " + hashSizeMB);
     }
 
     /**
@@ -70,7 +79,8 @@ public final class Pikafish {
     public static synchronized Pikafish getInstance(){
         if(INSTANCE != null)
             return INSTANCE;
-        INSTANCE = new Pikafish(ConfigOptions.getInstance());
+        final ConfigOptions options = ConfigOptions.getInstance();
+        INSTANCE = new Pikafish(options.getPathToExecutable(), options.getNumThreads(), options.getHashSizeMB());
         return INSTANCE;
     }
 }

@@ -1,7 +1,7 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Board {
+public final class Board {
     private final String fen;
     private final Alliance alliance;
     private final int pliesSinceACapture;
