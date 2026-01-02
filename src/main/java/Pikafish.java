@@ -5,13 +5,33 @@ import java.util.regex.Pattern;
 public final class Pikafish {
     private final BufferedReader bufferedReader;
     private final PrintWriter printWriter;
-    private static Pikafish INSTANCE;
+    private final int numThreads;
+    private final int hashSizeMiB;
+    private final int nodesToSearch;
 
-    private static final int NUM_THREADS = 15;
-    private static final int HASH_SIZE_MB = 1000;
-    private static final int NODES_TO_SEARCH = 1000000;
+    private static final int MIN_THREADS = 1;
+    private static final int MAX_THREADS = 1024;
+    private static final int MIN_HASH_SIZE_MIB = 1;
+    private static final int MAX_HASH_SIZE_MIB = 33554432;
+    private static final int MIN_NODES_TO_SEARCH = 1;
 
-    private Pikafish(final String pathToExecutable){
+    public static final Pikafish INSTANCE = new Pikafish(ConfigOptions.getInstance().getPathToExecutable(),
+                                                          ConfigOptions.getInstance().getNumThreads(),
+                                                          ConfigOptions.getInstance().getHashSizeMiB(),
+                                                          ConfigOptions.getInstance().getNodesToSearch());
+
+    private Pikafish(final String pathToExecutable, final int numThreads, final int hashSizeMiB, final int nodesToSearch){
+        if(numThreads < MIN_THREADS || numThreads > MAX_THREADS)
+            throw new IllegalArgumentException(String.format("Number of threads must be between %d and %d", MIN_THREADS, MAX_THREADS));
+        if(hashSizeMiB < MIN_HASH_SIZE_MIB || hashSizeMiB > MAX_HASH_SIZE_MIB)
+            throw new IllegalArgumentException(String.format("Hash size in MiB must be between %d and %d", MIN_HASH_SIZE_MIB, MAX_HASH_SIZE_MIB));
+        if(nodesToSearch < MIN_NODES_TO_SEARCH)
+            throw new IllegalArgumentException(String.format("Nodes to search must be at least %d", MIN_NODES_TO_SEARCH));
+
+        this.numThreads = numThreads;
+        this.hashSizeMiB = hashSizeMiB;
+        this.nodesToSearch = nodesToSearch;
+
         final ProcessBuilder processBuilder = new ProcessBuilder(pathToExecutable);
         try{
             final Process process = processBuilder.start();
@@ -26,8 +46,8 @@ public final class Pikafish {
         this.waitForResponseContaining("uciok");
         this.sendCommand("isready");
         this.waitForResponseContaining("readyok");
-        this.sendCommand("setoption name Threads value " + NUM_THREADS);
-        this.sendCommand("setoption name Hash value " + HASH_SIZE_MB);
+        this.sendCommand("setoption name Threads value " + this.numThreads);
+        this.sendCommand("setoption name Hash value " + this.hashSizeMiB);
     }
 
     /**
@@ -56,7 +76,7 @@ public final class Pikafish {
 
     public Move getBestMove(final Board board) throws IOException {
         this.sendCommand("position fen " + board.getFen());
-        this.sendCommand("go nodes " + NODES_TO_SEARCH);
+        this.sendCommand("go nodes " + this.nodesToSearch);
         String line;
         while ((line = this.bufferedReader.readLine()) != null) {
             if (line.startsWith("bestmove")) {
@@ -71,13 +91,5 @@ public final class Pikafish {
             }
         }
         throw new RuntimeException("No best move could be found");
-    }
-
-    public static Pikafish getInstance(){
-        if(INSTANCE != null)
-            return INSTANCE;
-        final ConfigOptions options = ConfigOptions.getInstance();
-        INSTANCE = new Pikafish(options.getPathToExecutable());
-        return INSTANCE;
     }
 }
