@@ -1,4 +1,7 @@
+import com.google.common.collect.ImmutableList;
+
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,10 +81,6 @@ public final class Pikafish {
         return new Move(srcSquare, destSquare);
     }
 
-    public Board makeMove(final Board board, final Move move){
-        return this.makeMoves(board, List.of(move));
-    }
-
     public Board makeMoves(final Board board, final List<Move> moves){
         final String movesString = String.join(" ", moves.stream().map(Move::toString).toList());
         this.writer.println("position fen " + board.getFen() + " moves " + movesString);
@@ -103,5 +102,11 @@ public final class Pikafish {
         this.writer.println("go nodes " + this.nodesToSearch);
         //TODO
         return 0;
+    }
+
+    public List<Move> getLegalMoves(final Board board) {
+        //TODO
+        List<Move> moves = new ArrayList<>();
+        return ImmutableList.copyOf(moves);
     }
 }
