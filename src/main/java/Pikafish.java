@@ -39,11 +39,6 @@ public final class Pikafish {
                                                 .orElseThrow(RuntimeException::new);
     }
 
-    /**
-     * Send an arbitrary command to the running Pikafish process (thread-safe).
-     * @param command command to send to Pikafish. See Stockfish documentation for valid commands.
-     * @return full output of Pikafish in response to the given command.
-     */
     private void sendCommand(final String command){
         final OutputStream outputStream = this.process.getOutputStream();
         final PrintWriter printWriter = new PrintWriter(outputStream);
