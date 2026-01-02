@@ -3,6 +3,7 @@ import java.util.regex.Pattern;
 
 public record Move(String srcSquare, String destSquare) {
     public Move(final String srcSquare, final String destSquare) {
+        //NOTE: this is a necessary but insufficient check for legal moves
         final Pattern pattern = Pattern.compile("[a-i]\\d");
         Matcher matcher = pattern.matcher(srcSquare);
         if (!matcher.matches())
