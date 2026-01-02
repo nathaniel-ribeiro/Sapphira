@@ -14,10 +14,10 @@ public final class Pikafish {
     private static final int MAX_HASH_SIZE_MIB = 33554432;
     private static final int MIN_NODES_TO_SEARCH = 1;
 
-    public static final Pikafish INSTANCE = new Pikafish(ConfigOptions.getInstance().getPathToExecutable(),
-                                                          ConfigOptions.getInstance().getNumThreads(),
-                                                          ConfigOptions.getInstance().getHashSizeMiB(),
-                                                          ConfigOptions.getInstance().getNodesToSearch());
+    public static final Pikafish INSTANCE = new Pikafish(ConfigOptions.INSTANCE.getPathToExecutable(),
+                                                          ConfigOptions.INSTANCE.getNumThreads(),
+                                                          ConfigOptions.INSTANCE.getHashSizeMiB(),
+                                                          ConfigOptions.INSTANCE.getNodesToSearch());
 
     private Pikafish(final String pathToExecutable, final int numThreads, final int hashSizeMiB, final int nodesToSearch){
         if(numThreads < MIN_THREADS || numThreads > MAX_THREADS)

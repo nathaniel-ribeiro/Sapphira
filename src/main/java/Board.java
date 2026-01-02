@@ -7,8 +7,8 @@ public final class Board {
     private final int pliesSinceACapture;
     private final int fullMoveNumber;
 
-    private static final String STARTPOS_FEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-    public static final Board STARTPOS = new Board(STARTPOS_FEN);
+    private static final String STARTING_FEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
+    public static final Board STARTING_BOARD = new Board(STARTING_FEN);
 
     public Board(final String fen){
         // NOTE: this check for valid FEN is not rigorous.
