@@ -97,4 +97,11 @@ public final class Pikafish {
         final String fen = matcher.group(1);
         return new Board(fen);
     }
+
+    public int evaluate(final Board board){
+        this.writer.println("position fen " + board.getFen());
+        this.writer.println("go nodes " + this.nodesToSearch);
+        //TODO
+        return 0;
+    }
 }
