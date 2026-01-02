@@ -7,8 +7,8 @@ public final class Pikafish {
     private final BufferedReader bufferedReader;
     private static Pikafish INSTANCE;
 
-    private static final int NUM_THREADS = 8;
-    private static final int HASH_SIZE_MB = 16;
+    private static final int NUM_THREADS = 15;
+    private static final int HASH_SIZE_MB = 1000;
     private static final int NODES_TO_SEARCH = 1000000;
 
     private Pikafish(final String pathToExecutable){
@@ -54,7 +54,7 @@ public final class Pikafish {
             if (line.startsWith("bestmove")) {
                 final Pattern pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d).+");
                 final Matcher matcher = pattern.matcher(line);
-                boolean b = matcher.matches();
+                final boolean b = matcher.matches();
                 // group 0 is the whole line, group 1 is the best move group
                 if (!b) throw new RuntimeException("No best move could be found");
                 final String srcSquare = matcher.group(1);
