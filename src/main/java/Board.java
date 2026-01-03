@@ -3,7 +3,7 @@ import java.util.regex.Pattern;
 
 public final class Board {
     private final String fen;
-    private final Alliance alliance;
+    private final Alliance whoseTurn;
     private final int pliesSinceACapture;
     private final int fullMoveNumber;
 
@@ -18,7 +18,7 @@ public final class Board {
         if(!matcher.matches())
             throw new IllegalArgumentException("Invalid FEN");
         this.fen = fen;
-        this.alliance = matcher.group(2).equals("w") ? Alliance.RED : Alliance.BLACK;
+        this.whoseTurn = matcher.group(2).equals("w") ? Alliance.RED : Alliance.BLACK;
         this.pliesSinceACapture = Integer.parseInt(matcher.group(3));
         this.fullMoveNumber = Integer.parseInt(matcher.group(4));
     }
@@ -27,8 +27,8 @@ public final class Board {
         return this.fen;
     }
 
-    public Alliance getAlliance() {
-        return this.alliance;
+    public Alliance getWhoseTurn() {
+        return this.whoseTurn;
     }
 
     public int getPliesSinceACapture() {
@@ -42,7 +42,7 @@ public final class Board {
     @Override
     public String toString() {
         return "Board{" + "fen='" + this.fen + '\'' +
-                ", alliance=" + this.alliance +
+                ", alliance=" + this.whoseTurn +
                 ", pliesSinceACapture=" + this.pliesSinceACapture +
                 ", pliesSinceStart=" + this.fullMoveNumber +
                 '}';
@@ -54,7 +54,7 @@ public final class Board {
         if(this == other) return true;
         if(other instanceof Board otherBoard){
             return this.fen.equals(otherBoard.fen) &&
-                    this.alliance == otherBoard.alliance &&
+                    this.whoseTurn == otherBoard.whoseTurn &&
                     this.fullMoveNumber == otherBoard.fullMoveNumber &&
                     this.pliesSinceACapture == otherBoard.pliesSinceACapture;
         }
@@ -64,7 +64,7 @@ public final class Board {
     @Override
     public int hashCode(){
         int result = this.fen.hashCode();
-        result = result * 31 + this.alliance.hashCode();
+        result = result * 31 + this.whoseTurn.hashCode();
         result = result * 31 + Integer.hashCode(this.pliesSinceACapture);
         result = result * 31 + Integer.hashCode(this.fullMoveNumber);
         return result;

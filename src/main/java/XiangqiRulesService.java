@@ -1,15 +1,18 @@
-import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 
 public class XiangqiRulesService {
+    private final Pikafish pikafish;
+
+    public XiangqiRulesService(final Pikafish pikafish){
+        this.pikafish = pikafish;
+    }
     public Board makeMove(final Board board, final Move move){
         return this.makeMoves(board, List.of(move));
     }
     public Board makeMoves(final Board board, final List<Move> moves){
-        return Pikafish.INSTANCE.makeMoves(board, moves);
+        return this.pikafish.makeMoves(board, moves);
     }
     public List<Move> getLegalMoves(final Board board){
-        return ImmutableList.copyOf(Pikafish.INSTANCE.getLegalMoves(board));
+        return this.pikafish.getLegalMoves(board);
     }
 }

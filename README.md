@@ -11,4 +11,4 @@ consult engines or strong players during their games.
 ## Features
 * Detects elevator/alt accounts
 * Platform-agnostic
-* Compatible with your favorite UCI-compliant engine
+* Compatible with your favorite UCI-compliant pikafish

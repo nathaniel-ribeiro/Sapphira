@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.util.Properties;
 
-public final class ConfigOptions {
+public final class ConfigOptions implements PikafishOptions {
     private final String pathToExecutable;
     private final int numThreads;
     private final int hashSizeMiB;
@@ -23,18 +23,22 @@ public final class ConfigOptions {
         }
     }
 
+    @Override
     public String getPathToExecutable() {
         return pathToExecutable;
     }
 
+    @Override
     public int getNumThreads() {
         return numThreads;
     }
 
+    @Override
     public int getHashSizeMiB() {
         return hashSizeMiB;
     }
 
+    @Override
     public int getNodesToSearch() {
         return nodesToSearch;
     }

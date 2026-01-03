@@ -17,22 +17,20 @@ public final class Pikafish {
     private static final int MAX_HASH_SIZE_MIB = 33554432;
     private static final int MIN_NODES_TO_SEARCH = 1;
 
-    public static final Pikafish INSTANCE = new Pikafish(ConfigOptions.INSTANCE.getPathToExecutable(),
-                                                          ConfigOptions.INSTANCE.getNumThreads(),
-                                                          ConfigOptions.INSTANCE.getHashSizeMiB(),
-                                                          ConfigOptions.INSTANCE.getNodesToSearch());
+    private static final Pattern BEST_MOVE_PATTERN = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?");
+    private static final Pattern FEN_EXTRACTOR_PATTERN = Pattern.compile("Fen: (.+)");
 
-    private Pikafish(final String pathToExecutable, final int numThreads, final int hashSizeMiB, final int nodesToSearch){
-        if(numThreads < MIN_THREADS || numThreads > MAX_THREADS)
+    public Pikafish(final PikafishOptions options){
+        if(options.getNumThreads() < MIN_THREADS || options.getNumThreads() > MAX_THREADS)
             throw new IllegalArgumentException(String.format("Number of threads must be between %d and %d", MIN_THREADS, MAX_THREADS));
-        if(hashSizeMiB < MIN_HASH_SIZE_MIB || hashSizeMiB > MAX_HASH_SIZE_MIB)
+        if(options.getHashSizeMiB() < MIN_HASH_SIZE_MIB || options.getHashSizeMiB() > MAX_HASH_SIZE_MIB)
             throw new IllegalArgumentException(String.format("Hash size in MiB must be between %d and %d", MIN_HASH_SIZE_MIB, MAX_HASH_SIZE_MIB));
-        if(nodesToSearch < MIN_NODES_TO_SEARCH)
+        if(options.getNodesToSearch() < MIN_NODES_TO_SEARCH)
             throw new IllegalArgumentException(String.format("Nodes to search must be at least %d", MIN_NODES_TO_SEARCH));
 
-        this.nodesToSearch = nodesToSearch;
+        this.nodesToSearch = options.getNodesToSearch();
 
-        final ProcessBuilder processBuilder = new ProcessBuilder(pathToExecutable);
+        final ProcessBuilder processBuilder = new ProcessBuilder(options.getPathToExecutable());
         try{
             final Process process = processBuilder.start();
             this.reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -46,13 +44,14 @@ public final class Pikafish {
         final String ignored1 = this.waitForResponseContaining("uciok");
         this.writer.println("isready");
         final String ignored2 = this.waitForResponseContaining("readyok");
-        this.writer.println("setoption name Threads value " + numThreads);
-        this.writer.println("setoption name Hash value " + hashSizeMiB);
+        this.writer.println("setoption name Threads value " + options.getNumThreads());
+        this.writer.println("setoption name Hash value " + options.getHashSizeMiB());
     }
 
     /**
      * Blocks until given keyword appears in the process's output buffer
      * @param keyword Keyword to wait for
+     * @return the line containing the specified keyword
      */
     private String waitForResponseContaining(final String keyword) {
         try {
@@ -72,8 +71,7 @@ public final class Pikafish {
         this.writer.println("position fen " + board.getFen());
         this.writer.println("go nodes " + this.nodesToSearch);
         final String bestMoveLine = this.waitForResponseContaining("bestmove");
-        final Pattern pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?");
-        final Matcher matcher = pattern.matcher(bestMoveLine);
+        final Matcher matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine);
         final boolean b = matcher.matches();
         if (!b) throw new RuntimeException();
         final String srcSquare = matcher.group(1);
@@ -89,8 +87,7 @@ public final class Pikafish {
         // For compatibility with other UCI engines, this code should be changed.
         this.writer.println("d");
         final String fenLine = this.waitForResponseContaining("Fen:");
-        final Pattern pattern = Pattern.compile("Fen: (.+)");
-        final Matcher matcher = pattern.matcher(fenLine);
+        final Matcher matcher = FEN_EXTRACTOR_PATTERN.matcher(fenLine);
         final boolean b = matcher.matches();
         if(!b) throw new RuntimeException();
         final String fen = matcher.group(1);
