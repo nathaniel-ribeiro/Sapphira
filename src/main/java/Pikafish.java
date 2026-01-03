@@ -16,11 +16,12 @@ public final class Pikafish{
     private static final int MIN_HASH_SIZE_MIB = 1;
     private static final int MAX_HASH_SIZE_MIB = 33554432;
     private static final int MIN_NODES_TO_SEARCH = 1;
+    private static final int CHECKMATE_EVALUATION = 100;
 
     private static final Pattern BEST_MOVE_PATTERN = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?");
     private static final Pattern FEN_EXTRACTOR_PATTERN = Pattern.compile("Fen: (.+)");
     private static final Pattern LEGAL_MOVE_PATTERN = Pattern.compile("([a-i]\\d)([a-i]\\d): 1");
-    private static final Pattern SCORE_CP_PATTERN = Pattern.compile(".*score cp (-?M?(\\d+)).*");
+    private static final Pattern EVALUATION_PATTERN = Pattern.compile(".*score (mate|cp) (-?\\d+).*");
 
     public Pikafish(final PikafishOptions options){
         if(options.getNumThreads() < MIN_THREADS || options.getNumThreads() > MAX_THREADS)
@@ -107,34 +108,28 @@ public final class Pikafish{
     public double evaluate(final Board board) {
         this.send("position fen " + board.getFen());
         this.send("go nodes " + this.nodesToSearch);
-        int evaluationCentipawns = 0;
+        double evaluation = Double.NaN;
         try {
             String line;
             while ((line = reader.readLine()) != null) {
-                final Matcher matcher = SCORE_CP_PATTERN.matcher(line);
+                final Matcher matcher = EVALUATION_PATTERN.matcher(line);
                 if (line.contains("bestmove")) break;
                 if (matcher.matches()) {
-                    try {
-                        evaluationCentipawns = Integer.parseInt(matcher.group(1));
-                    } catch (final NumberFormatException exception) {
-                        // this catch block will proc if the evaluation is checkmate-in-n rather than centipawns
-                        if (matcher.group(1).startsWith("M")) {
-                            final int pliesTilMate = Integer.parseInt(matcher.group(2));
-                            // we would rather make haste if we are doing the checkmating
-                            evaluationCentipawns = 10_000 - pliesTilMate;
-                        } else if (matcher.group(1).startsWith("-M")) {
-                            final int pliesTilMate = Integer.parseInt(matcher.group(2));
-                            // we would rather delay the inevitable if we are getting checkmated
-                            evaluationCentipawns = -10_000 + pliesTilMate;
-                        } else throw new RuntimeException();
+                    if(matcher.group(1).equals("cp"))
+                        evaluation = Integer.parseInt(matcher.group(2)) / 100.0;
+                    else{
+                        final int pliesTilMateUnnorm = Integer.parseInt(matcher.group(2));
+                        final int pliesTilMate = Math.abs(pliesTilMateUnnorm);
+                        boolean checkmating = matcher.group(1).equals("mate") && (pliesTilMateUnnorm > 0);
+                        // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
+                        evaluation = checkmating ? CHECKMATE_EVALUATION - pliesTilMate : -CHECKMATE_EVALUATION + pliesTilMate;
                     }
                 }
             }
         } catch (final IOException exception) {
             throw new RuntimeException(exception);
         }
-        // convert to pawns
-        return evaluationCentipawns / 100.0;
+        return evaluation;
     }
 
     public List<Move> getLegalMoves(final Board board) {
