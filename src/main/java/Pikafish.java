@@ -1,5 +1,4 @@
 import com.google.common.collect.ImmutableList;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,15 +114,15 @@ public final class Pikafish{
                 final Matcher matcher = EVALUATION_PATTERN.matcher(line);
                 if (line.contains("bestmove")) break;
                 if (matcher.matches()) {
-                    if(matcher.group(1).equals("cp"))
-                        evaluation = Integer.parseInt(matcher.group(2)) / 100.0;
-                    else{
-                        final int pliesTilMateUnnorm = Integer.parseInt(matcher.group(2));
-                        final int pliesTilMate = Math.abs(pliesTilMateUnnorm);
-                        boolean checkmating = matcher.group(1).equals("mate") && (pliesTilMateUnnorm > 0);
+                    final boolean checkmateSoon = matcher.group(1).equals("mate");
+                    if(checkmateSoon){
+                        final int pliesTilMateUnnormalized = Integer.parseInt(matcher.group(2));
+                        final int pliesTilMate = Math.abs(pliesTilMateUnnormalized);
+                        final boolean checkmating = matcher.group(1).equals("mate") && (pliesTilMateUnnormalized > 0);
                         // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
                         evaluation = checkmating ? CHECKMATE_EVALUATION - pliesTilMate : -CHECKMATE_EVALUATION + pliesTilMate;
                     }
+                    else evaluation = Integer.parseInt(matcher.group(2)) / 100.0;
                 }
             }
         } catch (final IOException exception) {

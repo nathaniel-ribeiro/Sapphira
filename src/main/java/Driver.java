@@ -4,7 +4,14 @@ import java.util.List;
 public final class Driver {
     public static void main(final String[] args) throws IOException {
         final Pikafish pikafish = new Pikafish(ConfigOptions.INSTANCE);
-        final Board board = new Board("4k4/9/9/9/9/9/9/9/9/3KR4 b - - 0 1");
-        System.out.println(pikafish.evaluate(board));
+        final Board board = Board.STARTING_BOARD;
+        final List<Move> allLegalMoves = pikafish.getLegalMoves(board);
+
+        System.out.println(allLegalMoves.stream()
+                    .map(move -> pikafish.makeMove(board, move))
+                    .map(pikafish::evaluate)
+                    .map(d -> -1 * d)
+                    // flip evaluation to be from our perspective
+                    .toList());
     }
 }
