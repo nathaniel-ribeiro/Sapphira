@@ -1,4 +1,4 @@
-public interface IPRModelOptions {
+public interface IntrinsicPerformanceRatingOptions {
     double getWinningAdvantageThreshold();
     int getNumberOfFirstTurnsToExclude();
 }
