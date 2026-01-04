@@ -12,6 +12,7 @@ public final class Driver {
                     .map(pikafish::evaluate)
                     .map(d -> -1 * d)
                     // flip evaluation to be from our perspective
-                    .toList());
+                    .max(Double::compareTo)
+                    .orElseThrow());
     }
 }

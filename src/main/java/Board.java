@@ -41,11 +41,7 @@ public final class Board {
 
     @Override
     public String toString() {
-        return "Board{" + "fen='" + this.fen + '\'' +
-                ", alliance=" + this.whoseTurn +
-                ", pliesSinceACapture=" + this.pliesSinceACapture +
-                ", pliesSinceStart=" + this.fullMoveNumber +
-                '}';
+        return this.fen;
     }
 
     @Override
@@ -63,7 +59,7 @@ public final class Board {
 
     @Override
     public int hashCode(){
-        int result = this.fen.hashCode();
+        int result = this.fen == null ? 0 : this.fen.hashCode();
         result = result * 31 + this.whoseTurn.hashCode();
         result = result * 31 + Integer.hashCode(this.pliesSinceACapture);
         result = result * 31 + Integer.hashCode(this.fullMoveNumber);
