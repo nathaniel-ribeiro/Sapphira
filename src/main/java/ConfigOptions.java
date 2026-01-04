@@ -1,7 +1,7 @@
 import java.io.IOException;
 import java.util.Properties;
 
-public final class ConfigOptions implements PikafishOptions, IntrinsicPerformanceRatingOptions {
+public final class ConfigOptions implements PikafishOptions, IPROptions {
     private final String pathToExecutable;
     private final int numThreads;
     private final int hashSizeMiB;

@@ -1,3 +1,5 @@
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BisectionSolver;
 import java.util.List;
@@ -6,9 +8,9 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class IntrinsicPerformanceRatingModel {
-    private final IntrinsicPerformanceRatingParameters parameters;
-    public IntrinsicPerformanceRatingModel(final IntrinsicPerformanceRatingParameters parameters){
+public final class IPRModel {
+    private final IPRParameters parameters;
+    public IPRModel(final IPRParameters parameters){
         this.parameters = parameters;
     }
     public Map<Move, Double> getMoveProbabilities(final Map<Move, Double> moveEvaluations){
@@ -26,15 +28,17 @@ public final class IntrinsicPerformanceRatingModel {
             final double lower = antiderivative.value(v_i);
             return upper - lower;
         }).toList();
-        final List<Double> alphas = deltas.stream().map(delta_i -> Math.exp(Math.pow((delta_i / parameters.sensitivity()), parameters.consistency()))).toList();
+        final List<Double> alphas = deltas.stream()
+                .map(delta_i -> Math.exp(Math.pow((delta_i / parameters.sensitivity()), parameters.consistency())))
+                .toList();
         final List<Double> probabilities = this.normalize(alphas);
-        return IntStream.range(0, moves.size()).boxed().collect(Collectors.toMap(moves::get, probabilities::get));
+        final Map<Move, Double> moveProbabilities = IntStream.range(0, moves.size()).boxed().collect(Collectors.toMap(moves::get, probabilities::get));
+        return ImmutableMap.copyOf(moveProbabilities);
     }
 
     private List<Double> normalize(final List<Double> alphas){
         // each p_i = p_best ^ {\alpha_i}
         // constraint: \sum p_i = 1 (probability vector)
-        System.out.println(alphas);
         final UnivariateFunction function = p_best -> {
             double sum = 0;
             for(final double alpha : alphas){
@@ -45,6 +49,7 @@ public final class IntrinsicPerformanceRatingModel {
         };
         final BisectionSolver solver = new BisectionSolver();
         final double p_best = solver.solve(1000, function, 0.0, 1.0);
-        return alphas.stream().map(alpha -> Math.pow(p_best, alpha)).toList();
+        final List<Double> probabilities = alphas.stream().map(alpha -> Math.pow(p_best, alpha)).toList();
+        return ImmutableList.copyOf(probabilities);
     }
 }

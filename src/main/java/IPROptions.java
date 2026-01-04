@@ -1,4 +1,4 @@
-public interface IntrinsicPerformanceRatingOptions {
+public interface IPROptions {
     double getWinningAdvantageThreshold();
     int getNumberOfFirstTurnsToExclude();
 }
