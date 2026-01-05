@@ -1,4 +1,4 @@
-public enum GameResultReason {
+enum class GameResultReason {
     CHECKMATE,
     TIMER_EXPIRED,
     DISCONNECT,

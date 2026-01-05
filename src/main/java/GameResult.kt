@@ -1,4 +1,4 @@
-public enum GameResult {
+enum class GameResult {
     WIN,
     DRAW,
     LOSE

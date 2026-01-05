@@ -1,2 +1,1 @@
-public record Player(String username, boolean isGuest, boolean isBanned, int rating){
-}
+data class Player(val username: String, val isGuest: Boolean, val isBanned: Boolean, val rating: Int)

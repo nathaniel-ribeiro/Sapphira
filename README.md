@@ -35,11 +35,11 @@ Sapphira detects these accounts using text similarity metrics, which should be s
 ### Platform-agnostic. 
 Sapphira and all its dependencies are written in pure Java, meaning it can be run on any platform with a JRE supporting Java 17+ 
 (Windows, Mac, Linux, and many more!). Building from source requires the full JDK, but you can run a fat JAR with just the JRE.
-### Compatible with top-rated Xiangqi engine Pikafish.
+### Compatible with top-rated Xiangqi engine com.xiangqi.Pikafish.
 Since Sapphira is NOT a Xiangqi engine, it offloads the task of evaluating positions and understanding the game's logic 
-to tried and tested external software. (You'll need to download [Pikafish](https://github.com/official-pikafish/Pikafish).) 
-Sapphira was originally intended to be compliant with *any* UCI-compliant engine, but currently relies on Pikafish-specific commands 
-that are not part of the UCI protocol. Future work may change this, but as of writing, Pikafish is the strongest and fastest engine, so
+to tried and tested external software. (You'll need to download [com.xiangqi.Pikafish](https://github.com/official-pikafish/com.xiangqi.Pikafish).) 
+Sapphira was originally intended to be compliant with *any* UCI-compliant engine, but currently relies on com.xiangqi.Pikafish-specific commands 
+that are not part of the UCI protocol. Future work may change this, but as of writing, com.xiangqi.Pikafish is the strongest and fastest engine, so
 there is really no reason to use anything else.
 ### Always open-source, always free.
 Licensed under GPLv3, you are free to copy, modify, distribute, and even sell Sapphira so long as you also release your 

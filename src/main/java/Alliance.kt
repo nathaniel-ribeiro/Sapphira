@@ -1,4 +1,4 @@
-public enum Alliance {
+enum class Alliance {
     RED,
     BLACK
 }

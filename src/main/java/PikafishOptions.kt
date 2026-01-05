@@ -1,6 +1,6 @@
-public interface PikafishOptions {
-    String getPathToExecutable();
-    int getNumThreads();
-    int getHashSizeMiB();
-    int getNodesToSearch();
+interface PikafishOptions {
+    val pathToExecutable: String
+    val numThreads: Int
+    val hashSizeMiB: Int
+    val nodesToSearch: Int
 }

@@ -1,4 +1,4 @@
-public interface IPROptions {
-    double getWinningAdvantageThreshold();
-    int getNumberOfFirstTurnsToExclude();
+interface IPROptions {
+    val winningAdvantageThreshold: Double
+    val numberOfFirstTurnsToExclude: Int
 }
