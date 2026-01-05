@@ -51,9 +51,9 @@ public final class IPRModel {
     private List<Double> normalize(final List<Double> alphas){
         // each p_i = p_best ^ {\alpha_i}
         // constraint: \sum p_i = 1 (probability vector)
-        final UnivariateFunction function = guessForPBest -> alphas.stream().mapToDouble(alpha -> Math.pow(guessForPBest, alpha)).sum() - 1.0;
+        final UnivariateFunction equationToSolve = pBestGuess -> alphas.stream().mapToDouble(alpha -> Math.pow(pBestGuess, alpha)).sum() - 1.0;
         final BracketingNthOrderBrentSolver solver = new BracketingNthOrderBrentSolver();
-        final double pBest = solver.solve(MAX_ROOTFINDER_ITERATIONS, function, 1.0 / alphas.size(), MAX_BEST_MOVE_PROJECTED_PROBABILITY);
+        final double pBest = solver.solve(MAX_ROOTFINDER_ITERATIONS, equationToSolve, 1.0 / alphas.size(), MAX_BEST_MOVE_PROJECTED_PROBABILITY);
         final List<Double> projectedProbabilities = alphas.stream().map(alpha -> Math.pow(pBest, alpha)).toList();
         return ImmutableList.copyOf(projectedProbabilities);
     }
