@@ -15,7 +15,7 @@ public final class Pikafish{
     private static final int MIN_HASH_SIZE_MIB = 1;
     private static final int MAX_HASH_SIZE_MIB = 33554432;
     private static final int MIN_NODES_TO_SEARCH = 1;
-    private static final int CHECKMATE_EVALUATION = 100;
+    private static final int CHECKMATE_EVALUATION_CENTIPAWNS = 10_000;
 
     private static final Pattern BEST_MOVE_PATTERN = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?");
     private static final Pattern FEN_EXTRACTOR_PATTERN = Pattern.compile("Fen: (.+)");
@@ -104,10 +104,10 @@ public final class Pikafish{
         return new Board(fen);
     }
 
-    public double evaluate(final Board board) {
+    public int evaluate(final Board board) {
         this.send("position fen " + board.getFen());
         this.send("go nodes " + this.nodesToSearch);
-        double evaluation = Double.NaN;
+        int evaluation = 0;
         try {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -120,9 +120,9 @@ public final class Pikafish{
                         final int pliesTilMate = Math.abs(pliesTilMateUnnormalized);
                         final boolean checkmating = matcher.group(1).equals("mate") && (pliesTilMateUnnormalized > 0);
                         // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                        evaluation = checkmating ? CHECKMATE_EVALUATION - pliesTilMate : -CHECKMATE_EVALUATION + pliesTilMate;
+                        evaluation = checkmating ? CHECKMATE_EVALUATION_CENTIPAWNS - pliesTilMate : -CHECKMATE_EVALUATION_CENTIPAWNS + pliesTilMate;
                     }
-                    else evaluation = Integer.parseInt(matcher.group(2)) / 100.0;
+                    else evaluation = Integer.parseInt(matcher.group(2));
                 }
             }
         } catch (final IOException exception) {
