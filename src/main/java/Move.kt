@@ -14,6 +14,6 @@ data class Move(val srcSquare: String, val destSquare: String) {
     }
 
     companion object {
-        val SQUARE_PATTERN: Pattern = Pattern.compile("[a-i]\\d")
+        private val SQUARE_PATTERN: Pattern = Pattern.compile("[a-i]\\d")
     }
 }

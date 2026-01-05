@@ -1,68 +1,31 @@
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-public final class Board {
-    private final String fen;
-    private final Alliance whoseTurn;
-    private final int pliesSinceACapture;
-    private final int fullMoveNumber;
+class Board(fen: String, ) {
+    val fen: String
+    val whoseTurn: Alliance
+    val pliesSinceACapture: Int
+    val fullMoveNumber: Int
 
-    private static final String STARTING_FEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-    public static final Board STARTING_BOARD = new Board(STARTING_FEN);
-
-    public Board(final String fen){
+    init {
         // NOTE: this check for valid FEN is not rigorous.
         // The following regex will match things that look like FEN but are in fact nonsensical positions
-        final Pattern pattern = Pattern.compile("([kabrcnpKABRCNP0-9]+/?){10} ([wb]) - - (\\d+) (\\d+)");
-        final Matcher matcher = pattern.matcher(fen);
-        if(!matcher.matches())
-            throw new IllegalArgumentException("Invalid FEN");
-        this.fen = fen;
-        this.whoseTurn = matcher.group(2).equals("w") ? Alliance.RED : Alliance.BLACK;
-        this.pliesSinceACapture = Integer.parseInt(matcher.group(3));
-        this.fullMoveNumber = Integer.parseInt(matcher.group(4));
+        val matcher: Matcher = FEN_VALIDATOR_PATTERN.matcher(fen)
+        require(matcher.matches()) { "Invalid FEN" }
+        this.fen = fen
+        this.whoseTurn = if (matcher.group(2) == "w") Alliance.RED else Alliance.BLACK
+        this.pliesSinceACapture = matcher.group(3).toInt()
+        this.fullMoveNumber = matcher.group(4).toInt()
     }
 
-    public String getFen() {
-        return this.fen;
+    override fun toString(): String {
+        return this.fen
     }
 
-    public Alliance getWhoseTurn() {
-        return this.whoseTurn;
-    }
-
-    public int getPliesSinceACapture() {
-        return this.pliesSinceACapture;
-    }
-
-    public int getFullMoveNumber() {
-        return this.fullMoveNumber;
-    }
-
-    @Override
-    public String toString() {
-        return this.fen;
-    }
-
-    @Override
-    public boolean equals(final Object other){
-        if(other == null) return false;
-        if(this == other) return true;
-        if(other instanceof Board otherBoard){
-            return this.fen.equals(otherBoard.fen) &&
-                    this.whoseTurn == otherBoard.whoseTurn &&
-                    this.fullMoveNumber == otherBoard.fullMoveNumber &&
-                    this.pliesSinceACapture == otherBoard.pliesSinceACapture;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode(){
-        int result = this.fen == null ? 0 : this.fen.hashCode();
-        result = result * 31 + this.whoseTurn.hashCode();
-        result = result * 31 + Integer.hashCode(this.pliesSinceACapture);
-        result = result * 31 + Integer.hashCode(this.fullMoveNumber);
-        return result;
+    companion object {
+        private val FEN_VALIDATOR_PATTERN: Pattern =
+            Pattern.compile("([kabrcnpKABRCNP0-9]+/?){10} ([wb]) - - (\\d+) (\\d+)")
+        private const val STARTING_FEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+        val STARTING_BOARD: Board = Board(STARTING_FEN)
     }
 }
