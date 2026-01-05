@@ -24,14 +24,14 @@ public final class IPRModel {
         this.sensitivity = sensitivity;
         this.consistency = consistency;
     }
-    public Map<Move, Double> getProjectedMoveProbabilities(final Map<Move, Integer> moveEvaluations){
-        final List<Entry<Move, Integer>> moveEvaluationsSorted = moveEvaluations.entrySet()
+    public Map<Move, Double> getProjectedMoveProbabilities(final Map<Move, Double> moveEvaluations){
+        final List<Entry<Move, Double>> moveEvaluationsSorted = moveEvaluations.entrySet()
                                                                          .stream()
-                                                                         .sorted(Entry.<Move, Integer>comparingByValue().reversed())
+                                                                         .sorted(Entry.<Move, Double>comparingByValue().reversed())
                                                                          .toList();
 
         final List<Move> moves = moveEvaluationsSorted.stream().map(Entry::getKey).toList();
-        final List<Integer> evaluations = moveEvaluationsSorted.stream().map(Entry::getValue).toList();
+        final List<Double> evaluations = moveEvaluationsSorted.stream().map(Entry::getValue).toList();
         final List<Double> deltas = computeDeltas(evaluations);
         final List<Double> alphas = deltas.stream()
                 .map(delta -> Math.exp(-Math.pow((delta / this.sensitivity), this.consistency)))
@@ -41,8 +41,8 @@ public final class IPRModel {
         return ImmutableMap.copyOf(projectedMoveProbabilities);
     }
 
-    private List<Double> computeDeltas(final List<Integer> evaluations){
-        final int bestEvaluation = evaluations.stream().max(Integer::compareTo).orElseThrow(RuntimeException::new);
+    private List<Double> computeDeltas(final List<Double> evaluations){
+        final double bestEvaluation = evaluations.stream().max(Double::compareTo).orElseThrow(RuntimeException::new);
         final List<Double> deltas = evaluations.stream().map(evaluation -> {
             final UnivariateFunction antiderivative = z -> (z * Math.log1p(Math.abs(z))) / Math.abs(z);
             final double upper = antiderivative.value(bestEvaluation);

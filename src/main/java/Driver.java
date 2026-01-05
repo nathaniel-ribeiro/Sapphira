@@ -8,13 +8,14 @@ public final class Driver {
         final Pikafish pikafish = new Pikafish(ConfigOptions.INSTANCE);
         final Board board = Board.STARTING_BOARD;
         final List<Move> allLegalMoves = pikafish.getLegalMoves(board);
-        final List<Integer> evaluations = allLegalMoves.stream()
+        final List<Double> evaluations = allLegalMoves.stream()
                                         .map(move -> pikafish.makeMove(board, move))
                                         .map(pikafish::evaluate)
                                         .map(d -> -1 * d)
                                         // flip evaluation to be from our perspective
                                         .toList();
-        final Map<Move, Integer> moveEvaluations = IntStream.range(0, allLegalMoves.size()).boxed().collect(Collectors.toMap(allLegalMoves::get, evaluations::get));
+        final Map<Move, Double> moveEvaluations = IntStream.range(0, allLegalMoves.size()).boxed().collect(Collectors.toMap(allLegalMoves::get, evaluations::get));
+        System.out.println(moveEvaluations);
         final IPRModel model = new IPRModel(0.139, 0.454);
         final Map<Move, Double> map = model.getProjectedMoveProbabilities(moveEvaluations);
 
