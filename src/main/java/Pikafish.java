@@ -73,7 +73,7 @@ public final class Pikafish{
     }
 
     public Move getBestMove(final Board board){
-        this.send("position fen " + board.fen);
+        this.send("position fen " + board.getFen());
         this.send("go nodes " + this.nodesToSearch);
         final String bestMoveLine = this.waitForResponseContaining("bestmove");
         final Matcher matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine);
@@ -91,7 +91,7 @@ public final class Pikafish{
     public Board makeMoves(final Board board, final List<Move> moves){
         if(moves.isEmpty()) return board;
         final String movesString = String.join(" ", moves.stream().map(Move::toString).toList());
-        this.send("position fen " + board.fen + " moves " + movesString);
+        this.send("position fen " + board.getFen() + " moves " + movesString);
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
@@ -105,7 +105,7 @@ public final class Pikafish{
     }
 
     public double evaluate(final Board board) {
-        this.send("position fen " + board.fen);
+        this.send("position fen " + board.getFen());
         this.send("go nodes " + this.nodesToSearch);
         double evaluation = Double.NaN;
         try {
@@ -132,7 +132,7 @@ public final class Pikafish{
     }
 
     public List<Move> getLegalMoves(final Board board) {
-        this.send("position fen " + board.fen);
+        this.send("position fen " + board.getFen());
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
