@@ -11,3 +11,10 @@ data class Game(
     val resultBlack: GameResult,
     val gameResultReason: GameResultReason
 )
+{
+    init{
+        require(gameTimer > 0)
+        require(moveTimer > 0)
+        require(increment >= 0)
+    }
+}
