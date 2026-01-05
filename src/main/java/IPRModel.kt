@@ -1,60 +1,53 @@
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import org.apache.commons.math3.analysis.UnivariateFunction
+import org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver
+import kotlin.math.*
 
-public final class IPRModel {
-    private final double sensitivity;
-    private final double consistency;
-
-    private static final double MAX_BEST_MOVE_PROJECTED_PROBABILITY = 1.0;
-    private static final int MAX_ROOTFINDER_ITERATIONS = 30;
-
-    public IPRModel(final double sensitivity, final double consistency){
-        if(sensitivity <= 0) throw new IllegalArgumentException("Sensitivity must be positive");
-        if(consistency <= 0) throw new IllegalArgumentException("Consistency must be positive");
-        this.sensitivity = sensitivity;
-        this.consistency = consistency;
-    }
-    public Map<Move, Double> getProjectedMoveProbabilities(final Map<Move, Double> moveEvaluations){
-        final List<Entry<Move, Double>> moveEvaluationsSorted = moveEvaluations.entrySet()
-                                                                         .stream()
-                                                                         .sorted(Entry.<Move, Double>comparingByValue().reversed())
-                                                                         .toList();
-
-        final List<Move> moves = moveEvaluationsSorted.stream().map(Entry::getKey).toList();
-        final List<Double> evaluations = moveEvaluationsSorted.stream().map(Entry::getValue).toList();
-        final List<Double> deltas = computeDeltas(evaluations);
-        final List<Double> alphas = computeAlphas(deltas);
-        final List<Double> projectedProbabilities = this.normalize(alphas);
-        final Map<Move, Double> projectedMoveProbabilities = IntStream.range(0, moves.size()).boxed().collect(Collectors.toMap(moves::get, projectedProbabilities::get));
-        return ImmutableMap.copyOf(projectedMoveProbabilities);
+class IPRModel(val sensitivity: Double, val consistency: Double) {
+    init {
+        require(sensitivity > 0) { "Sensitivity must be positive" }
+        require(consistency > 0) { "Consistency must be positive" }
     }
 
-    private List<Double> computeAlphas(final List<Double> deltas){
-        return deltas.stream().map(delta -> Math.exp(Math.pow((delta / this.sensitivity), this.consistency))).toList();
+    fun getProjectedMoveProbabilities(moveEvaluations: Map<Move, Double>): Map<Move, Double> {
+        val moveEvaluationsSorted = moveEvaluations.entries.sortedByDescending { it.value }
+        val moves = moveEvaluationsSorted.map { it.key }
+        val evaluations = moveEvaluationsSorted.map { it.value }
+        val deltas = computeDeltas(evaluations)
+        val alphas = computeAlphas(deltas)
+        val projectedProbabilities = this.normalize(alphas)
+        val projectedMoveProbabilities = moves.zip(projectedProbabilities).toMap()
+        return projectedMoveProbabilities
     }
 
-    private List<Double> computeDeltas(final List<Double> evaluations){
-        final double bestEvaluation = evaluations.stream().max(Double::compareTo).orElseThrow(RuntimeException::new);
-        final UnivariateFunction antiderivative = z -> Math.signum(z) * Math.log1p(Math.abs(z));
-        final double upper = antiderivative.value(bestEvaluation);
-        final List<Double> deltas = evaluations.stream().map(evaluation -> upper - antiderivative.value(evaluation)).toList();
-        return ImmutableList.copyOf(deltas);
+    private fun computeAlphas(deltas: List<Double>): List<Double> {
+        return deltas.map{ delta -> exp((delta / this.sensitivity).pow(this.consistency)) }
     }
 
-    private List<Double> normalize(final List<Double> alphas){
+    private fun computeDeltas(evaluations: List<Double>): List<Double> {
+        val bestEvaluation = evaluations.max()
+        val antiderivative = UnivariateFunction { z -> sign(z) * ln1p(abs(z)) }
+        val upper = antiderivative.value(bestEvaluation)
+        val deltas = evaluations.map{ evaluation -> upper - antiderivative.value(evaluation) }
+        return deltas
+    }
+
+    private fun normalize(alphas: List<Double>): List<Double> {
         // each p_i = p_best ^ {\alpha_i}
         // constraint: \sum p_i = 1 (probability vector)
-        final UnivariateFunction equationToSolve = pBestGuess -> alphas.stream().mapToDouble(alpha -> Math.pow(pBestGuess, alpha)).sum() - 1.0;
-        final BracketingNthOrderBrentSolver solver = new BracketingNthOrderBrentSolver();
-        final double pBest = solver.solve(MAX_ROOTFINDER_ITERATIONS, equationToSolve, 1.0 / alphas.size(), MAX_BEST_MOVE_PROJECTED_PROBABILITY);
-        final List<Double> projectedProbabilities = alphas.stream().map(alpha -> Math.pow(pBest, alpha)).toList();
-        return ImmutableList.copyOf(projectedProbabilities);
+        val equationToSolve = UnivariateFunction {pBestGuess -> alphas.sumOf { alpha -> pBestGuess.pow(alpha) } - 1.0}
+        val solver = BracketingNthOrderBrentSolver()
+        val pBest = solver.solve(
+            MAX_ROOTFINDER_ITERATIONS,
+            equationToSolve,
+            1.0 / alphas.size,
+            MAX_BEST_MOVE_PROJECTED_PROBABILITY
+        )
+        val projectedProbabilities = alphas.map{ alpha -> pBest.pow(alpha) }
+        return projectedProbabilities
+    }
+
+    companion object {
+        private const val MAX_BEST_MOVE_PROJECTED_PROBABILITY = 1.0
+        private const val MAX_ROOTFINDER_ITERATIONS = 30
     }
 }
