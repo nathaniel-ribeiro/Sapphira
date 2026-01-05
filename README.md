@@ -10,8 +10,8 @@ Performance Rating) uses individual moves in a game to determine the player's st
 we can predict the probability that a player will choose an inferior move. Sensitivity models the player's ability to discern between two roughly equal (but subtly different) moves and 
 consistency models the player's ability to avoid bad moves. 
 
-A player whose IPR for a game or set of games exceeds their recorded ELO (plus a cushion to account for natural factors like luck),
-can be flagged for cheating. You can read a more thorough explanation [here](https://cse.buffalo.edu/~regan/papers/pdf/Reg12IPRs.pdf).
+A player whose IPR for a game or set of games exceeds their recorded ELO by a certain threshold can be branded a cheater. 
+You can read a more thorough explanation [here](https://cse.buffalo.edu/~regan/papers/pdf/Reg12IPRs.pdf).
 
 ### Where does the name come from?
 > But a certain man named Ananias, with Sapphira his wife, sold a possession,
