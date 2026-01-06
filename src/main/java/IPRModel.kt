@@ -36,12 +36,7 @@ class IPRModel(val sensitivity: Double, val consistency: Double) {
         // constraint: \sum p_i = 1 (probability vector)
         val equationToSolve = UnivariateFunction {pBestGuess -> alphas.sumOf { alpha -> pBestGuess.pow(alpha) } - 1.0}
         val solver = BracketingNthOrderBrentSolver()
-        val pBest = solver.solve(
-            MAX_ROOTFINDER_ITERATIONS,
-            equationToSolve,
-            1.0 / alphas.size,
-            MAX_BEST_MOVE_PROJECTED_PROBABILITY
-        )
+        val pBest = solver.solve(MAX_ROOTFINDER_ITERATIONS, equationToSolve, 1.0 / alphas.size, MAX_BEST_MOVE_PROJECTED_PROBABILITY)
         val projectedProbabilities = alphas.map{ alpha -> pBest.pow(alpha) }
         return projectedProbabilities
     }
