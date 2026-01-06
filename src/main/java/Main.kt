@@ -1,5 +1,5 @@
 fun main(){
-    val pikafish = Pikafish(ConfigOptions.INSTANCE)
+    val pikafish = Pikafish(ConfigOptions)
     val board = Board.STARTING_BOARD
     val legalMoves = pikafish.getLegalMoves(board)
     val allEvaluations : List<Double> = legalMoves.map{ move -> -1 * pikafish.evaluate(pikafish.makeMove(board, move)) }

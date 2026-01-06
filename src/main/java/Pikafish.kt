@@ -1,56 +1,57 @@
-import com.google.common.collect.ImmutableList;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableList
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import kotlin.math.abs
 
-public final class Pikafish{
-    private final BufferedReader reader;
-    private final PrintWriter writer;
-    private final int nodesToSearch;
+class Pikafish(options: PikafishOptions) {
+    private val reader: BufferedReader
+    private val writer: PrintWriter
+    private val nodesToSearch: Int
 
-    private static final int MIN_THREADS = 1;
-    private static final int MAX_THREADS = 1024;
-    private static final int MIN_HASH_SIZE_MIB = 1;
-    private static final int MAX_HASH_SIZE_MIB = 33554432;
-    private static final int MIN_NODES_TO_SEARCH = 1;
-    private static final int CHECKMATE_EVALUATION = 100;
-
-    private static final Pattern BEST_MOVE_PATTERN = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?");
-    private static final Pattern FEN_EXTRACTOR_PATTERN = Pattern.compile("Fen: (.+)");
-    private static final Pattern LEGAL_MOVE_PATTERN = Pattern.compile("([a-i]\\d)([a-i]\\d): 1");
-    private static final Pattern EVALUATION_PATTERN = Pattern.compile(".*score (mate|cp) (-?\\d+).*");
-
-    public Pikafish(final PikafishOptions options){
-        if(options.getNumThreads() < MIN_THREADS || options.getNumThreads() > MAX_THREADS)
-            throw new IllegalArgumentException(String.format("Number of threads must be between %d and %d", MIN_THREADS, MAX_THREADS));
-        if(options.getHashSizeMiB() < MIN_HASH_SIZE_MIB || options.getHashSizeMiB() > MAX_HASH_SIZE_MIB)
-            throw new IllegalArgumentException(String.format("Hash size in MiB must be between %d and %d", MIN_HASH_SIZE_MIB, MAX_HASH_SIZE_MIB));
-        if(options.getNodesToSearch() < MIN_NODES_TO_SEARCH)
-            throw new IllegalArgumentException(String.format("Nodes to search must be at least %d", MIN_NODES_TO_SEARCH));
-
-        this.nodesToSearch = options.getNodesToSearch();
-
-        final ProcessBuilder processBuilder = new ProcessBuilder(options.getPathToExecutable());
-        try{
-            final Process process = processBuilder.start();
-            this.reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            this.writer = new PrintWriter(process.getOutputStream(), true);
+    init {
+        require(options.numThreads in MIN_THREADS..MAX_THREADS) {
+            String.format(
+                "Number of threads must be between %d and %d",
+                MIN_THREADS,
+                MAX_THREADS
+            )
         }
-        catch(final IOException exception){
-            throw new RuntimeException(exception);
+        require(options.hashSizeMiB in MIN_HASH_SIZE_MIB..MAX_HASH_SIZE_MIB) {
+            String.format(
+                "Hash size in MiB must be between %d and %d",
+                MIN_HASH_SIZE_MIB,
+                MAX_HASH_SIZE_MIB
+            )
         }
-        this.send("uci");
-        final String ignored1 = this.waitForResponseContaining("uciok");
-        this.send("isready");
-        final String ignored2 = this.waitForResponseContaining("readyok");
-        this.send("setoption name Threads value " + options.getNumThreads());
-        this.send("setoption name Hash value " + options.getHashSizeMiB());
+        require(options.nodesToSearch >= MIN_NODES_TO_SEARCH) {
+            String.format(
+                "Nodes to search must be at least %d",
+                MIN_NODES_TO_SEARCH
+            )
+        }
+
+        this.nodesToSearch = options.nodesToSearch
+
+        val processBuilder = ProcessBuilder(options.pathToExecutable)
+        try {
+            val process = processBuilder.start()
+            this.reader = BufferedReader(InputStreamReader(process.inputStream))
+            this.writer = PrintWriter(process.outputStream, true)
+        } catch (exception: IOException) {
+            throw RuntimeException(exception)
+        }
+        this.send("uci")
+        this.send("isready")
+        this.send("setoption name Threads value ${options.numThreads}")
+        this.send("setoption name Hash value ${options.hashSizeMiB}")
     }
 
-    private void send(final String command){
-        this.writer.println(command);
+    private fun send(command: String) {
+        this.writer.println(command)
     }
 
     /**
@@ -58,98 +59,112 @@ public final class Pikafish{
      * @param keyword Keyword to wait for
      * @return the line containing the specified keyword
      */
-    private String waitForResponseContaining(final String keyword) {
+    private fun waitForResponseContaining(keyword: String): String {
         try {
-            String line;
-            while ((line = reader.readLine()) != null) {
+            var line: String
+            while ((reader.readLine().also { line = it }) != null) {
                 if (line.contains(keyword)) {
-                    return line;
+                    return line
                 }
             }
-            throw new RuntimeException("Process terminated before keyword: '" + keyword + "' was received.");
-        } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+            throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
+        } catch (exception: IOException) {
+            throw RuntimeException(exception)
         }
     }
 
-    public Move getBestMove(final Board board){
-        this.send("position fen " + board.getFen());
-        this.send("go nodes " + this.nodesToSearch);
-        final String bestMoveLine = this.waitForResponseContaining("bestmove");
-        final Matcher matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine);
-        final boolean b = matcher.matches();
-        if (!b) throw new RuntimeException();
-        final String srcSquare = matcher.group(1);
-        final String destSquare = matcher.group(2);
-        return new Move(srcSquare, destSquare);
+    fun getBestMove(board: Board): Move {
+        this.send("position fen ${board.fen}")
+        this.send("go nodes ${this.nodesToSearch}")
+        val bestMoveLine = this.waitForResponseContaining("bestmove")
+        val matcher: Matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine)
+        val b = matcher.matches()
+        if (!b) throw RuntimeException()
+        val srcSquare = matcher.group(1)
+        val destSquare = matcher.group(2)
+        return Move(srcSquare, destSquare)
     }
 
-    public Board makeMove(final Board board, final Move move){
-        return this.makeMoves(board, List.of(move));
+    fun makeMove(board: Board, move: Move): Board {
+        return this.makeMoves(board, listOf(move))
     }
 
-    public Board makeMoves(final Board board, final List<Move> moves){
-        if(moves.isEmpty()) return board;
-        final String movesString = String.join(" ", moves.stream().map(Move::toString).toList());
-        this.send("position fen " + board.getFen() + " moves " + movesString);
+    fun makeMoves(board: Board, moves: List<Move>): Board {
+        if (moves.isEmpty()) return board
+        val movesString = moves.joinToString(separator = " ")
+        this.send("position fen ${board.fen} moves $movesString")
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
-        this.send("d");
-        final String fenLine = this.waitForResponseContaining("Fen:");
-        final Matcher matcher = FEN_EXTRACTOR_PATTERN.matcher(fenLine);
-        final boolean b = matcher.matches();
-        if(!b) throw new RuntimeException();
-        final String fen = matcher.group(1);
-        return new Board(fen);
+        this.send("d")
+        val fenLine = this.waitForResponseContaining("Fen:")
+        val matcher: Matcher = FEN_EXTRACTOR_PATTERN.matcher(fenLine)
+        val b = matcher.matches()
+        if (!b) throw RuntimeException()
+        val fen = matcher.group(1)
+        return Board(fen)
     }
 
-    public double evaluate(final Board board) {
-        this.send("position fen " + board.getFen());
-        this.send("go nodes " + this.nodesToSearch);
-        double evaluation = Double.NaN;
+    fun evaluate(board: Board): Double {
+        this.send("position fen ${board.fen}")
+        this.send("go nodes ${this.nodesToSearch}")
+        var evaluation = Double.NaN
         try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                final Matcher matcher = EVALUATION_PATTERN.matcher(line);
-                if (line.contains("bestmove")) break;
+            var line: String
+            while ((reader.readLine().also { line = it }) != null) {
+                val matcher: Matcher = EVALUATION_PATTERN.matcher(line)
+                if (line.contains("bestmove")) break
                 if (matcher.matches()) {
-                    final boolean checkmateSoon = matcher.group(1).equals("mate");
-                    if(checkmateSoon){
-                        final int pliesTilMateUnnormalized = Integer.parseInt(matcher.group(2));
-                        final int pliesTilMate = Math.abs(pliesTilMateUnnormalized);
-                        final boolean checkmating = matcher.group(1).equals("mate") && (pliesTilMateUnnormalized > 0);
+                    val checkmateSoon = matcher.group(1) == "mate"
+                    if (checkmateSoon) {
+                        val pliesTilMateUnnormalized = matcher.group(2).toInt()
+                        val pliesTilMate = abs(pliesTilMateUnnormalized)
+                        val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
                         // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                        evaluation = checkmating ? CHECKMATE_EVALUATION - pliesTilMate : -CHECKMATE_EVALUATION + pliesTilMate;
-                    }
-                    else evaluation = Integer.parseInt(matcher.group(2)) / 100.0;
+                        evaluation =
+                            (if (checkmating) CHECKMATE_EVALUATION - pliesTilMate else -CHECKMATE_EVALUATION + pliesTilMate).toDouble()
+                    } else evaluation = matcher.group(2).toInt() / 100.0
                 }
             }
-        } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+        } catch (exception: IOException) {
+            throw RuntimeException(exception)
         }
-        return evaluation;
+        return evaluation
     }
 
-    public List<Move> getLegalMoves(final Board board) {
-        this.send("position fen " + board.getFen());
+    fun getLegalMoves(board: Board): List<Move> {
+        this.send("position fen ${board.fen}")
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
-        this.send("go perft 1");
-        final List<Move> moves = new ArrayList<>();
+        this.send("go perft 1")
+        val moves: MutableList<Move> = ArrayList()
         try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                final Matcher matcher = LEGAL_MOVE_PATTERN.matcher(line);
-                if(line.contains("Nodes searched")) break;
+            var line: String
+            while ((reader.readLine().also { line = it }) != null) {
+                val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
+                if (line.contains("Nodes searched")) break
                 if (matcher.matches()) {
-                    moves.add(new Move(matcher.group(1), matcher.group(2)));
+                    moves.add(Move(matcher.group(1), matcher.group(2)))
                 }
             }
-        } catch (final IOException exception) {
-            throw new RuntimeException(exception);
+        } catch (exception: IOException) {
+            throw RuntimeException(exception)
         }
-        return ImmutableList.copyOf(moves);
+        return ImmutableList.copyOf<Move>(moves)
+    }
+
+    companion object {
+        private const val MIN_THREADS = 1
+        private const val MAX_THREADS = 1024
+        private const val MIN_HASH_SIZE_MIB = 1
+        private const val MAX_HASH_SIZE_MIB = 33554432
+        private const val MIN_NODES_TO_SEARCH = 1
+        private const val CHECKMATE_EVALUATION = 100
+
+        private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
+        private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
+        private val LEGAL_MOVE_PATTERN: Pattern = Pattern.compile("([a-i]\\d)([a-i]\\d): 1")
+        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+).*")
     }
 }
