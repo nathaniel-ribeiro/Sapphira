@@ -1,59 +1,29 @@
-import java.io.IOException;
-import java.util.Properties;
+import java.io.IOException
+import java.util.*
 
-public final class ConfigOptions implements PikafishOptions, IPROptions {
-    private final String pathToExecutable;
-    private final int numThreads;
-    private final int hashSizeMiB;
-    private final int nodesToSearch;
-    private final double winningAdvantageThreshold;
-    private final int numberOfFirstTurnsToExclude;
+object ConfigOptions : PikafishOptions, IPROptions {
+    override val pathToExecutable: String
+    override val numThreads: Int
+    override val hashSizeMiB: Int
+    override val nodesToSearch: Int
+    override val winningAdvantageThreshold: Double
+    override val numberOfFirstTurnsToExclude: Int
 
-    public static final ConfigOptions INSTANCE = new ConfigOptions();
-
-    private ConfigOptions(){
-        final Properties properties = new Properties();
+    init {
+        val properties = Properties()
         try {
-            properties.load(ConfigOptions.class.getClassLoader().getResourceAsStream("config.properties"));
-            this.pathToExecutable = properties.getProperty("pathToExecutable");
-            this.numThreads = Integer.parseInt(properties.getProperty("numThreads"));
-            this.hashSizeMiB = Integer.parseInt(properties.getProperty("hashSizeMiB"));
-            this.nodesToSearch = Integer.parseInt(properties.getProperty("nodesToSearch"));
-            this.winningAdvantageThreshold = Double.parseDouble(properties.getProperty("winningAdvantageThreshold"));
-            this.numberOfFirstTurnsToExclude = Integer.parseInt(properties.getProperty("numberOfFirstTurnsToExclude"));
+            val stream = requireNotNull(
+                ConfigOptions::class.java.getClassLoader().getResourceAsStream("config.properties")
+            ){ "config.properties not found on classpath" }
+            properties.load(stream)
+            this.pathToExecutable = properties.getProperty("pathToExecutable")
+            this.numThreads = properties.getProperty("numThreads").toInt()
+            this.hashSizeMiB = properties.getProperty("hashSizeMiB").toInt()
+            this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()
+            this.winningAdvantageThreshold = properties.getProperty("winningAdvantageThreshold").toDouble()
+            this.numberOfFirstTurnsToExclude = properties.getProperty("numberOfFirstTurnsToExclude").toInt()
+        } catch (exception: IOException) {
+            throw RuntimeException(exception)
         }
-        catch (final IOException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    @Override
-    public String getPathToExecutable() {
-        return pathToExecutable;
-    }
-
-    @Override
-    public int getNumThreads() {
-        return numThreads;
-    }
-
-    @Override
-    public int getHashSizeMiB() {
-        return hashSizeMiB;
-    }
-
-    @Override
-    public int getNodesToSearch() {
-        return nodesToSearch;
-    }
-
-    @Override
-    public double getWinningAdvantageThreshold(){
-        return this.winningAdvantageThreshold;
-    }
-
-    @Override
-    public int getNumberOfFirstTurnsToExclude(){
-        return this.numberOfFirstTurnsToExclude;
     }
 }
