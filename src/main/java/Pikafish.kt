@@ -37,13 +37,10 @@ class Pikafish(options: PikafishOptions) {
         this.nodesToSearch = options.nodesToSearch
 
         val processBuilder = ProcessBuilder(options.pathToExecutable)
-        try {
-            val process = processBuilder.start()
-            this.reader = BufferedReader(InputStreamReader(process.inputStream))
-            this.writer = PrintWriter(process.outputStream, true)
-        } catch (exception: IOException) {
-            throw RuntimeException(exception)
-        }
+        val process = processBuilder.start()
+        this.reader = BufferedReader(InputStreamReader(process.inputStream))
+        this.writer = PrintWriter(process.outputStream, true)
+
         this.send("uci")
         this.send("isready")
         this.send("setoption name Threads value ${options.numThreads}")
@@ -60,17 +57,13 @@ class Pikafish(options: PikafishOptions) {
      * @return the line containing the specified keyword
      */
     private fun waitForResponseContaining(keyword: String): String {
-        try {
-            var line: String
-            while ((reader.readLine().also { line = it }) != null) {
-                if (line.contains(keyword)) {
-                    return line
-                }
+        var line: String
+        while ((reader.readLine().also { line = it }) != null) {
+            if (line.contains(keyword)) {
+                return line
             }
-            throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
-        } catch (exception: IOException) {
-            throw RuntimeException(exception)
         }
+        throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
     }
 
     fun getBestMove(board: Board): Move {
@@ -109,25 +102,21 @@ class Pikafish(options: PikafishOptions) {
         this.send("position fen ${board.fen}")
         this.send("go nodes ${this.nodesToSearch}")
         var evaluation = Double.NaN
-        try {
-            var line: String
-            while ((reader.readLine().also { line = it }) != null) {
-                val matcher: Matcher = EVALUATION_PATTERN.matcher(line)
-                if (line.contains("bestmove")) break
-                if (matcher.matches()) {
-                    val checkmateSoon = matcher.group(1) == "mate"
-                    if (checkmateSoon) {
-                        val pliesTilMateUnnormalized = matcher.group(2).toInt()
-                        val pliesTilMate = abs(pliesTilMateUnnormalized)
-                        val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
-                        // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                        evaluation =
-                            (if (checkmating) CHECKMATE_EVALUATION - pliesTilMate else -CHECKMATE_EVALUATION + pliesTilMate).toDouble()
-                    } else evaluation = matcher.group(2).toInt() / 100.0
+        var line: String
+        while ((reader.readLine().also { line = it }) != null) {
+            val matcher: Matcher = EVALUATION_PATTERN.matcher(line)
+            if (line.contains("bestmove")) break
+            if (matcher.matches()) {
+                val checkmateSoon = matcher.group(1) == "mate"
+                if (checkmateSoon) {
+                    val pliesTilMateUnnormalized = matcher.group(2).toInt()
+                    val pliesTilMate = abs(pliesTilMateUnnormalized)
+                    val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
+                    // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
+                    evaluation = (if (checkmating) CHECKMATE_EVALUATION - pliesTilMate else -CHECKMATE_EVALUATION + pliesTilMate).toDouble()
                 }
+                else evaluation = matcher.group(2).toInt() / 100.0
             }
-        } catch (exception: IOException) {
-            throw RuntimeException(exception)
         }
         return evaluation
     }
@@ -139,17 +128,11 @@ class Pikafish(options: PikafishOptions) {
         // For compatibility with other UCI engines, this code should be changed.
         this.send("go perft 1")
         val moves: MutableList<Move> = ArrayList()
-        try {
-            var line: String
-            while ((reader.readLine().also { line = it }) != null) {
-                val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
-                if (line.contains("Nodes searched")) break
-                if (matcher.matches()) {
-                    moves.add(Move(matcher.group(1), matcher.group(2)))
-                }
-            }
-        } catch (exception: IOException) {
-            throw RuntimeException(exception)
+        var line: String
+        while ((reader.readLine().also { line = it }) != null) {
+            val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
+            if (line.contains("Nodes searched")) break
+            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2)))
         }
         return ImmutableList.copyOf<Move>(moves)
     }
