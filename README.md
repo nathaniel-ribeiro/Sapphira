@@ -1,16 +1,16 @@
 # Sapphira - Anti-Cheat for Online Xiangqi
 
 ## Overview
-This project bring the seminal work of Dr. Ken Regan on anti-cheat for chess to the game of Xiangqi. Note that this
+This project brings the seminal work of Dr. Ken Regan on anti-cheat for chess to the game of Xiangqi. Note that this
 repository is a work-in-progress.
 
 ### Regan's IPR Method
-Unlike ELO, which uses only the *outcomes* of games to determine a player's approximate strength, Regan's IPR (Intrinsic
-Performance Rating) uses individual moves in a game to determine the player's strength. Through two parameters, sensitivity and consistency, 
+Unlike ELO, which uses only the *outcomes* of a game to determine a player's approximate strength, Regan's IPR (Intrinsic
+Performance Rating) uses the quality of individual moves. Through two parameters, sensitivity and consistency, 
 we can predict the probability that a player will choose an inferior move. Sensitivity models the player's ability to discern between two roughly equal (but subtly different) moves and 
 consistency models the player's ability to avoid bad moves. 
 
-A player whose IPR for a game or set of games exceeds their recorded ELO by a certain threshold can be branded a cheater. 
+A player whose IPR for a game or set of games significantly exceeds their recorded ELO can be branded a cheater. 
 You can read a more thorough explanation [here](https://cse.buffalo.edu/~regan/papers/pdf/Reg12IPRs.pdf).
 
 ### Where does the name come from?
