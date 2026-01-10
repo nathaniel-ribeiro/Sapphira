@@ -5,5 +5,6 @@ enum class GameResultReason {
     DRAW,
     RESIGN,
     DRAW_NO_CAPTURE,
-    DRAW_NO_THREAT_PATTERN
+    DRAW_NO_THREAT_PATTERN,
+    STALEMATE
 }

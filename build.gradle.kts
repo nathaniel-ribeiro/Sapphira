@@ -19,7 +19,8 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta4")
     implementation("com.github.haifengl:smile-core:5.1.0")
-    implementation("org.apache.commons:commons-text:1.15.0") 
+    implementation("org.apache.commons:commons-text:1.15.0")
+    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
 }
 
 tasks.test {

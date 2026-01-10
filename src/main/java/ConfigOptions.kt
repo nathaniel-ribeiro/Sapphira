@@ -1,13 +1,12 @@
-import java.io.IOException
 import java.util.*
 
-object ConfigOptions : PikafishOptions, IPROptions {
+object ConfigOptions : PikafishOptions, FeatureExtractionOptions {
     override val pathToExecutable: String
     override val numThreads: Int
     override val hashSizeMiB: Int
     override val nodesToSearch: Int
     override val winningAdvantageThreshold: Double
-    override val numberOfFirstTurnsToExclude: Int
+    override val numberOfPliesToExclude: Int
 
     init {
         val properties = Properties()
@@ -20,6 +19,6 @@ object ConfigOptions : PikafishOptions, IPROptions {
         this.hashSizeMiB = properties.getProperty("hashSizeMiB").toInt()
         this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()
         this.winningAdvantageThreshold = properties.getProperty("winningAdvantageThreshold").toDouble()
-        this.numberOfFirstTurnsToExclude = properties.getProperty("numberOfFirstTurnsToExclude").toInt()
+        this.numberOfPliesToExclude = properties.getProperty("numberOfPliesToExclude").toInt()
     }
 }

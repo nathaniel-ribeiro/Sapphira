@@ -1,6 +1,6 @@
 import kotlin.math.ln
 
-class IPRFitter constructor(val learningRate: Double = DEFAULT_LEARNING_RATE) {
+class IPRFitter(val learningRate: Double = DEFAULT_LEARNING_RATE) {
     fun partialFit(moveEvaluations: Map<Move, Double>, movePlayed: Move): IPRModel {
         return this.partialFit(
             IPRModel(SENSITIVITY_INITIAL_GUESS, CONSISTENCY_INITIAL_GUESS),

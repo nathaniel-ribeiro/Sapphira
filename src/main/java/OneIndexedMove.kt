@@ -7,11 +7,13 @@ class OneIndexedMove(val srcSquare : String, val destSquare : String) {
         require(SQUARE_PATTERN.matcher(destSquare).matches())
         require(!srcSquare.equals(destSquare, ignoreCase = true))
     }
+
     fun toZeroIndexedMove() : Move{
         val zeroIndexedSrcSquare = "${this.srcSquare.substring(0, 1)}${(this.srcSquare.substring(1, this.srcSquare.length).toInt() - 1)}"
         val zeroIndexedDestSquare = "${this.destSquare.substring(0, 1)}${(this.destSquare.substring(1, this.destSquare.length).toInt() - 1)}"
         return Move(zeroIndexedSrcSquare, zeroIndexedDestSquare)
     }
+
     override fun toString(): String {
         return this.srcSquare + this.destSquare
     }
