@@ -1,5 +1,5 @@
 enum class GameResult {
-    WIN,
+    WON,
     DRAW,
-    LOSE
+    LOST
 }

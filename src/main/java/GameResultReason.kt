@@ -3,5 +3,7 @@ enum class GameResultReason {
     TIMER_EXPIRED,
     DISCONNECT,
     DRAW,
-    RESIGN
+    RESIGN,
+    DRAW_NO_CAPTURE,
+    DRAW_NO_THREAT_PATTERN
 }

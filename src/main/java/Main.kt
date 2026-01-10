@@ -1,3 +1,4 @@
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
@@ -37,7 +38,39 @@ fun main(args : Array<String>){
     // avg_cp_loss_red (excluding first 14 plies, endgame positions, and positions where one side has overwhelming advantage),
     // avg_cp_loss_black (excluding first 14 plies, endgame positions, and positions where one side has overwhelming advantage),
     println(df.schema())
+    val games = ArrayList<Game>()
     for(row in df){
-        println(GameImportingService().convertToListOfMoves(row["moves_raw"] as String))
+        // NOTE: some values in the df are WRONG!
+        // val moveCount = row["move_count"] as Int
+        val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
+        val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
+        val jwSimilarity = JaroWinklerSimilarity().apply(redPlayer.username, blackPlayer.username)
+        if(jwSimilarity >= 0.9) println("Potential alt/elevator accounts: ${redPlayer.username} and ${blackPlayer.username}")
+        val movesWithThinkTime = GameImportingService().convertToListOfMoves(row["moves_raw"] as String)
+        val moves = movesWithThinkTime.map { it.first }
+        val thinkTimes = movesWithThinkTime.map { it.second }
+        val redThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 0}
+        val blackThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 1}
+
+        val redThinkTimeMean = redThinkTimes.average()
+        val redThinkTimeStd = StandardDeviation().evaluate(redThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
+
+        val blackThinkTimeMean = blackThinkTimes.average()
+        val blackThinkTimeStd = StandardDeviation().evaluate(blackThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
+
+        val gameTimer = row["game_timer"] as Int
+        val moveTimer = row["move_timer"] as Int
+        val increment = row["increment"] as Int
+        val endReason = GameResultReason.valueOf((row["end_reason"] as String).uppercase().replace(" ", "_"))
+        val resultRed = GameResult.valueOf((row["result_red"] as String).uppercase())
+        val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
+        val game = Game(redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
+        games.add(game)
+
+        if(redPlayer.isBanned || blackPlayer.isBanned){
+            println(game)
+            println("Red think: $redThinkTimeMean \\pm $redThinkTimeStd")
+            println("Black think: $blackThinkTimeMean \\pm $blackThinkTimeStd")
+        }
     }
 }
