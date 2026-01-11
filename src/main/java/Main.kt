@@ -63,13 +63,13 @@ fun main(args : Array<String>){
     println("Finished importing games!")
     val pikafish = Pikafish(ConfigOptions)
     println("Finished building Pikafish instance!")
-    val game = games[42]
+    val game = games[32]
     println(game.moves)
     val evaluationsRedPerspective = game.moves.indices.map { pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(it + 1)) }.mapIndexed { index, board -> if(index.mod(2) == 0) pikafish.evaluate(board).flip() else pikafish.evaluate(board) }
     println(evaluationsRedPerspective)
     println("Finished game review!")
     val featureExtractionService = FeatureExtractionService(ConfigOptions)
-    val cpLossesRed = featureExtractionService.getAdjustedCPLosses(evaluationsRedPerspective, Alliance.BLACK)
+    val cpLossesRed = featureExtractionService.getAdjustedEvaluationLosses(evaluationsRedPerspective, Alliance.RED)
     println(cpLossesRed)
     println(featureExtractionService.getMoveQualityFrequencies(cpLossesRed))
 }

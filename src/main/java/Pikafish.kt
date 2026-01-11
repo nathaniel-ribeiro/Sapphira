@@ -117,9 +117,9 @@ class Pikafish(options: PikafishOptions) {
                     centipawns = if (checkmating) CHECKMATE_EVALUATION_CENTIPAWNS - pliesTilMate else -CHECKMATE_EVALUATION_CENTIPAWNS + pliesTilMate
                 }
                 else centipawns = matcher.group(2).toInt()
-                val winProbability = matcher.group(3).toDouble()
-                val drawProbability = matcher.group(4).toDouble()
-                val loseProbability = matcher.group(5).toDouble()
+                val winProbability = matcher.group(3).toDouble() / 1000.0
+                val drawProbability = matcher.group(4).toDouble() / 1000.0
+                val loseProbability = matcher.group(5).toDouble() / 1000.0
                 evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
             }
         }

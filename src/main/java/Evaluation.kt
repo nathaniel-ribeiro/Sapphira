@@ -1,12 +1,15 @@
+import kotlin.math.abs
+
 class Evaluation(val centipawns : Int,
                  val winProbability : Double,
                  val drawProbability : Double,
                  val loseProbability : Double){
     init {
-        require(winProbability >= 0)
-        require(drawProbability >= 0)
-        require(loseProbability >= 0)
-        require(winProbability + drawProbability + loseProbability == 1.0){"Win/draw/loss values must form a probability distribution (sum to 1 and be non-negative)"}
+        require(winProbability in 0.0..1.0)
+        require(drawProbability in 0.0..1.0)
+        require(loseProbability in 0.0..1.0)
+        var totalProbabilityMass = winProbability + drawProbability + loseProbability
+        require(abs(totalProbabilityMass - 1.0) <= 1e-6){"Win/draw/loss values must form a probability distribution (sum to 1 and be non-negative)"}
     }
 
     override fun equals(other: Any?): Boolean {

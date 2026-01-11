@@ -1,32 +1,34 @@
 import kotlin.math.abs
 
+typealias CentipawnAndWinProbabilityLoss = Pair<Int, Double>
 class FeatureExtractionService(val options: FeatureExtractionOptions) {
-    fun getAdjustedCPLosses(evaluationsRedPerspective: List<Evaluation>, alliance: Alliance) : List<Int>{
+    fun getAdjustedEvaluationLosses(evaluationsRedPerspective: List<Evaluation>, alliance: Alliance) : List<CentipawnAndWinProbabilityLoss>{
         require(evaluationsRedPerspective.size > options.numberOfPliesToExclude) { "Game was too short to provide a centipawn loss"}
         val evaluationsAfterOpening = evaluationsRedPerspective.drop(options.numberOfPliesToExclude - 1)
-        val redCPLosses = ArrayList<Int>()
-        val blackCPLosses = ArrayList<Int>()
+        val redEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
+        val blackEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
         for(i in 0..<(evaluationsAfterOpening.size - 1)){
-            val evalBefore =  evaluationsAfterOpening[i]
-            val evalAfter = evaluationsAfterOpening[i + 1]
-            if(abs(evalBefore.centipawns) >= options.winningAdvantageThreshold
-                && abs(evalAfter.centipawns) >= options.winningAdvantageThreshold) continue
+            val before =  evaluationsAfterOpening[i]
+            val after = evaluationsAfterOpening[i + 1]
+            // TODO: check if win probability <= 10% or >= 90%
+            if(abs(before.centipawns) >= options.winningAdvantageThreshold
+                && abs(after.centipawns) >= options.winningAdvantageThreshold) continue
             val redTurn = i.mod(2) == 0
-            val evalDropRed = evalBefore.centipawns - evalAfter.centipawns
-            val evalDropBlack = -evalDropRed
-            if(redTurn) redCPLosses.add(evalDropRed)
-            else blackCPLosses.add(evalDropBlack)
+            val evalDropRed = CentipawnAndWinProbabilityLoss(before.centipawns - after.centipawns, before.winProbability - after.winProbability)
+            val evalDropBlack = CentipawnAndWinProbabilityLoss(-evalDropRed.first, -evalDropRed.second)
+            if(redTurn) redEvaluationLosses.add(evalDropRed)
+            else blackEvaluationLosses.add(evalDropBlack)
         }
-        return if(alliance == Alliance.RED) redCPLosses else blackCPLosses
+        return if(alliance == Alliance.RED) redEvaluationLosses else blackEvaluationLosses
     }
 
-    fun getMoveQualityFrequencies(adjustedCPLosses : List<Int>) : Map<MoveQuality, Int>{
-        require(adjustedCPLosses.isNotEmpty())
+    fun getMoveQualityFrequencies(adjustedEvaluationLosses : List<CentipawnAndWinProbabilityLoss>) : Map<MoveQuality, Int>{
+        require(adjustedEvaluationLosses.isNotEmpty())
         val moveQualities = MoveQuality.entries.toTypedArray().toList()
         val moveQualityFrequencies = moveQualities.associateWith { 0 }.toMutableMap()
-        for(cpLoss in adjustedCPLosses){
+        for(centipawnAndWinProbabilityLoss in adjustedEvaluationLosses){
             for(moveQuality in moveQualities){
-                if(cpLoss in moveQuality.cpLossRange){
+                if(centipawnAndWinProbabilityLoss.second in moveQuality.dropInWinProbability){
                     moveQualityFrequencies[moveQuality] = (moveQualityFrequencies[moveQuality]?:0) + 1
                 }
             }
