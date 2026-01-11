@@ -1,4 +1,4 @@
-enum class MoveQualities(val cpLossRange : IntRange) {
+enum class MoveQuality(val cpLossRange : IntRange) {
     // Note: the cp loss lower bound for "best" should intuitively be 0 but low depth analysis can miss
     // the true best move and setting the lower bound and setting the lower bound to Int.MIN_VALUE captures the full
     // range of integers

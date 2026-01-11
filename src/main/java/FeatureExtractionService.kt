@@ -19,9 +19,9 @@ class FeatureExtractionService(val pikafish: Pikafish, val options: FeatureExtra
         return if(alliance == Alliance.RED) redCPLosses else blackCPLosses
     }
 
-    fun getMoveQualityFrequencies(adjustedCPLosses : List<Int>) : Map<MoveQualities, Int>{
+    fun getMoveQualityFrequencies(adjustedCPLosses : List<Int>) : Map<MoveQuality, Int>{
         require(adjustedCPLosses.isNotEmpty())
-        val moveQualities = MoveQualities.entries.toTypedArray().toList()
+        val moveQualities = MoveQuality.entries.toTypedArray().toList()
         val moveQualityFrequencies = moveQualities.associateWith { 0 }.toMutableMap()
         for(cpLoss in adjustedCPLosses){
             for(moveQuality in moveQualities){
