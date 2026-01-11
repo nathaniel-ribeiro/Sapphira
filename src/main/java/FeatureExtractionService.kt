@@ -1,7 +1,7 @@
 import kotlin.math.abs
 
-class FeatureExtractionService(val pikafish: Pikafish, val options: FeatureExtractionOptions) {
-    fun getAdjustedCPLosses(evaluationsRedPerspective : List<Double>, alliance: Alliance) : List<Int>{
+class FeatureExtractionService(val options: FeatureExtractionOptions) {
+    fun getAdjustedCPLosses(evaluationsRedPerspective: List<Evaluation>, alliance: Alliance) : List<Int>{
         require(evaluationsRedPerspective.size > options.numberOfPliesToExclude) { "Game was too short to provide a centipawn loss"}
         val evaluationsAfterOpening = evaluationsRedPerspective.drop(options.numberOfPliesToExclude - 1)
         val redCPLosses = ArrayList<Int>()
@@ -9,12 +9,13 @@ class FeatureExtractionService(val pikafish: Pikafish, val options: FeatureExtra
         for(i in 0..<(evaluationsAfterOpening.size - 1)){
             val evalBefore =  evaluationsAfterOpening[i]
             val evalAfter = evaluationsAfterOpening[i + 1]
-            if(abs(evalBefore) >= options.winningAdvantageThreshold && abs(evalAfter) >= options.winningAdvantageThreshold) continue
+            if(abs(evalBefore.centipawns) >= options.winningAdvantageThreshold
+                && abs(evalAfter.centipawns) >= options.winningAdvantageThreshold) continue
             val redTurn = i.mod(2) == 0
-            val evalDropRed = evalBefore - evalAfter
+            val evalDropRed = evalBefore.centipawns - evalAfter.centipawns
             val evalDropBlack = -evalDropRed
-            if(redTurn) redCPLosses.add((evalDropRed * 100).toInt())
-            else blackCPLosses.add((evalDropBlack * 100).toInt())
+            if(redTurn) redCPLosses.add(evalDropRed)
+            else blackCPLosses.add(evalDropBlack)
         }
         return if(alliance == Alliance.RED) redCPLosses else blackCPLosses
     }
