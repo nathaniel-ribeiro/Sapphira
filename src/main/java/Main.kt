@@ -1,9 +1,7 @@
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.*
-import org.jetbrains.kotlinx.dataframe.io.*
-import java.awt.Taskbar
+import org.jetbrains.kotlinx.dataframe.io.readCsv
 
 fun main(args : Array<String>){
     if(args.size != 1) throw IllegalArgumentException()
@@ -35,8 +33,43 @@ fun main(args : Array<String>){
     // black_think_time_std
     // avg_cp_loss_red (excluding first 14 plies, endgame positions, and positions where one side has overwhelming advantage),
     // avg_cp_loss_black (excluding first 14 plies, endgame positions, and positions where one side has overwhelming advantage),
-    val evaluationsRedPerspective = listOf(0.33, 0.42, 0.33, 0.83, 0.26, 2.32, 0.54, 0.81, -0.14, 0.93, 0.97, 1.02, -0.05, 0.62, 0.57, 2.27, 2.19, 4.15, 4.04, 4.7, 4.27, 5.83, 5.47, 7.25, 5.39, 8.63, 6.75, 7.67, 6.99, 7.8, 7.67, 8.26, 7.94, 8.48, 8.08, 95.0, 10.06, 96.0, 97.0, 97.0, 98.0)
+    val df = DataFrame.readCsv(args[0])
+    val games = ArrayList<Game>()
+    for(row in df){
+        val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
+        val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
+        val usernameSimilarity = JaroWinklerSimilarity().apply(redPlayer.username, blackPlayer.username)
+        val movesWithThinkTime = GameImportingService().convertToListOfMoves(row["moves_raw"] as String)
+        val moves = movesWithThinkTime.map { it.first }
+        val thinkTimes = movesWithThinkTime.map { it.second }
+        val redThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 0}
+        val blackThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 1}
+
+        val redThinkTimeMean = redThinkTimes.average()
+        val redThinkTimeStd = StandardDeviation().evaluate(redThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
+
+        val blackThinkTimeMean = blackThinkTimes.average()
+        val blackThinkTimeStd = StandardDeviation().evaluate(blackThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
+
+        val gameTimer = row["game_timer"] as Int
+        val moveTimer = row["move_timer"] as Int
+        val increment = row["increment"] as Int
+        val endReason = GameResultReason.valueOf((row["end_reason"] as String).uppercase().replace(" ", "_"))
+        val resultRed = GameResult.valueOf((row["result_red"] as String).uppercase())
+        val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
+        val game = Game(redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
+        games.add(game)
+    }
+    println("Finished importing games!")
     val pikafish = Pikafish(ConfigOptions)
+    println("Finished building Pikafish instance!")
+    val game = games[42]
+    println(game.moves)
+    val evaluationsRedPerspective = game.moves.indices.map { pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(it + 1)) }.mapIndexed { index, board -> if(index.mod(2) == 0) -1 * pikafish.evaluate(board) else pikafish.evaluate(board) }
+    println(evaluationsRedPerspective)
+    println("Finished game review!")
     val featureExtractionService = FeatureExtractionService(pikafish, ConfigOptions)
-    println(featureExtractionService.getAdjustedCPLosses(evaluationsRedPerspective, Alliance.BLACK))
+    val cpLossesRed = featureExtractionService.getAdjustedCPLosses(evaluationsRedPerspective, Alliance.BLACK)
+    println(cpLossesRed)
+    println(featureExtractionService.getMoveQualityFrequencies(cpLossesRed))
 }
