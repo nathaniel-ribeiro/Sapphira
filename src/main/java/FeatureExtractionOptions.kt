@@ -1,4 +1,4 @@
 interface FeatureExtractionOptions {
-    val winningAdvantageThreshold : Double
+    val winningAdvantageThreshold : Int
     val numberOfPliesToExclude : Int
 }

@@ -70,6 +70,8 @@ fun main(args : Array<String>){
     println("Finished game review!")
     val featureExtractionService = FeatureExtractionService(ConfigOptions)
     val cpLossesRed = featureExtractionService.getAdjustedEvaluationLosses(evaluationsRedPerspective, Alliance.RED)
-    println(cpLossesRed)
-    println(featureExtractionService.getMoveQualityFrequencies(cpLossesRed))
+    val cpLossesBlack = featureExtractionService.getAdjustedEvaluationLosses(evaluationsRedPerspective, Alliance.BLACK)
+
+    println("Game review for red: ${featureExtractionService.getMoveQualityFrequencies(cpLossesRed)}")
+    println("Game review for black: ${featureExtractionService.getMoveQualityFrequencies(cpLossesBlack)}")
 }

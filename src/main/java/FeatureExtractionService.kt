@@ -8,7 +8,7 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
         val redEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
         val blackEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
         for(i in 0..<(evaluationsAfterOpening.size - 1)){
-            val before =  evaluationsAfterOpening[i]
+            val before = evaluationsAfterOpening[i]
             val after = evaluationsAfterOpening[i + 1]
             // TODO: check if win probability <= 10% or >= 90%
             if(abs(before.centipawns) >= options.winningAdvantageThreshold
