@@ -1,6 +1,5 @@
 import com.google.common.collect.ImmutableList
 import java.io.BufferedReader
-import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.util.regex.Matcher
@@ -45,6 +44,7 @@ class Pikafish(options: PikafishOptions) {
         this.send("isready")
         this.send("setoption name Threads value ${options.numThreads}")
         this.send("setoption name Hash value ${options.hashSizeMiB}")
+        this.send("setoption name UCI_ShowWDL value true")
     }
 
     private fun send(command: String) {
@@ -98,24 +98,29 @@ class Pikafish(options: PikafishOptions) {
         return Board(fen)
     }
 
-    fun evaluate(board: Board): Double {
+    fun evaluate(board: Board): Evaluation {
         this.send("position fen ${board.fen}")
         this.send("go nodes ${this.nodesToSearch}")
-        var evaluation = Double.NaN
+        lateinit var evaluation : Evaluation
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = EVALUATION_PATTERN.matcher(line)
             if (line.contains("bestmove")) break
             if (matcher.matches()) {
                 val checkmateSoon = matcher.group(1) == "mate"
+                val centipawns : Int
                 if (checkmateSoon) {
                     val pliesTilMateUnnormalized = matcher.group(2).toInt()
                     val pliesTilMate = abs(pliesTilMateUnnormalized)
                     val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
                     // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                    evaluation = (if (checkmating) CHECKMATE_EVALUATION - pliesTilMate else -CHECKMATE_EVALUATION + pliesTilMate).toDouble()
+                    centipawns = if (checkmating) CHECKMATE_EVALUATION_CENTIPAWNS - pliesTilMate else -CHECKMATE_EVALUATION_CENTIPAWNS + pliesTilMate
                 }
-                else evaluation = matcher.group(2).toInt() / 100.0
+                else centipawns = matcher.group(2).toInt()
+                val winProbability = matcher.group(3).toDouble()
+                val drawProbability = matcher.group(4).toDouble()
+                val loseProbability = matcher.group(5).toDouble()
+                evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
             }
         }
         return evaluation
@@ -143,11 +148,11 @@ class Pikafish(options: PikafishOptions) {
         private const val MIN_HASH_SIZE_MIB = 1
         private const val MAX_HASH_SIZE_MIB = 33554432
         private const val MIN_NODES_TO_SEARCH = 1
-        private const val CHECKMATE_EVALUATION = 100
+        private const val CHECKMATE_EVALUATION_CENTIPAWNS = 10_000
 
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
         private val LEGAL_MOVE_PATTERN: Pattern = Pattern.compile("([a-i]\\d)([a-i]\\d): 1")
-        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+).*")
+        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+) wdl (\\d+) (\\d+) (\\d+).*")
     }
 }
