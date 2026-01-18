@@ -1,6 +1,7 @@
 import com.google.common.collect.ImmutableList
 
 data class Game(
+    val uuid : String,
     val redPlayer: Player,
     val blackPlayer: Player,
     val gameTimer: Int,

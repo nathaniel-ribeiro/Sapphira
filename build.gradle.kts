@@ -21,6 +21,7 @@ dependencies {
     implementation("com.github.haifengl:smile-core:5.1.0")
     implementation("org.apache.commons:commons-text:1.15.0")
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 tasks.test {

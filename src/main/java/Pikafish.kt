@@ -117,9 +117,20 @@ class Pikafish(options: PikafishOptions) {
                     centipawns = if (checkmating) CHECKMATE_EVALUATION_CENTIPAWNS - pliesTilMate else -CHECKMATE_EVALUATION_CENTIPAWNS + pliesTilMate
                 }
                 else centipawns = matcher.group(2).toInt()
-                val winProbability = matcher.group(3).toDouble() / 1000.0
-                val drawProbability = matcher.group(4).toDouble() / 1000.0
-                val loseProbability = matcher.group(5).toDouble() / 1000.0
+                var winProbability : Double
+                var drawProbability : Double
+                var loseProbability : Double
+                try{
+                    winProbability = matcher.group(4).toDouble() / 1000.0
+                    drawProbability = matcher.group(5).toDouble() / 1000.0
+                    loseProbability = matcher.group(6).toDouble() / 1000.0
+                }
+                catch (e : Exception){
+                    // extreme case where the game is already over
+                    winProbability = if(centipawns > 0) 1.0 else 0.0
+                    drawProbability = if(centipawns == 0) 1.0 else 0.0
+                    loseProbability = if(centipawns < 0) 1.0 else 0.0
+                }
                 evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
             }
         }
@@ -142,6 +153,10 @@ class Pikafish(options: PikafishOptions) {
         return ImmutableList.copyOf<Move>(moves)
     }
 
+    fun clear(){
+        this.send("ucinewgame")
+    }
+
     companion object {
         private const val MIN_THREADS = 1
         private const val MAX_THREADS = 1024
@@ -153,6 +168,7 @@ class Pikafish(options: PikafishOptions) {
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
         private val LEGAL_MOVE_PATTERN: Pattern = Pattern.compile("([a-i]\\d)([a-i]\\d): 1")
-        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+) wdl (\\d+) (\\d+) (\\d+).*")
+        // if one side is already checkmated/stalemated, the WDL will not show, even if the show wdl option has been sent
+        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+)( wdl (\\d+) (\\d+) (\\d+))?.*")
     }
 }

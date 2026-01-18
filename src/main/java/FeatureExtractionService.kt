@@ -8,13 +8,16 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
         val redEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
         val blackEvaluationLosses = ArrayList<CentipawnAndWinProbabilityLoss>()
         for(i in 0..<(evaluationsAfterOpening.size - 1)){
+            val redTurn = i.mod(2) == 0
+            if((!redTurn && alliance == Alliance.RED) || (redTurn && alliance != Alliance.RED)) continue
             val before = evaluationsAfterOpening[i]
             val after = evaluationsAfterOpening[i + 1]
-            // TODO: check if win probability <= 10% or >= 90%
-            if(abs(before.centipawns) >= options.winningAdvantageThreshold
-                && abs(after.centipawns) >= options.winningAdvantageThreshold) continue
-            val redTurn = i.mod(2) == 0
+            // skip computing centipawn loss in hopeless positions
+            if((abs(before.centipawns) >= options.winningAdvantageThreshold
+                && abs(after.centipawns) >= options.winningAdvantageThreshold)
+                || (before.winProbability !in 0.10..0.90 && after.winProbability !in 0.10..0.90)) continue
             val evalDropRed = CentipawnAndWinProbabilityLoss(before.centipawns - after.centipawns, before.winProbability - after.winProbability)
+            // TODO: (bugfix) drop in red's win probability is not automatically an increase in black's win probability (could be an increase in draw probability)
             val evalDropBlack = CentipawnAndWinProbabilityLoss(-evalDropRed.first, -evalDropRed.second)
             if(redTurn) redEvaluationLosses.add(evalDropRed)
             else blackEvaluationLosses.add(evalDropBlack)

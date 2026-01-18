@@ -1,3 +1,9 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import org.jetbrains.kotlinx.dataframe.DataFrame
@@ -36,42 +42,49 @@ fun main(args : Array<String>){
     val df = DataFrame.readCsv(args[0])
     val games = ArrayList<Game>()
     for(row in df){
+        val uuid = row["game_uuid"] as String
         val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
         val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
-        val usernameSimilarity = JaroWinklerSimilarity().apply(redPlayer.username, blackPlayer.username)
         val movesWithThinkTime = GameImportingService().convertToListOfMoves(row["moves_raw"] as String)
         val moves = movesWithThinkTime.map { it.first }
-        val thinkTimes = movesWithThinkTime.map { it.second }
-        val redThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 0}
-        val blackThinkTimes = thinkTimes.filterIndexed { index, _ ->  index.mod(2) == 1}
-
-        val redThinkTimeMean = redThinkTimes.average()
-        val redThinkTimeStd = StandardDeviation().evaluate(redThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
-
-        val blackThinkTimeMean = blackThinkTimes.average()
-        val blackThinkTimeStd = StandardDeviation().evaluate(blackThinkTimes.toIntArray().map { it.toDouble() }.toDoubleArray())
-
         val gameTimer = row["game_timer"] as Int
         val moveTimer = row["move_timer"] as Int
         val increment = row["increment"] as Int
         val endReason = GameResultReason.valueOf((row["end_reason"] as String).uppercase().replace(" ", "_"))
         val resultRed = GameResult.valueOf((row["result_red"] as String).uppercase())
         val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
-        val game = Game(redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
+        val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
         games.add(game)
+        if(games.size > 100) break
     }
     println("Finished importing games!")
-    val pikafish = Pikafish(ConfigOptions)
+    val pikafishInstances = listOf(Pikafish(ConfigOptions), Pikafish(ConfigOptions))
+    val pool = Channel<Pikafish>(pikafishInstances.size)
+    pikafishInstances.forEach { pool.trySend(it) }
     println("Finished building Pikafish instance!")
-    val game = games[32]
-    println(game.moves)
-    val evaluationsRedPerspective = game.moves.indices.map { pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(it + 1)) }.mapIndexed { index, board -> if(index.mod(2) == 0) pikafish.evaluate(board).flip() else pikafish.evaluate(board) }
-    println(evaluationsRedPerspective)
-    println("Finished game review!")
-    val featureExtractionService = FeatureExtractionService(ConfigOptions)
-    val cpLossesRed = featureExtractionService.getAdjustedEvaluationLosses(evaluationsRedPerspective, Alliance.RED)
-    val cpLossesBlack = featureExtractionService.getAdjustedEvaluationLosses(evaluationsRedPerspective, Alliance.BLACK)
 
-    println("Game review for red: ${featureExtractionService.getMoveQualityFrequencies(cpLossesRed)}")
-    println("Game review for black: ${featureExtractionService.getMoveQualityFrequencies(cpLossesBlack)}")
+    suspend fun processGames(games: List<Game>) = coroutineScope {
+        games.mapIndexed { i, game ->
+            async(Dispatchers.Default) {
+                val pikafish = pool.receive()
+                try {
+                    game.moves.indices.map { i ->
+                        val board = pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(i + 1))
+                        val eval = pikafish.evaluate(board)
+                        if (i % 2 == 0) eval.flip() else eval
+                    }
+                    println("Finished processing game #$i!")
+                }
+                catch(e : Exception) {
+                    println("Failed to evaluate game #$i with id ${game.uuid}")
+                }
+                finally {
+                        pikafish.clear()
+                        pool.send(pikafish)
+                    }
+                }
+            }
+        }.awaitAll()
+    val allEvaluations = runBlocking { processGames(listOf(games[1])) }
+    println("Evaluated all games!")
 }
