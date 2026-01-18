@@ -114,24 +114,20 @@ class Pikafish(options: PikafishOptions) {
                     val pliesTilMate = abs(pliesTilMateUnnormalized)
                     val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
                     // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                    centipawns = if (checkmating) CHECKMATE_EVALUATION_CENTIPAWNS - pliesTilMate else -CHECKMATE_EVALUATION_CENTIPAWNS + pliesTilMate
+                    centipawns = if (checkmating) Evaluation.WON.centipawns - pliesTilMate else -Evaluation.LOST.centipawns + pliesTilMate
                 }
                 else centipawns = matcher.group(2).toInt()
-                var winProbability : Double
-                var drawProbability : Double
-                var loseProbability : Double
                 try{
-                    winProbability = matcher.group(4).toDouble() / 1000.0
-                    drawProbability = matcher.group(5).toDouble() / 1000.0
-                    loseProbability = matcher.group(6).toDouble() / 1000.0
+                    // the wdl groups will be missing if the game is already over (goes to catch block)
+                    val winProbability = matcher.group(4).toDouble() / 1000.0
+                    val drawProbability = matcher.group(5).toDouble() / 1000.0
+                    val loseProbability = matcher.group(6).toDouble() / 1000.0
+                    evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
                 }
                 catch (e : Exception){
                     // extreme case where the game is already over
-                    winProbability = if(centipawns > 0) 1.0 else 0.0
-                    drawProbability = if(centipawns == 0) 1.0 else 0.0
-                    loseProbability = if(centipawns < 0) 1.0 else 0.0
+                    evaluation = if(centipawns > 0) Evaluation.WON else if(centipawns == 0) Evaluation.DREW else Evaluation.LOST
                 }
-                evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
             }
         }
         return evaluation
@@ -163,7 +159,6 @@ class Pikafish(options: PikafishOptions) {
         private const val MIN_HASH_SIZE_MIB = 1
         private const val MAX_HASH_SIZE_MIB = 33554432
         private const val MIN_NODES_TO_SEARCH = 1
-        private const val CHECKMATE_EVALUATION_CENTIPAWNS = 10_000
 
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")

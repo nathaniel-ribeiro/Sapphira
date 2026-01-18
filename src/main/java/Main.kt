@@ -58,7 +58,7 @@ fun main(args : Array<String>){
         if(games.size > 100) break
     }
     println("Finished importing games!")
-    val pikafishInstances = listOf(Pikafish(ConfigOptions), Pikafish(ConfigOptions))
+    val pikafishInstances = listOf(Pikafish(ConfigOptions), Pikafish(ConfigOptions), Pikafish(ConfigOptions), Pikafish(ConfigOptions))
     val pool = Channel<Pikafish>(pikafishInstances.size)
     pikafishInstances.forEach { pool.trySend(it) }
     println("Finished building Pikafish instance!")
@@ -75,16 +75,13 @@ fun main(args : Array<String>){
                     }
                     println("Finished processing game #$i!")
                 }
-                catch(e : Exception) {
-                    println("Failed to evaluate game #$i with id ${game.uuid}")
-                }
                 finally {
-                        pikafish.clear()
-                        pool.send(pikafish)
-                    }
+                    pikafish.clear()
+                    pool.send(pikafish)
                 }
             }
+        }
         }.awaitAll()
-    val allEvaluations = runBlocking { processGames(listOf(games[1])) }
+    val allEvaluations = runBlocking { processGames(games) }
     println("Evaluated all games!")
 }

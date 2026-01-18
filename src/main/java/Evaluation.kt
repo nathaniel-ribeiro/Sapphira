@@ -39,4 +39,10 @@ class Evaluation(val centipawns : Int,
     override fun toString(): String {
         return "Evaluation(centipawns=$centipawns, winProbability=$winProbability, drawProbability=$drawProbability, loseProbability=$loseProbability)"
     }
+
+    companion object{
+        val LOST = Evaluation(-10_000, 0.0, 0.0, 1.0)
+        val DREW = Evaluation(0, 0.0, 1.0, 0.0)
+        val WON = Evaluation(10_000, 1.0, 0.0, 0.0)
+    }
 }
