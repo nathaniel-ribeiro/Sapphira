@@ -75,7 +75,7 @@ class Pikafish(options: PikafishOptions) {
         if (!b) throw RuntimeException()
         val srcSquare = matcher.group(1)
         val destSquare = matcher.group(2)
-        return Move(srcSquare, destSquare)
+        return Move(srcSquare, destSquare, board.whoseTurn)
     }
 
     fun makeMove(board: Board, move: Move): Board {
@@ -84,7 +84,7 @@ class Pikafish(options: PikafishOptions) {
 
     fun makeMoves(board: Board, moves: List<Move>): Board {
         if (moves.isEmpty()) return board
-        val movesString = moves.joinToString(separator = " ")
+        val movesString = moves.joinToString(separator = " ") { it.srcSquare + it.destSquare }
         this.send("position fen ${board.fen} moves $movesString")
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
@@ -144,7 +144,7 @@ class Pikafish(options: PikafishOptions) {
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
             if (line.contains("Nodes searched")) break
-            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2)))
+            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn))
         }
         return ImmutableList.copyOf<Move>(moves)
     }

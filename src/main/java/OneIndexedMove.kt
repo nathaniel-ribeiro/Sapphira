@@ -1,6 +1,6 @@
 import java.util.regex.Pattern
 
-class OneIndexedMove(val srcSquare : String, val destSquare : String) {
+class OneIndexedMove(val srcSquare : String, val destSquare : String, val whoMoved : Alliance) {
     init {
         //NOTE: this is a necessary but insufficient check for legal moves
         require(SQUARE_PATTERN.matcher(srcSquare).matches())
@@ -11,7 +11,7 @@ class OneIndexedMove(val srcSquare : String, val destSquare : String) {
     fun toZeroIndexedMove() : Move{
         val zeroIndexedSrcSquare = "${this.srcSquare.substring(0, 1)}${(this.srcSquare.substring(1, this.srcSquare.length).toInt() - 1)}"
         val zeroIndexedDestSquare = "${this.destSquare.substring(0, 1)}${(this.destSquare.substring(1, this.destSquare.length).toInt() - 1)}"
-        return Move(zeroIndexedSrcSquare, zeroIndexedDestSquare)
+        return Move(zeroIndexedSrcSquare, zeroIndexedDestSquare, whoMoved)
     }
 
     override fun toString(): String {

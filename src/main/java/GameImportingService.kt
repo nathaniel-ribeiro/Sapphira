@@ -15,11 +15,11 @@ class GameImportingService {
                                    .map { it.trim().trim('\'') }
                                    .filter { it.isNotEmpty() }
 
-        return movesListRaw.map{ moveRaw ->
+        return movesListRaw.mapIndexed{ i, moveRaw ->
             val matcher = MOVE_WITH_TIME_USAGE_PATTERN.matcher(moveRaw)
             require(matcher.matches()){"$moveRaw did not match pattern $MOVE_WITH_TIME_USAGE_PATTERN"}
             val thinkTime = matcher.group(7).toInt()
-            val moveOneIndexed = OneIndexedMove(matcher.group(1), matcher.group(3))
+            val moveOneIndexed = OneIndexedMove(matcher.group(1), matcher.group(3), if(i.mod(2) == 0) Alliance.RED else Alliance.BLACK)
             val moveZeroIndexed = moveOneIndexed.toZeroIndexedMove()
             MoveWithThinkTime(moveZeroIndexed, thinkTime)
         }.toList()
