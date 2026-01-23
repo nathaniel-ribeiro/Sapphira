@@ -9,5 +9,5 @@ data class ReviewedMove(
     val winProbabilityLoss : Double
         get() = bestMoveEvaluation.winProbability - movePlayedEvaluation.winProbability
     val moveQuality : MoveQuality
-        get() =
+        get() = MoveClassifier.classify(this.winProbabilityLoss)
 }
