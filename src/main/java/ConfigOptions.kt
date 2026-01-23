@@ -1,12 +1,13 @@
 import java.util.*
 
-object ConfigOptions : PikafishOptions, FeatureExtractionOptions {
+object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessingOptions {
     override val pathToExecutable: String
     override val numThreads: Int
     override val hashSizeMiB: Int
     override val nodesToSearch: Int
     override val winningAdvantageThreshold: Int
     override val numberOfPliesToExclude: Int
+    override val pikafishPoolSize : Int
 
     init {
         val properties = Properties()
@@ -20,5 +21,6 @@ object ConfigOptions : PikafishOptions, FeatureExtractionOptions {
         this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()
         this.winningAdvantageThreshold = properties.getProperty("winningAdvantageThreshold").toInt()
         this.numberOfPliesToExclude = properties.getProperty("numberOfPliesToExclude").toInt()
+        this.pikafishPoolSize = properties.getProperty("pikafishPoolSize").toInt()
     }
 }

@@ -114,7 +114,7 @@ class Pikafish(options: PikafishOptions) {
                     val pliesTilMate = abs(pliesTilMateUnnormalized)
                     val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
                     // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                    centipawns = if (checkmating) Evaluation.WON.centipawns - pliesTilMate else -Evaluation.LOST.centipawns + pliesTilMate
+                    centipawns = if (checkmating) Evaluation.WON.centipawns - pliesTilMate else Evaluation.LOST.centipawns + pliesTilMate
                 }
                 else centipawns = matcher.group(2).toInt()
                 try{

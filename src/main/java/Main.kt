@@ -58,7 +58,8 @@ fun main(args : Array<String>){
         if(games.size > 100) break
     }
     println("Finished importing games!")
-    val pikafishInstances = listOf(Pikafish(ConfigOptions), Pikafish(ConfigOptions), Pikafish(ConfigOptions), Pikafish(ConfigOptions))
+    val pikafishInstances = ArrayList<Pikafish>()
+    (0..<ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
     val pool = Channel<Pikafish>(pikafishInstances.size)
     pikafishInstances.forEach { pool.trySend(it) }
     println("Finished building Pikafish instance!")
@@ -68,12 +69,12 @@ fun main(args : Array<String>){
             async(Dispatchers.Default) {
                 val pikafish = pool.receive()
                 try {
-                    game.moves.indices.map { i ->
+                    val evaluationsRed = game.moves.indices.map { i ->
                         val board = pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(i + 1))
                         val eval = pikafish.evaluate(board)
                         if (i % 2 == 0) eval.flip() else eval
                     }
-                    println("Finished processing game #$i!")
+                    println(evaluationsRed)
                 }
                 finally {
                     pikafish.clear()

@@ -1,8 +1,3 @@
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
-import org.apache.commons.text.similarity.JaroWinklerSimilarity
-import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.io.readCsv
-import java.io.File
 import java.util.regex.Pattern
 
 typealias MoveWithThinkTime = Pair<Move, Int>
@@ -31,8 +26,8 @@ class GameImportingService {
     }
     companion object{
         // abandon hope all ye who enter here
-        // TODO: ask David why there are negative numbers in this
+        // negative numbers possible if there is increment and user takes less time to move than the increment
         private val MOVE_WITH_TIME_USAGE_PATTERN =
-            Pattern.compile("([a-i]([1-9]|10))([a-i]([1-9]|10)) (0|\\d+/-?\\d+) (0|\\d+/-?\\d+) (-?\\d+)")
+            Pattern.compile("([a-i]([1-9]|10))([a-i]([1-9]|10)) (0|\\d+/\\d+) (0|\\d+/\\d+) (-?\\d+)")
     }
 }
