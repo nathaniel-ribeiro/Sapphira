@@ -65,7 +65,7 @@ fun main(args : Array<String>){
     println("Finished building Pikafish instance!")
 
     suspend fun processGames(games: List<Game>) = coroutineScope {
-        games.mapIndexed { i, game ->
+        games.map { game ->
             async(Dispatchers.Default) {
                 val pikafish = pool.receive()
                 try {

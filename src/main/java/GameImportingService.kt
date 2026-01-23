@@ -28,6 +28,6 @@ class GameImportingService {
         // abandon hope all ye who enter here
         // negative numbers possible if there is increment and user takes less time to move than the increment
         private val MOVE_WITH_TIME_USAGE_PATTERN =
-            Pattern.compile("([a-i]([1-9]|10))([a-i]([1-9]|10)) (0|\\d+/\\d+) (0|\\d+/\\d+) (-?\\d+)")
+            Pattern.compile("([a-i]([1-9]|10))([a-i]([1-9]|10)) (0|\\d+/-?\\d+) (0|\\d+/-?\\d+) (-?\\d+)")
     }
 }
