@@ -8,7 +8,7 @@ repository is a work-in-progress.
 Due to the high volume of online games played per day, an efficient anti-cheat tool suite either needs large amounts of compute or a hierarchical method of screening games, reserving heavy analysis for high likelihood cheaters.
 The first stage of analysis is nicknamed Ananias and uses an Isolation Forest (iForest) to detect unusual (but not necessarily cheating) behaviors. An major advantage of iForests over statistical anomaly detection is that iForests
 tolerate contamination of the training data and do not require the proportion of contaminated values to be known a priori. The intuition of iForest is that if we recursively split our dataset with random hyperplanes, it would require
-more splits to *isolate* the outliers. At inference time, the forest detects anomalous behavior which can then be forwarded to the next stage of the model for deeper analysis. This massively cuts down on calls to the heavier model,
+fewer splits to *isolate* the outliers. At inference time, the forest detects anomalous behavior which can then be forwarded to the next stage of the model for deeper analysis. This massively cuts down on calls to the heavier model,
 Sapphira, and thus saves compute while only somewhat compromising on detection power.
 
 ### Regan's IPR Method (Sapphira)
