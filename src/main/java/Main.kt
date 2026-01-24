@@ -55,7 +55,7 @@ fun main(args : Array<String>){
         val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
         val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
         games.add(game)
-        if(games.size > 100) break
+        if(games.size > 10) break
     }
     println("Finished importing games!")
     val pikafishInstances = ArrayList<Pikafish>()
