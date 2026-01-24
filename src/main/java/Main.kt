@@ -53,10 +53,9 @@ fun main(args : Array<String>){
         val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
         val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
         games.add(game)
-        if(games.size >= 2) break
     }
     val pikafishInstances = ArrayList<Pikafish>()
-    (0..<ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
+    (1..ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
     val pool = Channel<Pikafish>(pikafishInstances.size)
     pikafishInstances.forEach { pool.trySend(it) }
 
@@ -71,32 +70,20 @@ fun main(args : Array<String>){
                 finally {
                     pikafish.clear()
                     pool.send(pikafish)
+                    println("Finished game ${game.uuid}")
                 }
             }
         }
     }.awaitAll()
     val allReviewedGames = runBlocking { reviewGames(games) }
     val featureExtractionService = FeatureExtractionService(ConfigOptions)
-    val reviewedGame = allReviewedGames[1]
+    val reviewedGame = allReviewedGames[0]
     println("First game: ${reviewedGame.game.uuid}")
     println("Game length plies: ${featureExtractionService.getTotalPlies(reviewedGame)}")
     println("Blunder rate red: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.RED)}")
     println("Blunder rate black: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.BLACK)}")
-    try{
-        val adjustedCPLossRed = featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.RED)
-        println("Adjusted CP loss red: $adjustedCPLossRed")
-    }
-    catch(exception : Exception){
-        println("Adjusted CP loss red: ???")
-    }
-
-    try{
-        val adjustedCPLossBlack = featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.BLACK)
-        println("Adjusted CP loss black: $adjustedCPLossBlack")
-    }
-    catch(exception : Exception){
-        println("Adjusted CP loss black: ???")
-    }
+    println("Adjusted CP loss red: ${featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.RED) ?: Double.NaN}")
+    println("Adjusted CP loss black: ${featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.BLACK) ?: Double.NaN}")
     println("Longest best/excellent streak red: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.RED)}")
     println("Longest best/excellent streak black: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.BLACK)}")
     println("Blunder inter-arrival time red: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.RED)}")

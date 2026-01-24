@@ -1,6 +1,5 @@
 data class ReviewedMove(
     val movePlayed : Move,
-    val bestMove : Move,
     val movePlayedEvaluation: Evaluation,
     val bestMoveEvaluation: Evaluation,
 ){

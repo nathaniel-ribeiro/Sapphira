@@ -10,13 +10,13 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
         return jwSimilarity.apply(redUsername, blackUsername)
     }
 
-    fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : Double{
+    fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : Double?{
         val adjustedAllianceMoves = reviewedGame.reviewedMovesFor(alliance)
                                                 .filterIndexed { index, _ ->  index >= options.numberOfTurnsToExclude}
                                                 .filter { abs(it.bestMoveEvaluation.centipawns) <= options.winningAdvantageThreshold }
                                                 .filter { it.bestMoveEvaluation.winProbability in 0.10..0.90 }
 
-        if(adjustedAllianceMoves.isEmpty()) throw RuntimeException("The reviewed game did not contain any moves after controlling for opening positions and one-sided positions.")
+        if(adjustedAllianceMoves.isEmpty()) return null
         return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
     }
 
@@ -63,7 +63,7 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
 
     fun getAccuracy(reviewedGame: ReviewedGame, alliance: Alliance) : Double{
         val allianceMoves = reviewedGame.reviewedMovesFor(alliance)
-        return allianceMoves.count { it.movePlayed ==  it.bestMove} / allianceMoves.size.toDouble()
+        return allianceMoves.count { it.moveQuality == MoveQuality.BEST} / allianceMoves.size.toDouble()
     }
 
     fun getTotalPlies(reviewedGame: ReviewedGame) : Int{
