@@ -6,7 +6,7 @@ object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessing
     override val hashSizeMiB: Int
     override val nodesToSearch: Int
     override val winningAdvantageThreshold: Int
-    override val numberOfPliesToExclude: Int
+    override val numberOfTurnsToExclude: Int
     override val pikafishPoolSize : Int
 
     init {
@@ -20,7 +20,7 @@ object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessing
         this.hashSizeMiB = properties.getProperty("hashSizeMiB").toInt()
         this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()
         this.winningAdvantageThreshold = properties.getProperty("winningAdvantageThreshold").toInt()
-        this.numberOfPliesToExclude = properties.getProperty("numberOfPliesToExclude").toInt()
+        this.numberOfTurnsToExclude = properties.getProperty("numberOfTurnsToExclude").toInt()
         this.pikafishPoolSize = properties.getProperty("pikafishPoolSize").toInt()
     }
 }

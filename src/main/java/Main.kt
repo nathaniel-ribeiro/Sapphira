@@ -4,8 +4,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
-import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 
@@ -55,23 +53,20 @@ fun main(args : Array<String>){
         val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
         val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
         games.add(game)
-        if(games.size > 10) break
+        if(games.size >= 2) break
     }
-    println("Finished importing games!")
     val pikafishInstances = ArrayList<Pikafish>()
     (0..<ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
     val pool = Channel<Pikafish>(pikafishInstances.size)
     pikafishInstances.forEach { pool.trySend(it) }
-    println("Finished building Pikafish instance!")
 
-    suspend fun processGames(games: List<Game>) = coroutineScope {
+    suspend fun reviewGames(games: List<Game>) = coroutineScope {
         games.map { game ->
             async(Dispatchers.Default) {
                 val pikafish = pool.receive()
                 try {
                     val gameReviewService = GameReviewService(pikafish)
-                    val reviewedGame = gameReviewService.review(game)
-                    println("$reviewedGame")
+                    gameReviewService.review(game)
                 }
                 finally {
                     pikafish.clear()
@@ -79,7 +74,31 @@ fun main(args : Array<String>){
                 }
             }
         }
-        }.awaitAll()
-    val allEvaluations = runBlocking { processGames(games) }
+    }.awaitAll()
+    val allReviewedGames = runBlocking { reviewGames(games) }
+    val featureExtractionService = FeatureExtractionService(ConfigOptions)
+    val reviewedGame = allReviewedGames[1]
+    println("First game: ${reviewedGame.game.uuid}")
+    println("Blunder rate red: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.RED)}")
+    println("Blunder rate black: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.BLACK)}")
+    try{
+        val adjustedCPLossRed = featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.RED)
+        println("Adjusted CP loss red: $adjustedCPLossRed")
+    }
+    catch(exception : Exception){
+        println("Adjusted CP loss red: ???")
+    }
+
+    try{
+        val adjustedCPLossBlack = featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.BLACK)
+        println("Adjusted CP loss red: $adjustedCPLossBlack")
+    }
+    catch(exception : Exception){
+        println("Adjusted CP loss black: ???")
+    }
+    println("Best streak red: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.RED)}")
+    println("Best streak black: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.BLACK)}")
+    println("Blunder inter-arrival time red: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.RED)}")
+    println("Blunder inter-arrival time black: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.BLACK)}")
     println("Evaluated all games!")
 }

@@ -1,20 +1,45 @@
 import kotlin.math.abs
 
 class FeatureExtractionService(val options: FeatureExtractionOptions) {
-    fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : List<Int>{
-        TODO()
-    }
+    fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : Double{
+        val adjustedAllianceMoves = reviewedGame.reviewedMovesFor(alliance)
+                                                .filterIndexed { index, _ ->  index >= options.numberOfTurnsToExclude}
+                                                .filter { abs(it.bestMoveEvaluation.centipawns) <= options.winningAdvantageThreshold }
+                                                .filter { it.bestMoveEvaluation.winProbability in 0.10..0.90 }
 
-    fun getMoveQualityFrequencies(reviewedGame : ReviewedGame, alliance : Alliance) : Map<MoveQuality, Int>{
-        TODO()
+        if(adjustedAllianceMoves.isEmpty()) throw RuntimeException("The reviewed game did not contain any moves after controlling for opening positions and one-sided positions.")
+        return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
     }
 
     fun getLongestBestOrExcellentStreak(reviewedGame : ReviewedGame, alliance : Alliance) : Int {
-        TODO()
+        val allianceMoves = reviewedGame.reviewedMovesFor(alliance)
+        val streakQualities = setOf(MoveQuality.BEST, MoveQuality.EXCELLENT)
+        return allianceMoves
+            .map { if (it.moveQuality in streakQualities) 'S' else ' ' }
+            .joinToString("")
+            .split(" ")
+            .maxOfOrNull { it.length } ?: 0
     }
 
     fun getBlunderRate(reviewedGame : ReviewedGame, alliance : Alliance) : Double {
-        TODO()
+        val allianceMoves = reviewedGame.reviewedMovesFor(alliance)
+        return allianceMoves.count { it.moveQuality == MoveQuality.BLUNDER } / allianceMoves.size.toDouble()
+    }
+
+    fun getAverageBlunderInterarrivalTime(reviewedGame: ReviewedGame, alliance: Alliance) : Double {
+        val allianceMoves = reviewedGame.reviewedMovesFor(alliance)
+        val moveQualities = allianceMoves.map(ReviewedMove::moveQuality)
+        val blunderMoveNumbers = moveQualities.mapIndexedNotNull { index, quality ->
+            if (quality == MoveQuality.BLUNDER) index + 1 else null
+        }
+        val gameStart = 0
+        val gameEnd = moveQualities.size
+        // NOTE: forcing a pseudo-blunder at the end is not statistically rigorous but ensures we have
+        // *some* lower bound on blunder rates for players who didn't blunder at all during their game
+        val timeline = listOf(gameStart) + blunderMoveNumbers + listOf(gameEnd)
+        return timeline
+            .zipWithNext { a, b -> b - a }
+            .average()
     }
 
     fun getTimeSeriesFeatures(reviewedGame : ReviewedGame, alliance : Alliance){
@@ -23,5 +48,14 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
 
     fun getAccuracy(reviewedGame: ReviewedGame, alliance: Alliance) : Double{
         return reviewedGame.reviewedMoves.count { it.movePlayed ==  it.bestMove} / reviewedGame.reviewedMoves.size.toDouble()
+    }
+
+    fun getGameLength(reviewedGame: ReviewedGame) : Int{
+        return reviewedGame.reviewedMoves.size
+    }
+
+    companion object{
+        // helper extension function since we only care about red's/black's moves for metrics pertaining to red/black
+        private fun ReviewedGame.reviewedMovesFor(alliance: Alliance) : List<ReviewedMove> =  reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
     }
 }
