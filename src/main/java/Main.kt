@@ -100,5 +100,7 @@ fun main(args : Array<String>){
     println("Best streak black: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.BLACK)}")
     println("Blunder inter-arrival time red: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.RED)}")
     println("Blunder inter-arrival time black: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.BLACK)}")
+    println("Accuracy red: ${featureExtractionService.getAccuracy(reviewedGame, Alliance.RED)}")
+    println("Accuracy black: ${featureExtractionService.getAccuracy(reviewedGame, Alliance.BLACK)}")
     println("Evaluated all games!")
 }

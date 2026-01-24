@@ -47,7 +47,8 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
     }
 
     fun getAccuracy(reviewedGame: ReviewedGame, alliance: Alliance) : Double{
-        return reviewedGame.reviewedMoves.count { it.movePlayed ==  it.bestMove} / reviewedGame.reviewedMoves.size.toDouble()
+        val allianceMoves = reviewedGame.reviewedMovesFor(alliance)
+        return allianceMoves.count { it.movePlayed ==  it.bestMove} / allianceMoves.size.toDouble()
     }
 
     fun getGameLength(reviewedGame: ReviewedGame) : Int{
