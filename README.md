@@ -1,17 +1,16 @@
-# Ananias and Sapphira - Anti-Cheat for Online Xiangqi
+# Sapphira - Anti-Cheat for Online Xiangqi
 
 ## Overview
 This project brings the seminal work of Dr. Ken Regan on anti-cheat for chess to the game of Xiangqi. Note that this
 repository is a work-in-progress.
 
-### Anomaly Detection by Isolation Forest (Ananias)
-Due to the high volume of online games played per day, an efficient anti-cheat tool suite either needs large amounts of compute or a hierarchical method of screening games, reserving heavy analysis for high likelihood cheaters.
-The first stage of analysis is nicknamed Ananias and uses an Isolation Forest (iForest) to detect unusual (but not necessarily cheating) behaviors. An major advantage of iForests over statistical anomaly detection is that iForests
+### Anomaly Detection by Isolation Forest
+Due to the high volume of online games played per day, a screening model is used to avoid wasting compute on analyzing the games of non-suspicious players.
+We use an Isolation Forest (iForest) to detect unusual (but not necessarily cheating) behaviors. An major advantage of iForests over statistical anomaly detection is that iForests
 tolerate contamination of the training data and do not require the proportion of contaminated values to be known a priori. The intuition of iForest is that if we recursively split our dataset with random hyperplanes, it would require
-more splits to *isolate* the outliers. At inference time, the forest detects anomalous behavior which can then be forwarded to the next stage of the model for deeper analysis. This massively cuts down on calls to the heavier model,
-Sapphira, and thus saves compute while only somewhat compromising on detection power.
+fewer splits to isolate the outliers. At inference time, the forest detects anomalous games which can then be selected for deeper analysis.
 
-### Regan's IPR Method (Sapphira)
+### Regan's IPR Method
 Unlike ELO, which uses only the *outcomes* of a game to determine a player's approximate strength, Regan's IPR (Intrinsic
 Performance Rating) uses the quality of individual moves. Through two parameters, sensitivity and consistency, 
 we can predict the probability that a player will choose an inferior move. Sensitivity models the player's ability to discern between two roughly equal (but subtly different) moves and 
@@ -40,7 +39,7 @@ This project seeks to strike down duplicitous players just as Ananias and Sapphi
 Online Xiangqi differs from OTB Xiangqi in that players can play *themselves* with throw-away/alt/elevator accounts in order to artificially boost their ELO. 
 Sapphira detects these accounts using text similarity metrics, which should be sufficient to catch most such accounts.
 ### Platform-agnostic. 
-Sapphira and all its dependencies are written in pure Java and Kotlin, meaning it can be run on any platform with a JRE supporting Java 17+ 
+Sapphira and all its dependencies are written in pure Java and Kotlin, meaning it can be run on any platform with a JRE supporting Java 8+ 
 (Windows, Mac, Linux, and many more!). Building from source requires the full JDK, but you can run a fat JAR with just the JRE.
 ### Compatible with top-rated Xiangqi engine Pikafish.
 Since Sapphira is NOT a Xiangqi engine, it offloads the task of evaluating positions and understanding the game's logic 
