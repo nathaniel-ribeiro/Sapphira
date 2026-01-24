@@ -79,6 +79,7 @@ fun main(args : Array<String>){
     val featureExtractionService = FeatureExtractionService(ConfigOptions)
     val reviewedGame = allReviewedGames[1]
     println("First game: ${reviewedGame.game.uuid}")
+    println("Game length plies: ${featureExtractionService.getTotalPlies(reviewedGame)}")
     println("Blunder rate red: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.RED)}")
     println("Blunder rate black: ${featureExtractionService.getBlunderRate(reviewedGame, Alliance.BLACK)}")
     try{
@@ -91,16 +92,17 @@ fun main(args : Array<String>){
 
     try{
         val adjustedCPLossBlack = featureExtractionService.getAdjustedCPLoss(reviewedGame, Alliance.BLACK)
-        println("Adjusted CP loss red: $adjustedCPLossBlack")
+        println("Adjusted CP loss black: $adjustedCPLossBlack")
     }
     catch(exception : Exception){
         println("Adjusted CP loss black: ???")
     }
-    println("Best streak red: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.RED)}")
-    println("Best streak black: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.BLACK)}")
+    println("Longest best/excellent streak red: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.RED)}")
+    println("Longest best/excellent streak black: ${featureExtractionService.getLongestBestOrExcellentStreak(reviewedGame, Alliance.BLACK)}")
     println("Blunder inter-arrival time red: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.RED)}")
     println("Blunder inter-arrival time black: ${featureExtractionService.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.BLACK)}")
     println("Accuracy red: ${featureExtractionService.getAccuracy(reviewedGame, Alliance.RED)}")
     println("Accuracy black: ${featureExtractionService.getAccuracy(reviewedGame, Alliance.BLACK)}")
+    println("JaroWinkler similarity: ${featureExtractionService.getUsernameSimilarity(reviewedGame)}")
     println("Evaluated all games!")
 }

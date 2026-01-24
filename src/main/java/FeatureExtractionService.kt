@@ -1,6 +1,15 @@
+import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import kotlin.math.abs
 
 class FeatureExtractionService(val options: FeatureExtractionOptions) {
+
+    fun getUsernameSimilarity(reviewedGame: ReviewedGame) : Double{
+        val redUsername = reviewedGame.game.redPlayer.username
+        val blackUsername = reviewedGame.game.blackPlayer.username
+        val jwSimilarity = JaroWinklerSimilarity()
+        return jwSimilarity.apply(redUsername, blackUsername)
+    }
+
     fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : Double{
         val adjustedAllianceMoves = reviewedGame.reviewedMovesFor(alliance)
                                                 .filterIndexed { index, _ ->  index >= options.numberOfTurnsToExclude}
@@ -43,6 +52,12 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
     }
 
     fun getTimeSeriesFeatures(reviewedGame : ReviewedGame, alliance : Alliance){
+        val evaluationGraphRedPerspective = reviewedGame.reviewedMoves
+                                                        .map(ReviewedMove::movePlayedEvaluation)
+                                                        .mapIndexed {
+                                                            i, evaluation ->
+                                                            if(i.mod(2) == 0) evaluation else evaluation.flip()
+                                                        }
         TODO()
     }
 
@@ -51,7 +66,7 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
         return allianceMoves.count { it.movePlayed ==  it.bestMove} / allianceMoves.size.toDouble()
     }
 
-    fun getGameLength(reviewedGame: ReviewedGame) : Int{
+    fun getTotalPlies(reviewedGame: ReviewedGame) : Int{
         return reviewedGame.reviewedMoves.size
     }
 
