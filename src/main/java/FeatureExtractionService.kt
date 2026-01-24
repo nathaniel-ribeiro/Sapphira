@@ -20,4 +20,8 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
     fun getTimeSeriesFeatures(reviewedGame : ReviewedGame, alliance : Alliance){
         TODO()
     }
+
+    fun getAccuracy(reviewedGame: ReviewedGame, alliance: Alliance) : Double{
+        return reviewedGame.reviewedMoves.count { it.movePlayed ==  it.bestMove} / reviewedGame.reviewedMoves.size.toDouble()
+    }
 }

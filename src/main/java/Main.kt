@@ -69,12 +69,9 @@ fun main(args : Array<String>){
             async(Dispatchers.Default) {
                 val pikafish = pool.receive()
                 try {
-                    val evaluationsRed = game.moves.indices.map { i ->
-                        val board = pikafish.makeMoves(Board.STARTING_BOARD, game.moves.take(i + 1))
-                        val eval = pikafish.evaluate(board)
-                        if (i % 2 == 0) eval.flip() else eval
-                    }
-                    println(evaluationsRed)
+                    val gameReviewService = GameReviewService(pikafish)
+                    val reviewedGame = gameReviewService.review(game)
+                    println("$reviewedGame")
                 }
                 finally {
                     pikafish.clear()
