@@ -20,6 +20,23 @@ data class Board(val fen: String) {
         return this.fen
     }
 
+    override fun equals(other: Any?): Boolean {
+        if(this === other) return true
+        if(other !is Board) return false
+        return this.fen == other.fen &&
+                this.whoseTurn == other.whoseTurn &&
+                this.pliesSinceACapture == other.pliesSinceACapture &&
+                this.fullMoveNumber == other.fullMoveNumber
+    }
+
+    override fun hashCode() : Int {
+        var result = fen.hashCode()
+        result = result * 31 + whoseTurn.hashCode()
+        result = result * 31 + pliesSinceACapture.hashCode()
+        result = result * 31 + fullMoveNumber.hashCode()
+        return result
+    }
+
     companion object {
         private val FEN_VALIDATOR_PATTERN =
             Pattern.compile("([kabrcnpKABRCNP0-9]+/?){10} ([wb]) - - (\\d+) (\\d+)")
