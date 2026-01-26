@@ -47,7 +47,9 @@ to tried and tested external software. (You'll need to download [Pikafish](https
 Sapphira was originally intended to be compliant with *any* UCI-compliant engine, but currently relies on Pikafish-specific commands 
 that are not part of the UCI protocol. Future work may change this, but as of writing, Pikafish is the strongest and fastest engine, so
 there is really no reason to use anything else.
-### Always open-source, always free.
-Licensed under GPLv3, you are free to copy, modify, distribute, and even sell Sapphira so long as you also release your 
-modifications under GPLv3 or provide a pointer to the source code. While not required by the license agreement, 
-I would appreciate a shout-out if you do use this project!
+
+## Terms of Use
+Sapphira is free and distributed under the GNU General Public License version 3 (GPL v3). Essentially, this means you are free to do almost exactly what you want with the program, including distributing it among your friends, making it available for download from your website, selling it (either by itself or as part of some bigger software package), or using it as the starting point for a software project of your own. The only real limitation is that whenever you distribute Sapphira in some way, you MUST always include the license and the full source code (or a pointer to where the source code can be found) to generate the exact binary you are distributing. If you make any changes to the source code, these changes must also be made available under GPL v3.
+
+## Acknowledgements
+This work would not have been possible without the advice and support of [@DavidK](https://play.xiangqi.com/@DavidK) and Dr. Ken Regan!
