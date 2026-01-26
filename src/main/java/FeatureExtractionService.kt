@@ -13,8 +13,14 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
     fun getAdjustedCPLoss(reviewedGame : ReviewedGame, alliance: Alliance) : Double?{
         val adjustedAllianceMoves = reviewedGame.reviewedMovesFor(alliance)
                                                 .filterIndexed { index, _ ->  index >= options.numberOfTurnsToExclude}
-                                                .filter { abs(it.bestMoveEvaluation.centipawns) <= options.winningAdvantageThreshold }
-                                                .filter { it.bestMoveEvaluation.winProbability in 0.10..0.90 }
+                                                .filter {
+                                                    abs(it.bestMoveEvaluation.centipawns) <= options.winningAdvantageThreshold &&
+                                                    abs(it.movePlayedEvaluation.centipawns) <= options.winningAdvantageThreshold
+                                                }
+                                                .filter {
+                                                    (it.bestMoveEvaluation.winProbability <= 0.90 && it.bestMoveEvaluation.flip().winProbability <= 0.90) &&
+                                                    (it.movePlayedEvaluation.winProbability <= 0.90 && it.movePlayedEvaluation.flip().winProbability <= 0.90)
+                                                }
 
         if(adjustedAllianceMoves.isEmpty()) return null
         return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
@@ -71,7 +77,6 @@ class FeatureExtractionService(val options: FeatureExtractionOptions) {
     }
 
     companion object{
-        // helper extension function since we only care about red's/black's moves for metrics pertaining to red/black
         private fun ReviewedGame.reviewedMovesFor(alliance: Alliance) : List<ReviewedMove> =  reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
     }
 }

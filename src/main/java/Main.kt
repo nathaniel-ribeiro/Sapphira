@@ -8,6 +8,7 @@ import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import smile.anomaly.IsolationForest
 import smile.feature.imputation.KNNImputer
+import smile.feature.imputation.SVDImputer
 import smile.data.DataFrame as SMILEDataFrame
 
 fun main(args : Array<String>){
@@ -56,7 +57,7 @@ fun main(args : Array<String>){
         val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
         val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
         games.add(game)
-        if(games.size >= 10) break
+        if(games.size >= 100) break
     }
     val pikafishInstances = ArrayList<Pikafish>()
     (1..ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
@@ -106,17 +107,11 @@ fun main(args : Array<String>){
                       adjustedCPLossBlack ?: Double.NaN, longestBestOrExcellentStreakRed.toDouble(), longestBestOrExcellentStreakBlack.toDouble(),
                       accuracyRed, accuracyBlack)
     }
-
     val allReviewedGames = runBlocking { reviewGames(games) }
     val allFeatures = buildList { addAll(allReviewedGames.map { getFeatures(it) }) }
     val data = allFeatures.map { it.toDoubleArray() }.toTypedArray()
     println(data.contentDeepToString())
-    val dataDF = SMILEDataFrame.of(data)
-
-    println(dataDF)
-
-    val imputer = KNNImputer(dataDF, 5)
-    val imputedData = imputer.apply(dataDF).toArray()
+    val imputedData = SVDImputer.impute(data, 5, 10)
     println(imputedData.contentDeepToString())
     val iForest = IsolationForest.fit(imputedData)
 }

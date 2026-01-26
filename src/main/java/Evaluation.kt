@@ -4,6 +4,8 @@ class Evaluation(val centipawns : Int,
                  val winProbability : Double,
                  val drawProbability : Double,
                  val loseProbability : Double){
+
+    val expectedScore = winProbability + 0.5 * drawProbability
     init {
         require(winProbability in 0.0..1.0)
         require(drawProbability in 0.0..1.0)
