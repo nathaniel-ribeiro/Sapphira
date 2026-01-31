@@ -6,45 +6,37 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.abs
 
-class Pikafish(pathToExecutable : String, options: PikafishOptions) {
+class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
     private val reader: BufferedReader
     private val writer: PrintWriter
-    private val nodesToSearch: Int
 
     init {
-        require(options.numThreads in MIN_THREADS..MAX_THREADS) {
+        require(numThreads in MIN_THREADS..MAX_THREADS) {
             String.format(
                 "Number of threads must be between %d and %d",
                 MIN_THREADS,
                 MAX_THREADS
             )
         }
-        require(options.hashSizeMiB in MIN_HASH_SIZE_MIB..MAX_HASH_SIZE_MIB) {
+        require(hashSizeMiB in MIN_HASH_SIZE_MIB..MAX_HASH_SIZE_MIB) {
             String.format(
                 "Hash size in MiB must be between %d and %d",
                 MIN_HASH_SIZE_MIB,
                 MAX_HASH_SIZE_MIB
             )
         }
-        require(options.nodesToSearch >= MIN_NODES_TO_SEARCH) {
-            String.format(
-                "Nodes to search must be at least %d",
-                MIN_NODES_TO_SEARCH
-            )
-        }
-
-        this.nodesToSearch = options.nodesToSearch
-
         val processBuilder = ProcessBuilder(pathToExecutable)
         val process = processBuilder.start()
         this.reader = BufferedReader(InputStreamReader(process.inputStream))
         this.writer = PrintWriter(process.outputStream, true)
 
         this.send("uci")
-        this.send("isready")
-        this.send("setoption name Threads value ${options.numThreads}")
-        this.send("setoption name Hash value ${options.hashSizeMiB}")
+        this.send("setoption name Threads value $numThreads")
+        this.send("setoption name Hash value $hashSizeMiB")
         this.send("setoption name UCI_ShowWDL value true")
+        this.send("isready")
+        this.waitForResponseContaining("readyok")
+        this.send("ucinewgame")
     }
 
     private fun send(command: String) {
@@ -66,9 +58,9 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
         throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
     }
 
-    fun getBestMove(board: Board): Move {
+    fun getBestMove(board: Board, nodesToSearch: Int): Move {
         this.send("position fen ${board.fen}")
-        this.send("go nodes ${this.nodesToSearch}")
+        this.send("go nodes $nodesToSearch")
         val bestMoveLine = this.waitForResponseContaining("bestmove")
         val matcher: Matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine)
         val b = matcher.matches()
@@ -139,14 +131,14 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
         this.send("go perft 1")
-        val moves: MutableList<Move> = ArrayList()
+        val moves = ArrayList<Move>()
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
             if (line.contains("Nodes searched")) break
             if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn))
         }
-        return ImmutableList.copyOf<Move>(moves)
+        return ImmutableList.copyOf(moves)
     }
 
     fun clear(){
@@ -160,7 +152,6 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
         private const val MAX_THREADS = 1024
         private const val MIN_HASH_SIZE_MIB = 1
         private const val MAX_HASH_SIZE_MIB = 33554432
-        private const val MIN_NODES_TO_SEARCH = 1
 
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
