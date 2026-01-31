@@ -1,11 +1,9 @@
 import java.util.*
 
-object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessingOptions {
+object ConfigOptions : PikafishOptions, DataProcessingOptions {
     override val numThreads: Int
     override val hashSizeMiB: Int
     override val nodesToSearch: Int
-    override val winningAdvantageThreshold: Int
-    override val numberOfTurnsToExclude: Int
     override val pikafishPoolSize : Int
 
     init {
@@ -17,8 +15,6 @@ object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessing
         this.numThreads = properties.getProperty("numThreads").toInt()
         this.hashSizeMiB = properties.getProperty("hashSizeMiB").toInt()
         this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()
-        this.winningAdvantageThreshold = properties.getProperty("winningAdvantageThreshold").toInt()
-        this.numberOfTurnsToExclude = properties.getProperty("numberOfTurnsToExclude").toInt()
         this.pikafishPoolSize = properties.getProperty("pikafishPoolSize").toInt()
     }
 }
