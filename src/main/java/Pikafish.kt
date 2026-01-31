@@ -98,9 +98,9 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
         return Board(fen)
     }
 
-    fun evaluate(board: Board): Evaluation {
+    fun evaluate(board: Board, nodesToSearch : Int): Evaluation {
         this.send("position fen ${board.fen}")
-        this.send("go nodes ${this.nodesToSearch}")
+        this.send("go nodes $nodesToSearch")
         lateinit var evaluation : Evaluation
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
@@ -124,7 +124,7 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
                     val loseProbability = matcher.group(6).toDouble() / 1000.0
                     evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
                 }
-                catch (e : Exception){
+                catch (_ : Exception){
                     // extreme case where the game is already over
                     evaluation = if(centipawns > 0) Evaluation.WON else if(centipawns == 0) Evaluation.DREW else Evaluation.LOST
                 }
@@ -151,6 +151,8 @@ class Pikafish(pathToExecutable : String, options: PikafishOptions) {
 
     fun clear(){
         this.send("ucinewgame")
+        this.send("isready")
+        this.waitForResponseContaining("readyok")
     }
 
     companion object {
