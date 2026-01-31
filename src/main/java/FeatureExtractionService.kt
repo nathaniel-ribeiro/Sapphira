@@ -118,7 +118,8 @@ class FeatureExtractionService {
                                                             i, evaluation ->
                                                             if(i.mod(2) == 0) evaluation else evaluation.flip()
                                                         }
-        TODO()
+        // number of "reversals"
+        // TODO: come up with more time series features
     }
 
     private fun getAccuracy(reviewedMovesForAlliance: List<ReviewedMove>) : Double{

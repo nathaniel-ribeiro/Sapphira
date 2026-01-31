@@ -27,20 +27,20 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
         }
         val processBuilder = ProcessBuilder(pathToExecutable)
         val process = processBuilder.start()
-        this.reader = BufferedReader(InputStreamReader(process.inputStream))
-        this.writer = PrintWriter(process.outputStream, true)
+        reader = BufferedReader(InputStreamReader(process.inputStream))
+        writer = PrintWriter(process.outputStream)
 
-        this.send("uci")
-        this.send("setoption name Threads value $numThreads")
-        this.send("setoption name Hash value $hashSizeMiB")
-        this.send("setoption name UCI_ShowWDL value true")
-        this.send("isready")
-        this.waitForResponseContaining("readyok")
-        this.send("ucinewgame")
+        send("uci")
+        send("setoption name Threads value $numThreads")
+        send("setoption name Hash value $hashSizeMiB")
+        send("setoption name UCI_ShowWDL value true")
+        readyUp()
+        send("ucinewgame")
     }
 
     private fun send(command: String) {
-        this.writer.println(command)
+        writer.println(command)
+        writer.flush()
     }
 
     /**
@@ -59,9 +59,9 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
     }
 
     fun getBestMove(board: Board, nodesToSearch: Int): Move {
-        this.send("position fen ${board.fen}")
-        this.send("go nodes $nodesToSearch")
-        val bestMoveLine = this.waitForResponseContaining("bestmove")
+        send("position fen ${board.fen}")
+        send("go nodes $nodesToSearch")
+        val bestMoveLine = waitForResponseContaining("bestmove")
         val matcher: Matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine)
         val b = matcher.matches()
         if (!b) throw RuntimeException()
@@ -71,18 +71,18 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
     }
 
     fun makeMove(board: Board, move: Move): Board {
-        return this.makeMoves(board, listOf(move))
+        return makeMoves(board, listOf(move))
     }
 
     fun makeMoves(board: Board, moves: List<Move>): Board {
         if (moves.isEmpty()) return board
         val movesString = moves.joinToString(separator = " ") { it.srcSquare + it.destSquare }
-        this.send("position fen ${board.fen} moves $movesString")
+        send("position fen ${board.fen} moves $movesString")
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
-        this.send("d")
-        val fenLine = this.waitForResponseContaining("Fen:")
+        send("d")
+        val fenLine = waitForResponseContaining("Fen:")
         val matcher: Matcher = FEN_EXTRACTOR_PATTERN.matcher(fenLine)
         val b = matcher.matches()
         if (!b) throw RuntimeException()
@@ -91,8 +91,8 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
     }
 
     fun evaluate(board: Board, nodesToSearch : Int): Evaluation {
-        this.send("position fen ${board.fen}")
-        this.send("go nodes $nodesToSearch")
+        send("position fen ${board.fen}")
+        send("go nodes $nodesToSearch")
         lateinit var evaluation : Evaluation
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
@@ -126,11 +126,11 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
     }
 
     fun getLegalMoves(board: Board): List<Move> {
-        this.send("position fen ${board.fen}")
+        send("position fen ${board.fen}")
         // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
-        this.send("go perft 1")
+        send("go perft 1")
         val moves = ArrayList<Move>()
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
@@ -141,10 +141,14 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
         return ImmutableList.copyOf(moves)
     }
 
+    private fun readyUp(){
+        send("isready")
+        waitForResponseContaining("readyok")
+    }
+
     fun clear(){
-        this.send("ucinewgame")
-        this.send("isready")
-        this.waitForResponseContaining("readyok")
+        send("ucinewgame")
+        readyUp()
     }
 
     companion object {

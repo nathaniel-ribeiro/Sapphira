@@ -3,17 +3,16 @@ import kotlinx.coroutines.channels.Channel
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 
-fun main(args : Array<String>){
-    if(args.size != 1) throw IllegalArgumentException()
-    val pathToExecutable = "/u/cwa6zf/Pikafish/src/pikafish"
-
+fun main(){
     //TODO: move these to command line args
+    val pathToExecutable = "/u/cwa6zf/Pikafish/src/pikafish"
     val pikafishPoolSize = 1
     val numThreads = 8
     val hashSizeMiB = 128
     val nodesToSearchPerMove = 3_500_000
+    val csvFilepath = "/u/cwa6zf/chunk_ki.csv"
 
-    val df = DataFrame.readCsv(args[0])
+    val df = DataFrame.readCsv(csvFilepath)
     val games = ArrayList<Game>()
     for(row in df){
         val uuid = row["game_uuid"] as String
@@ -41,9 +40,11 @@ fun main(args : Array<String>){
             async(Dispatchers.Default) {
                 val pikafish = pool.receive()
                 val gameReviewService = GameReviewService(pikafish)
-                gameReviewService.review(game, nodesToSearchPerMove)
+                val reviewedGame = gameReviewService.review(game, nodesToSearchPerMove)
                 pikafish.clear()
                 pool.send(pikafish)
+                println("$reviewedGame")
+                return@async reviewedGame
             }
         }
     }.awaitAll()
