@@ -2,13 +2,25 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import kotlin.math.abs
 
-class FeatureExtractionService() {
+class FeatureExtractionService {
 
     fun getFeatures(reviewedGame: ReviewedGame, redThinkTimes : List<Int>, blackThinkTimes : List<Int>) : Features{
         val reviewedMovesRed = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.RED }
         val reviewedMovesBlack = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.BLACK }
 
+        // general features about the game
+        //TODO: probably refactor this, getFeatures is doing a lot
+        val gameTimer = reviewedGame.game.gameTimer
+        val moveTimer = reviewedGame.game.moveTimer
+        val increment = reviewedGame.game.increment
+        val resultRed = reviewedGame.game.resultRed
+        val resultBlack = reviewedGame.game.resultBlack
+        val gameResultReason = reviewedGame.game.gameResultReason
         val usernameSimilarity = getUsernameSimilarity(reviewedGame.game.redPlayer.username, reviewedGame.game.blackPlayer.username)
+        val gameLength = reviewedGame.game.moves.size
+
+        // specific features about red/black's behavior and play quality
+        // TODO: probably refactor this, getFeatures is doing a lot
         val adjustedCPLossRed = getAdjustedCPLoss(reviewedMovesRed)
         val adjustedCPLossBlack = getAdjustedCPLoss(reviewedMovesBlack)
         val longestBestOrExcellentStreakRed = getLongestBestOrExcellentStreak(reviewedMovesRed)
@@ -20,13 +32,18 @@ class FeatureExtractionService() {
         // TODO: time series features
         val accuracyRed = getAccuracy(reviewedMovesRed)
         val accuracyBlack = getAccuracy(reviewedMovesBlack)
-        val gameLength = reviewedGame.game.moves.size
         val averageThinkTimeRed = redThinkTimes.average()
         val averageThinkTimeBlack = blackThinkTimes.average()
         val stdevThinkTimeRed = getThinkTimeStdev(redThinkTimes)
         val stdevThinkTimeBlack = getThinkTimeStdev(blackThinkTimes)
 
-        return Features(usernameSimilarity,
+        return Features(gameTimer,
+                        moveTimer,
+                        increment,
+                        resultRed,
+                        resultBlack,
+                        gameResultReason,
+                        usernameSimilarity,
                         adjustedCPLossRed ?: Double.NaN,
                         adjustedCPLossBlack ?: Double.NaN,
                         longestBestOrExcellentStreakRed,
@@ -41,8 +58,7 @@ class FeatureExtractionService() {
                         averageThinkTimeRed,
                         averageThinkTimeBlack,
                         stdevThinkTimeRed,
-                        stdevThinkTimeBlack
-        )
+                        stdevThinkTimeBlack)
     }
 
     private fun getUsernameSimilarity(redUsername : String, blackUsername : String) : Double{
