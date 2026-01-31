@@ -6,7 +6,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.abs
 
-class Pikafish(options: PikafishOptions) {
+class Pikafish(pathToExecutable : String, options: PikafishOptions) {
     private val reader: BufferedReader
     private val writer: PrintWriter
     private val nodesToSearch: Int
@@ -35,7 +35,7 @@ class Pikafish(options: PikafishOptions) {
 
         this.nodesToSearch = options.nodesToSearch
 
-        val processBuilder = ProcessBuilder(options.pathToExecutable)
+        val processBuilder = ProcessBuilder(pathToExecutable)
         val process = processBuilder.start()
         this.reader = BufferedReader(InputStreamReader(process.inputStream))
         this.writer = PrintWriter(process.outputStream, true)

@@ -1,7 +1,6 @@
 import java.util.*
 
 object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessingOptions {
-    override val pathToExecutable: String
     override val numThreads: Int
     override val hashSizeMiB: Int
     override val nodesToSearch: Int
@@ -15,7 +14,6 @@ object ConfigOptions : PikafishOptions, FeatureExtractionOptions, DataProcessing
             ConfigOptions::class.java.getClassLoader().getResourceAsStream("config.properties")
         ){ "config.properties not found on classpath" }
         properties.load(stream)
-        this.pathToExecutable = properties.getProperty("pathToExecutable")
         this.numThreads = properties.getProperty("numThreads").toInt()
         this.hashSizeMiB = properties.getProperty("hashSizeMiB").toInt()
         this.nodesToSearch = properties.getProperty("nodesToSearch").toInt()

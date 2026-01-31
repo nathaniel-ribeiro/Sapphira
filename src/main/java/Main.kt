@@ -1,18 +1,13 @@
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import smile.anomaly.IsolationForest
-import smile.feature.imputation.KNNImputer
 import smile.feature.imputation.SVDImputer
-import smile.data.DataFrame as SMILEDataFrame
 
 fun main(args : Array<String>){
     if(args.size != 1) throw IllegalArgumentException()
+    val pathToExecutable = "/u/cwa6zf/Pikafish/src/pikafish"
     // create new dataframe for anomaly detection:
     // game_format_bullet?
     // game_format_blitz?
@@ -60,7 +55,7 @@ fun main(args : Array<String>){
         if(games.size >= 100) break
     }
     val pikafishInstances = ArrayList<Pikafish>()
-    (1..ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(ConfigOptions)) }
+    (1..ConfigOptions.pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(pathToExecutable, ConfigOptions)) }
     val pool = Channel<Pikafish>(pikafishInstances.size)
     pikafishInstances.forEach { pool.trySend(it) }
 
@@ -89,7 +84,7 @@ fun main(args : Array<String>){
         val usernameSimilarity = extractor.getUsernameSimilarity(reviewedGame)
         val redRating = reviewedGame.game.redPlayer.rating
         val blackRating = reviewedGame.game.blackPlayer.rating
-        val totalPlies = extractor.getTotalPlies(reviewedGame)
+        val totalPlies = extractor.getGameLength(reviewedGame)
         val blunderRateRed = extractor.getBlunderRate(reviewedGame, Alliance.RED)
         val blunderRateBlack = extractor.getBlunderRate(reviewedGame, Alliance.BLACK)
         val blunderInterarrivalRed = extractor.getAverageBlunderInterarrivalTime(reviewedGame, Alliance.RED)
