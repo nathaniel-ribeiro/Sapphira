@@ -1,4 +1,4 @@
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import kotlin.math.abs
 
@@ -8,19 +8,7 @@ class FeatureExtractionService {
         val reviewedMovesRed = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.RED }
         val reviewedMovesBlack = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.BLACK }
 
-        // general features about the game
-        //TODO: probably refactor this, getFeatures is doing a lot
-        val gameTimer = reviewedGame.game.gameTimer
-        val moveTimer = reviewedGame.game.moveTimer
-        val increment = reviewedGame.game.increment
-        val resultRed = reviewedGame.game.resultRed
-        val resultBlack = reviewedGame.game.resultBlack
-        val gameResultReason = reviewedGame.game.gameResultReason
         val usernameSimilarity = getUsernameSimilarity(reviewedGame.game.redPlayer.username, reviewedGame.game.blackPlayer.username)
-        val gameLength = reviewedGame.game.moves.size
-
-        // specific features about red/black's behavior and play quality
-        // TODO: probably refactor this, getFeatures is doing a lot
         val adjustedCPLossRed = getAdjustedCPLoss(reviewedMovesRed)
         val adjustedCPLossBlack = getAdjustedCPLoss(reviewedMovesBlack)
         val longestBestOrExcellentStreakRed = getLongestBestOrExcellentStreak(reviewedMovesRed)
@@ -32,20 +20,13 @@ class FeatureExtractionService {
         // TODO: time series features
         val accuracyRed = getAccuracy(reviewedMovesRed)
         val accuracyBlack = getAccuracy(reviewedMovesBlack)
-        val averageThinkTimeRed = redThinkTimes.average()
-        val averageThinkTimeBlack = blackThinkTimes.average()
-        val stdevThinkTimeRed = getThinkTimeStdev(redThinkTimes)
-        val stdevThinkTimeBlack = getThinkTimeStdev(blackThinkTimes)
+        val thinkTimeStatsRed = getThinkTimeStats(redThinkTimes)
+        val thinkTimeStatsBlack = getThinkTimeStats(blackThinkTimes)
 
-        return Features(gameTimer,
-                        moveTimer,
-                        increment,
-                        resultRed,
-                        resultBlack,
-                        gameResultReason,
+        return Features(reviewedGame.game,
                         usernameSimilarity,
-                        adjustedCPLossRed ?: Double.NaN,
-                        adjustedCPLossBlack ?: Double.NaN,
+                        adjustedCPLossRed,
+                        adjustedCPLossBlack,
                         longestBestOrExcellentStreakRed,
                         longestBestOrExcellentStreakBlack,
                         blunderRateRed,
@@ -54,11 +35,10 @@ class FeatureExtractionService {
                         averageBlunderInterarrivalTimeBlack,
                         accuracyRed,
                         accuracyBlack,
-                        gameLength,
-                        averageThinkTimeRed,
-                        averageThinkTimeBlack,
-                        stdevThinkTimeRed,
-                        stdevThinkTimeBlack)
+                        thinkTimeStatsRed.first,
+                        thinkTimeStatsBlack.first,
+                        thinkTimeStatsRed.second,
+                        thinkTimeStatsBlack.second)
     }
 
     private fun getUsernameSimilarity(redUsername : String, blackUsername : String) : Double{
@@ -127,9 +107,11 @@ class FeatureExtractionService {
                 .count { it.moveQuality == MoveQuality.BEST} / reviewedMovesForAlliance.size.toDouble()
     }
 
-    private fun getThinkTimeStdev(thinkTimes : List<Int>) : Double {
-        val stdev = StandardDeviation()
-        return stdev.evaluate(thinkTimes.map { it.toDouble() }.toDoubleArray())
+    private fun getThinkTimeStats(thinkTimes : List<Int>) : Pair<Double, Double> {
+        val descriptiveStatistics = DescriptiveStatistics(thinkTimes.map { it.toDouble() }.toDoubleArray())
+        val median = descriptiveStatistics.getPercentile(50.0)
+        val iqr = descriptiveStatistics.getPercentile(75.0) - descriptiveStatistics.getPercentile(25.0)
+        return Pair(median, iqr)
     }
 
     companion object{
