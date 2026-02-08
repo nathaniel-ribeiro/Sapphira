@@ -18,10 +18,6 @@ data class Features(
     val accuracyRed : Double,
     val accuracyBlack : Double,
     val gameLength : Int,
-    val averageThinkTimeRed : Double,
-    val averageThinkTimeBlack : Double,
-    val stdevThinkTimeRed : Double,
-    val stdevThinkTimeBlack : Double
 ){
     init {
         require(gameTimer > 0)
@@ -37,9 +33,5 @@ data class Features(
         require(accuracyRed in 0.00..1.00)
         require(accuracyBlack in 0.00..1.00)
         require(gameLength > 0)
-        require(averageThinkTimeRed >= 0.0)
-        require(averageThinkTimeBlack >= 0.0)
-        require(stdevThinkTimeRed >= 0.0)
-        require(stdevThinkTimeBlack >= 0.0)
     }
 }

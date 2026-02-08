@@ -4,7 +4,7 @@ import kotlin.math.abs
 
 class FeatureExtractionService {
 
-    fun getFeatures(reviewedGame: ReviewedGame, redThinkTimes : List<Int>, blackThinkTimes : List<Int>) : Features{
+    fun getFeatures(reviewedGame: ReviewedGame) : Features{
         val reviewedMovesRed = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.RED }
         val reviewedMovesBlack = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.BLACK }
 
@@ -32,10 +32,6 @@ class FeatureExtractionService {
         // TODO: time series features
         val accuracyRed = getAccuracy(reviewedMovesRed)
         val accuracyBlack = getAccuracy(reviewedMovesBlack)
-        val averageThinkTimeRed = redThinkTimes.average()
-        val averageThinkTimeBlack = blackThinkTimes.average()
-        val stdevThinkTimeRed = getThinkTimeStdev(redThinkTimes)
-        val stdevThinkTimeBlack = getThinkTimeStdev(blackThinkTimes)
 
         return Features(gameTimer,
                         moveTimer,
@@ -54,11 +50,7 @@ class FeatureExtractionService {
                         averageBlunderInterarrivalTimeBlack,
                         accuracyRed,
                         accuracyBlack,
-                        gameLength,
-                        averageThinkTimeRed,
-                        averageThinkTimeBlack,
-                        stdevThinkTimeRed,
-                        stdevThinkTimeBlack)
+                        gameLength)
     }
 
     private fun getUsernameSimilarity(redUsername : String, blackUsername : String) : Double{
@@ -125,11 +117,6 @@ class FeatureExtractionService {
     private fun getAccuracy(reviewedMovesForAlliance: List<ReviewedMove>) : Double{
         return reviewedMovesForAlliance
                 .count { it.moveQuality == MoveQuality.BEST} / reviewedMovesForAlliance.size.toDouble()
-    }
-
-    private fun getThinkTimeStdev(thinkTimes : List<Int>) : Double {
-        val stdev = StandardDeviation()
-        return stdev.evaluate(thinkTimes.map { it.toDouble() }.toDoubleArray())
     }
 
     companion object{
