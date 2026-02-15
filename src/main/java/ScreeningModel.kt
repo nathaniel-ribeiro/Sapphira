@@ -1,16 +1,22 @@
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import smile.anomaly.IsolationForest
 import smile.data.DataFrame
-import smile.feature.imputation.KNNImputer
+import smile.feature.imputation.SimpleImputer
 
-@Serializable
-class ScreeningModel(@Contextual val imputer : KNNImputer? = null,
-                     @Contextual val forest : IsolationForest? = null) {
+val mapper: ObjectMapper = jacksonObjectMapper().apply {
+    setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+}
+
+class ScreeningModel(val imputer : SimpleImputer? = null, val forest : IsolationForest? = null) {
     fun fit(data: Array<DoubleArray>) : ScreeningModel{
         val numCols = data[0].size
         val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
-        val fittedImputer = KNNImputer(df, 5)
+        val fittedImputer = SimpleImputer.fit(df)
         val imputedData = fittedImputer.apply(df).toArray()
         val fittedForest = IsolationForest.fit(imputedData)
         return ScreeningModel(fittedImputer, fittedForest)
@@ -25,7 +31,9 @@ class ScreeningModel(@Contextual val imputer : KNNImputer? = null,
         return forest.score(imputedData)
     }
 
+    fun toJson() : String = mapper.writeValueAsString(this)
+
     companion object{
-        const val serialVersionUID = 42L
+        fun fromJson(json : String) : ScreeningModel = mapper.readValue(json)
     }
 }

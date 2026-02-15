@@ -24,7 +24,9 @@ dependencies {
     implementation("org.apache.commons:commons-text:1.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.github.ajalt.clikt:clikt:5.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.+")
+    // SMILE classes don't have default constructors, so we need the ParameterNames module
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.15.+")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:1.14.7")
 }

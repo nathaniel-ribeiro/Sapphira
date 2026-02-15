@@ -9,9 +9,6 @@ import com.github.ajalt.clikt.parameters.types.restrictTo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.Json
-import smile.anomaly.IsolationForest
-import smile.data.DataFrame
-import smile.feature.imputation.KNNImputer
 import java.io.File
 
 class ScreeningModelTrainer : CliktCommand() {
@@ -50,9 +47,8 @@ class ScreeningModelTrainer : CliktCommand() {
         val encoder = Encoder()
         val data = allFeatures.map { encoder.encode(it) }.toTypedArray()
         val screeningModel = ScreeningModel().fit(data)
-        val screeningModelJson = Json.encodeToString(screeningModel)
         val file = File("model.json")
-        file.writeText(screeningModelJson)
+        file.writeText(screeningModel.toJson())
     }
 }
 
