@@ -23,7 +23,7 @@ data class Features(
         require(gameTimer > 0)
         require(moveTimer > 0)
         require(increment >= 0)
-        require(usernameSimilarity > 0.0)
+        require(usernameSimilarity >= 0.0)
         require(longestBestOrExcellentStreakRed >= 0)
         require(longestBestOrExcellentStreakBlack >= 0)
         require(blunderRateRed >= 0.0)
