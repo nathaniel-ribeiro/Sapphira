@@ -22,8 +22,6 @@ class GameImportingService {
             val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
             val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
             games.add(game)
-            // TODO: remove this, just for debugging
-            if(games.size > 50) break
         }
         return games
     }

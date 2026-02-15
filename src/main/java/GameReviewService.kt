@@ -1,9 +1,3 @@
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-
 class GameReviewService(val pikafish: Pikafish) {
     fun review(game: Game, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
         if(nodesToSearchPerMove < 1) throw IllegalArgumentException()

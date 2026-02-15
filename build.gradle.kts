@@ -1,6 +1,7 @@
 plugins {
     java
-    kotlin("jvm")
+    kotlin("jvm") version "2.3.10"
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 group = "com.xiangqi"
@@ -23,6 +24,7 @@ dependencies {
     implementation("org.apache.commons:commons-text:1.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.github.ajalt.clikt:clikt:5.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:1.14.7")
 }

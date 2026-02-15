@@ -3,16 +3,16 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.types.*
+import com.github.ajalt.clikt.parameters.types.file
+import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.types.restrictTo
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.io.readCsv
-import smile.feature.imputation.KNNImputer
-import smile.feature.imputation.SVDImputer
-import smile.feature.imputation.SimpleImputer
-import java.io.File
+import kotlinx.serialization.json.Json
 import smile.anomaly.IsolationForest
+import smile.data.DataFrame
+import smile.feature.imputation.KNNImputer
+import java.io.File
 
 class ScreeningModelTrainer : CliktCommand() {
     val csvFilePath : File by argument("--data", help="Path to the training data (in CSV format).").file()
@@ -23,20 +23,22 @@ class ScreeningModelTrainer : CliktCommand() {
     val nodesToSearchPerMove : Int by option("--nodes", help="Minimum number of nodes to search per move in each game.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
 
     override fun run() {
-        val games = GameImportingService().importFromCSV(csvFilePath)
+        // guests have uncertain ratings and highly similar "usernames"; excluding guest games likely improves separation of anomalies by username similarity and rating
+        val games = GameImportingService().importFromCSV(csvFilePath).filter { !it.blackPlayer.isGuest && !it.redPlayer.isGuest }
         val pikafishInstances = ArrayList<Pikafish>()
-        (1..pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }
+        (0 until pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }
         val pool = Channel<Pikafish>(pikafishInstances.size)
         pikafishInstances.forEach { pool.trySend(it) }
 
         suspend fun reviewGames(games: List<Game>) = coroutineScope {
-            games.map { game ->
+            games.mapIndexed { i, game ->
                 async(Dispatchers.Default) {
                     val pikafish = pool.receive()
                     val gameReviewService = GameReviewService(pikafish)
                     val reviewedGame = gameReviewService.review(game, nodesToSearchPerMove)
                     pikafish.clear()
                     pool.send(pikafish)
+                    println("Reviewed game #$i / ${games.size}")
                     return@async reviewedGame
                 }
             }
@@ -47,9 +49,10 @@ class ScreeningModelTrainer : CliktCommand() {
         val allFeatures = buildList { addAll(allReviewedGames.map { featureExtractionService.getFeatures(it) }) }
         val encoder = Encoder()
         val data = allFeatures.map { encoder.encode(it) }.toTypedArray()
-        val dataImputed = SVDImputer.impute(data, 5, 10)
-        val isolationForest = IsolationForest.fit(dataImputed)
-        println("Anomaly score for first game: ${isolationForest.score(data[0])}")
+        val screeningModel = ScreeningModel().fit(data)
+        val screeningModelJson = Json.encodeToString(screeningModel)
+        val file = File("model.json")
+        file.writeText(screeningModelJson)
     }
 }
 
