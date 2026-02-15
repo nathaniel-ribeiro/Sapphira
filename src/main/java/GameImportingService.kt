@@ -1,7 +1,33 @@
+import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.io.readCsv
+import java.io.File
 import java.util.regex.Pattern
 
 typealias MoveWithThinkTime = Pair<Move, Int>
 class GameImportingService {
+    fun importFromCSV(csvFilePath : File) : List<Game>{
+        val df = DataFrame.readCsv(csvFilePath)
+        val games = ArrayList<Game>()
+        for(row in df){
+            val uuid = row["game_uuid"] as String
+            val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
+            val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
+            val movesWithThinkTime = this.convertToListOfMoves(row["moves_raw"] as String)
+            val moves = movesWithThinkTime.map { it.first }
+            val gameTimer = row["game_timer"] as Int
+            val moveTimer = row["move_timer"] as Int
+            val increment = row["increment"] as Int
+            val endReason = GameResultReason.valueOf((row["end_reason"] as String).uppercase().replace(" ", "_"))
+            val resultRed = GameResult.valueOf((row["result_red"] as String).uppercase())
+            val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
+            val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
+            games.add(game)
+            // TODO: remove this, just for debugging
+            if(games.size > 50) break
+        }
+        return games
+    }
+
     /**
      * Convert moves_raw from proprietary user games into native "Move" format.
      * Assumes that each move is stored in long algebraic notation with rows 1-10 instead of 0-9

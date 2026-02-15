@@ -23,25 +23,7 @@ class ScreeningModelTrainer : CliktCommand() {
     val nodesToSearchPerMove : Int by option("--nodes", help="Minimum number of nodes to search per move in each game.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
 
     override fun run() {
-        val df = DataFrame.readCsv(csvFilePath)
-        val games = ArrayList<Game>()
-        for(row in df){
-            val uuid = row["game_uuid"] as String
-            val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
-            val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
-            val movesWithThinkTime = GameImportingService().convertToListOfMoves(row["moves_raw"] as String)
-            val moves = movesWithThinkTime.map { it.first }
-            val gameTimer = row["game_timer"] as Int
-            val moveTimer = row["move_timer"] as Int
-            val increment = row["increment"] as Int
-            val endReason = GameResultReason.valueOf((row["end_reason"] as String).uppercase().replace(" ", "_"))
-            val resultRed = GameResult.valueOf((row["result_red"] as String).uppercase())
-            val resultBlack = GameResult.valueOf((row["result_black"] as String).uppercase())
-            val game = Game(uuid, redPlayer, blackPlayer, gameTimer, moveTimer, increment, moves, resultBlack, resultRed, endReason)
-            games.add(game)
-            // TODO: remove this, just for debugging
-            if(games.size > 100) break
-        }
+        val games = GameImportingService().importFromCSV(csvFilePath)
         val pikafishInstances = ArrayList<Pikafish>()
         (1..pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }
         val pool = Channel<Pikafish>(pikafishInstances.size)
@@ -67,7 +49,7 @@ class ScreeningModelTrainer : CliktCommand() {
         val data = allFeatures.map { encoder.encode(it) }.toTypedArray()
         val dataImputed = SVDImputer.impute(data, 5, 10)
         val isolationForest = IsolationForest.fit(dataImputed)
-        println(isolationForest)
+        println("Anomaly score for first game: ${isolationForest.score(data[0])}")
     }
 }
 
