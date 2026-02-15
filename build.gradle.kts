@@ -28,7 +28,7 @@ dependencies {
 }
 
 tasks.jar {
-    manifest.attributes["Main-Class"] = "MainKt"
+    manifest.attributes["Main-Class"] = "ScreeningModelTrainerKt"
     val dependencies = configurations
         .runtimeClasspath
         .get()
