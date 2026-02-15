@@ -11,6 +11,7 @@ repositories {
     mavenCentral()
 }
 
+val ktorVersion = "3.4.0"
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -27,6 +28,10 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.+")
     // SMILE classes don't have default constructors, so we need the ParameterNames module
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:2.15.+")
+    implementation("io.ktor:ktor-server-core:${ktorVersion}")
+    implementation("io.ktor:ktor-server-netty:${ktorVersion}")
+    implementation("io.ktor:ktor-server-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-jackson:${ktorVersion}")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:1.14.7")
 }

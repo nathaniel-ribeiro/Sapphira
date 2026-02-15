@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import smile.anomaly.IsolationForest
 import smile.data.DataFrame
 import smile.feature.imputation.SimpleImputer
@@ -10,6 +11,7 @@ import smile.feature.imputation.SimpleImputer
 val mapper: ObjectMapper = jacksonObjectMapper().apply {
     setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
 }
 
 class ScreeningModel(val imputer : SimpleImputer? = null, val forest : IsolationForest? = null) {
