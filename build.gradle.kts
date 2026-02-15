@@ -22,6 +22,7 @@ dependencies {
     implementation("com.github.haifengl:smile-core:3.1.1")
     implementation("org.apache.commons:commons-text:1.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("com.github.ajalt.clikt:clikt:5.0.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:1.14.7")
 }

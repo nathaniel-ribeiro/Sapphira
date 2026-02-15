@@ -1,12 +1,13 @@
 import com.google.common.collect.ImmutableList
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.abs
 
-class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
+class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMiB : Int = DEFAULT_HASH_SIZE_MIB) {
     private val reader: BufferedReader
     private val writer: PrintWriter
 
@@ -25,7 +26,7 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
                 MAX_HASH_SIZE_MIB
             )
         }
-        val processBuilder = ProcessBuilder(pathToExecutable)
+        val processBuilder = ProcessBuilder(executable.path)
         val process = processBuilder.start()
         reader = BufferedReader(InputStreamReader(process.inputStream))
         writer = PrintWriter(process.outputStream)
@@ -156,6 +157,9 @@ class Pikafish(pathToExecutable : String, numThreads : Int, hashSizeMiB : Int) {
         private const val MAX_THREADS = 1024
         private const val MIN_HASH_SIZE_MIB = 1
         private const val MAX_HASH_SIZE_MIB = 33554432
+
+        const val DEFAULT_THREADS = 1
+        const val DEFAULT_HASH_SIZE_MIB = 16
 
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
