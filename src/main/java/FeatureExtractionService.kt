@@ -34,23 +34,23 @@ class FeatureExtractionService {
         val accuracyBlack = getAccuracy(reviewedMovesBlack)
 
         return Features(gameTimer,
-                        moveTimer,
-                        increment,
-                        resultRed,
-                        resultBlack,
-                        gameResultReason,
-                        usernameSimilarity,
-                        adjustedCPLossRed ?: Double.NaN,
-                        adjustedCPLossBlack ?: Double.NaN,
-                        longestBestOrExcellentStreakRed,
-                        longestBestOrExcellentStreakBlack,
-                        blunderRateRed,
-                        blunderRateBlack,
-                        averageBlunderInterarrivalTimeRed,
-                        averageBlunderInterarrivalTimeBlack,
-                        accuracyRed,
-                        accuracyBlack,
-                        gameLength)
+            moveTimer,
+            increment,
+            resultRed,
+            resultBlack,
+            gameResultReason,
+            usernameSimilarity,
+            adjustedCPLossRed ?: Double.NaN,
+            adjustedCPLossBlack ?: Double.NaN,
+            longestBestOrExcellentStreakRed,
+            longestBestOrExcellentStreakBlack,
+            blunderRateRed,
+            blunderRateBlack,
+            averageBlunderInterarrivalTimeRed,
+            averageBlunderInterarrivalTimeBlack,
+            accuracyRed,
+            accuracyBlack,
+            gameLength)
     }
 
     private fun getUsernameSimilarity(redUsername : String, blackUsername : String) : Double{
@@ -60,17 +60,17 @@ class FeatureExtractionService {
 
     private fun getAdjustedCPLoss(reviewedMovesForAlliance : List<ReviewedMove>) : Double?{
         val adjustedAllianceMoves = reviewedMovesForAlliance
-                                                .filterIndexed { index, _ ->  index >= NUMBER_OF_TURNS_TO_EXCLUDE}
-                                                .filter {
-                                                    abs(it.bestMoveEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS &&
-                                                    abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
-                                                }
-                                                .filter {
-                                                    it.bestMoveEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                                                    it.bestMoveEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                                                    it.movePlayedEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                                                    it.movePlayedEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY
-                                                }
+            .filterIndexed { index, _ ->  index >= NUMBER_OF_TURNS_TO_EXCLUDE}
+            .filter {
+                abs(it.bestMoveEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS &&
+                        abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
+            }
+            .filter {
+                it.bestMoveEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+                        it.bestMoveEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+                        it.movePlayedEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+                        it.movePlayedEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY
+            }
 
         if(adjustedAllianceMoves.isEmpty()) return null
         return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
@@ -87,7 +87,7 @@ class FeatureExtractionService {
 
     private fun getBlunderRate(reviewedMovesForAlliance: List<ReviewedMove>) : Double {
         return reviewedMovesForAlliance
-                .count { it.moveQuality == MoveQuality.BLUNDER } / reviewedMovesForAlliance.size.toDouble()
+            .count { it.moveQuality == MoveQuality.BLUNDER } / reviewedMovesForAlliance.size.toDouble()
     }
 
     private fun getAverageBlunderInterarrivalTime(reviewedMovesForAlliance: List<ReviewedMove>) : Double {
@@ -105,18 +105,18 @@ class FeatureExtractionService {
 
     private fun getTimeSeriesFeatures(reviewedGame : ReviewedGame){
         val evaluationGraphRedPerspective = reviewedGame.reviewedMoves
-                                                        .map(ReviewedMove::movePlayedEvaluation)
-                                                        .mapIndexed {
-                                                            i, evaluation ->
-                                                            if(i.mod(2) == 0) evaluation else evaluation.flip()
-                                                        }
+            .map(ReviewedMove::movePlayedEvaluation)
+            .mapIndexed {
+                    i, evaluation ->
+                if(i.mod(2) == 0) evaluation else evaluation.flip()
+            }
         // number of "reversals"
         // TODO: come up with more time series features
     }
 
     private fun getAccuracy(reviewedMovesForAlliance: List<ReviewedMove>) : Double{
         return reviewedMovesForAlliance
-                .count { it.moveQuality == MoveQuality.BEST} / reviewedMovesForAlliance.size.toDouble()
+            .count { it.moveQuality == MoveQuality.BEST} / reviewedMovesForAlliance.size.toDouble()
     }
 
     companion object{
