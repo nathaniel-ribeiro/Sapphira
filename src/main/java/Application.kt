@@ -16,30 +16,34 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.channels.Channel
 import java.io.File
 import kotlin.collections.mapOf
-
-data class Response(val status : String, val anomalyScore : Double, val isAnomalous : Boolean)
 
 class Application : CliktCommand() {
     val pikafishExecutable : File by argument("--exe", help="Path to the Pikafish executable.").file()
     val modelFile : File by argument("--model", help="Path to trained screening model.").file()
+    val pikafishPoolSize : Int by option("--pool", help="Number of concurrent Pikafish instances used for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(1)
     val numThreads : Int by option("--threads", help="Number of threads used for *each* Pikafish instance.").int().default(Pikafish.DEFAULT_THREADS)
     val hashSizeMiB : Int by option("--hash", help="Hash size for *each* Pikafish instance in MiB.").int().default(Pikafish.DEFAULT_HASH_SIZE_MIB)
     val nodesToSearchPerMove : Int by option("--nodes", help="Minimum number of nodes to search per move in each game.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
     val port by option("--port").int().default(8080)
 
     override fun run() {
-        val model = ScreeningModel.fromJson(modelFile.readText())
-        val pikafish = Pikafish(pikafishExecutable, numThreads, hashSizeMiB)
-        startWebService(model, pikafish, nodesToSearchPerMove, port)
+        startWebService(pikafishExecutable, modelFile, pikafishPoolSize,
+                         numThreads, hashSizeMiB, nodesToSearchPerMove, port)
     }
 }
 
-fun startWebService(model : ScreeningModel, pikafish : Pikafish, nodesToSearchPerMove : Int, port : Int){
-    val reviewService = GameReviewService(pikafish)
+fun startWebService(pikafishExecutable : File, modelFile : File, pikafishPoolSize : Int, numThreads : Int,
+                    hashSizeMiB : Int, nodesToSearchPerMove : Int, port : Int){
+    val pikafishInstances = ArrayList<Pikafish>()
+    (0 until pikafishPoolSize).forEach { _ -> pikafishInstances.add(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }
+    val pool = Channel<Pikafish>(pikafishInstances.size)
+    pikafishInstances.forEach { pool.trySend(it) }
     val featureService = FeatureExtractionService()
     val encoder = Encoder()
+    val model = ScreeningModel.fromJson(modelFile.readText())
 
     val server = embeddedServer(Netty, port = port) {
         install(ContentNegotiation) {
@@ -50,9 +54,11 @@ fun startWebService(model : ScreeningModel, pikafish : Pikafish, nodesToSearchPe
 
         routing {
             post("/screen-game") {
+                val pikafish = pool.receive()
                 try {
                     val game = call.receive<Game>()
-                    val reviewedGame = reviewService.review(game, nodesToSearchPerMove)
+                    val gameReviewService = GameReviewService(pikafish)
+                    val reviewedGame = gameReviewService.review(game, nodesToSearchPerMove)
                     val features = featureService.getFeatures(reviewedGame)
                     val encoded = encoder.encode(features)
                     val scores = model.predict(arrayOf(encoded))
@@ -61,6 +67,9 @@ fun startWebService(model : ScreeningModel, pikafish : Pikafish, nodesToSearchPe
                     call.respond(mapOf("status" to "success", "score" to score, "anomaly" to (score >= 0.50)))
                 } catch (_: Exception) {
                     call.respond(mapOf("status" to "failure", "message" to "An internal server error occurred."))
+                }
+                finally{
+                    pool.send(pikafish)
                 }
             }
         }
