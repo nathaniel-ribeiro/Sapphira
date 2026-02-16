@@ -1,4 +1,5 @@
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
+import org.apache.commons.math3.analysis.integration.SimpsonIntegrator
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import kotlin.math.abs
 
@@ -13,9 +14,6 @@ class FeatureExtractionService {
         val gameTimer = reviewedGame.game.gameTimer
         val moveTimer = reviewedGame.game.moveTimer
         val increment = reviewedGame.game.increment
-        val resultRed = reviewedGame.game.resultRed
-        val resultBlack = reviewedGame.game.resultBlack
-        val gameResultReason = reviewedGame.game.gameResultReason
         val usernameSimilarity = getUsernameSimilarity(reviewedGame.game.redPlayer.username, reviewedGame.game.blackPlayer.username)
         val gameLength = reviewedGame.game.moves.size
 
@@ -29,16 +27,19 @@ class FeatureExtractionService {
         val blunderRateBlack = getBlunderRate(reviewedMovesBlack)
         val averageBlunderInterarrivalTimeRed = getAverageBlunderInterarrivalTime(reviewedMovesRed)
         val averageBlunderInterarrivalTimeBlack = getAverageBlunderInterarrivalTime(reviewedMovesBlack)
-        // TODO: time series features
         val accuracyRed = getAccuracy(reviewedMovesRed)
         val accuracyBlack = getAccuracy(reviewedMovesBlack)
+
+        val evaluationGraph = getEvaluationGraphRedPerspective(reviewedGame.reviewedMoves)
+        val numReversals = getNumReversals(evaluationGraph)
+        val areaUnderTheEvaluationCurve = getAUC(evaluationGraph)
+        val recoveryRateRed = getRecoveryRate(reviewedMovesRed)
+        val recoveryRateBlack = getRecoveryRate(reviewedMovesBlack)
+
 
         return Features(gameTimer,
             moveTimer,
             increment,
-            resultRed,
-            resultBlack,
-            gameResultReason,
             usernameSimilarity,
             adjustedCPLossRed ?: Double.NaN,
             adjustedCPLossBlack ?: Double.NaN,
@@ -48,9 +49,62 @@ class FeatureExtractionService {
             blunderRateBlack,
             averageBlunderInterarrivalTimeRed,
             averageBlunderInterarrivalTimeBlack,
+            numReversals,
+            areaUnderTheEvaluationCurve ?: Double.NaN,
+            recoveryRateRed ?: Double.NaN,
+            recoveryRateBlack ?: Double.NaN,
             accuracyRed,
             accuracyBlack,
             gameLength)
+    }
+
+    private fun getAUC(evaluationGraph: List<Evaluation>) : Double? {
+        if (evaluationGraph.size < 5) return null
+        val x = DoubleArray(evaluationGraph.size) { it.toDouble() }
+        val y = DoubleArray(evaluationGraph.size) { evaluationGraph[it].expectedScore }
+        val interpolator = SplineInterpolator()
+        val spline = interpolator.interpolate(x, y)
+        val integrator = SimpsonIntegrator()
+        return integrator.integrate(10_000, spline, x.first(), x.last())
+    }
+
+    private fun getEvaluationGraphRedPerspective(reviewedMoves: List<ReviewedMove>) : List<Evaluation> {
+        val evaluationGraphRedPerspective = reviewedMoves
+            .map(ReviewedMove::movePlayedEvaluation)
+            .mapIndexed {
+                    i, evaluation ->
+                if(i.mod(2) == 0) evaluation else evaluation.flip()
+            }
+        return evaluationGraphRedPerspective
+    }
+
+    private fun getNumReversals(evaluationGraph: List<Evaluation>): Int {
+        return evaluationGraph
+            .map { eval ->
+                when {
+                    eval.centipawns > WINNING_ADVANTAGE_CENTIPAWNS -> "RED_WINNING"
+                    eval.centipawns < -WINNING_ADVANTAGE_CENTIPAWNS -> "RED_LOSING"
+                    else -> "ROUGHLY_EQUAL"
+                }
+            }
+            .filter { it != "ROUGHLY_EQUAL" }
+            .zipWithNext()
+            .count { (current, next) -> current != next }
+    }
+
+    private fun getRecoveryRate(reviewedMovesForAlliance: List<ReviewedMove>) : Double? {
+        // what fraction of the time was a MISTAKE or BLUNDER followed by the BEST or an EXCELLENT move?
+        if(reviewedMovesForAlliance.size < 2) return null
+        val recoveryOpportunities = reviewedMovesForAlliance.windowed(2)
+            .filter { (current, _) ->
+                current.moveQuality == MoveQuality.MISTAKE || current.moveQuality == MoveQuality.BLUNDER
+            }
+        if (recoveryOpportunities.isEmpty()) return null
+        val successfulRecoveries = recoveryOpportunities
+            .count { (_, next) ->
+                next.moveQuality == MoveQuality.BEST || next.moveQuality == MoveQuality.EXCELLENT
+            }
+        return successfulRecoveries.toDouble() / recoveryOpportunities.size
     }
 
     private fun getUsernameSimilarity(redUsername : String, blackUsername : String) : Double{
@@ -101,17 +155,6 @@ class FeatureExtractionService {
         // *some* lower bound on blunder rates for players who didn't blunder at all during their game
         val timeline = listOf(gameStart) + blunderMoveNumbers + listOf(gameEnd)
         return timeline.zipWithNext { a, b -> b - a }.average()
-    }
-
-    private fun getTimeSeriesFeatures(reviewedGame : ReviewedGame){
-        val evaluationGraphRedPerspective = reviewedGame.reviewedMoves
-            .map(ReviewedMove::movePlayedEvaluation)
-            .mapIndexed {
-                    i, evaluation ->
-                if(i.mod(2) == 0) evaluation else evaluation.flip()
-            }
-        // number of "reversals"
-        // TODO: come up with more time series features
     }
 
     private fun getAccuracy(reviewedMovesForAlliance: List<ReviewedMove>) : Double{
