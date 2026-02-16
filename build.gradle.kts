@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     java
     kotlin("jvm") version "2.3.10"
@@ -37,7 +39,7 @@ dependencies {
 }
 
 tasks.jar {
-    manifest.attributes["Main-Class"] = "ScreeningModelTrainerKt"
+    manifest.attributes["Main-Class"] = "MainKt"
     val dependencies = configurations
         .runtimeClasspath
         .get()
@@ -53,3 +55,7 @@ kotlin {
     jvmToolchain(17)
 }
 
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property=param-property"))
+}

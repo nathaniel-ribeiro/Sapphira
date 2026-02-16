@@ -6,19 +6,16 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.restrictTo
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.call
-import io.ktor.server.application.install
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.serialization.jackson.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.channels.Channel
 import java.io.File
-import kotlin.collections.mapOf
 
 class Application : CliktCommand() {
     val pikafishExecutable : File by argument("--exe", help="Path to the Pikafish executable.").file()
@@ -44,6 +41,7 @@ fun startWebService(pikafishExecutable : File, modelFile : File, pikafishPoolSiz
     val featureService = FeatureExtractionService()
     val encoder = Encoder()
     val model = ScreeningModel.fromJson(modelFile.readText())
+    println("Is model fitted?: ${model.isFitted}")
 
     val server = embeddedServer(Netty, port = port) {
         install(ContentNegotiation) {
@@ -64,7 +62,7 @@ fun startWebService(pikafishExecutable : File, modelFile : File, pikafishPoolSiz
                     val scores = model.predict(arrayOf(encoded))
                     val score = scores.firstOrNull() ?: 0.0
 
-                    call.respond(mapOf("status" to "success", "score" to score, "anomaly" to (score >= 0.50)))
+                    call.respond(mapOf("status" to "success", "anomaly_score" to score))
                 } catch (_: Exception) {
                     call.respond(mapOf("status" to "failure", "message" to "An internal server error occurred."))
                 }
