@@ -2,6 +2,9 @@ data class Features(
     val gameTimer : Int,
     val moveTimer : Int,
     val increment : Int,
+    val redRating : Int,
+    val blackRating : Int,
+    val gameLength : Int,
     val usernameSimilarity : Double,
     val adjustedCPLossRed : Double,
     val adjustedCPLossBlack : Double,
@@ -17,9 +20,10 @@ data class Features(
     val recoveryRateBlack : Double,
     val accuracyRed : Double,
     val accuracyBlack : Double,
-    val gameLength : Int,
 ){
     init {
+        require(redRating > 0)
+        require(blackRating > 0)
         require(gameTimer > 0)
         require(moveTimer > 0)
         require(increment >= 0)

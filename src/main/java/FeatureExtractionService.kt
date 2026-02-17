@@ -14,6 +14,8 @@ class FeatureExtractionService {
         val gameTimer = reviewedGame.game.gameTimer
         val moveTimer = reviewedGame.game.moveTimer
         val increment = reviewedGame.game.increment
+        val redRating = reviewedGame.game.redPlayer.rating
+        val blackRating = reviewedGame.game.blackPlayer.rating
         val usernameSimilarity = getUsernameSimilarity(reviewedGame.game.redPlayer.username, reviewedGame.game.blackPlayer.username)
         val gameLength = reviewedGame.game.moves.size
 
@@ -40,6 +42,9 @@ class FeatureExtractionService {
         return Features(gameTimer,
             moveTimer,
             increment,
+            redRating,
+            blackRating,
+            gameLength,
             usernameSimilarity,
             adjustedCPLossRed ?: Double.NaN,
             adjustedCPLossBlack ?: Double.NaN,
@@ -54,8 +59,7 @@ class FeatureExtractionService {
             recoveryRateRed ?: Double.NaN,
             recoveryRateBlack ?: Double.NaN,
             accuracyRed,
-            accuracyBlack,
-            gameLength)
+            accuracyBlack)
     }
 
     private fun getAUC(evaluationGraph: List<Evaluation>) : Double? {
