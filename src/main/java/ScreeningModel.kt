@@ -55,7 +55,7 @@ class ScreeningModel(
     fun predict(data : Array<DoubleArray>) : DoubleArray{
         requireNotNull(imputer){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
         requireNotNull(forest){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
-        require(isFitted)
+        require(isFitted){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
         val numCols = data[0].size
         val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
         val imputedData = imputer.apply(df).toArray()
