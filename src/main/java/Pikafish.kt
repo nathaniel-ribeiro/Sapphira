@@ -92,6 +92,10 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
     }
 
     fun evaluate(board: Board, nodesToSearch : Int): Evaluation {
+        val won = if(board.whoseTurn == Alliance.RED) Evaluation.RED_WON else Evaluation.BLACK_WON
+        val lost = if(board.whoseTurn == Alliance.RED) Evaluation.RED_LOST else Evaluation.BLACK_LOST
+        val draw = if(board.whoseTurn == Alliance.RED) Evaluation.RED_DRAW else Evaluation.BLACK_DRAW
+
         send("position fen ${board.fen}")
         send("go nodes $nodesToSearch")
         lateinit var evaluation : Evaluation
@@ -107,7 +111,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                     val pliesTilMate = abs(pliesTilMateUnnormalized)
                     val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
                     // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                    centipawns = if (checkmating) Evaluation.WON.centipawns - pliesTilMate else Evaluation.LOST.centipawns + pliesTilMate
+                    centipawns = if (checkmating) won.centipawns - pliesTilMate else lost.centipawns + pliesTilMate
                 }
                 else centipawns = matcher.group(2).toInt()
                 try{
@@ -115,11 +119,11 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                     val winProbability = matcher.group(4).toDouble() / 1000.0
                     val drawProbability = matcher.group(5).toDouble() / 1000.0
                     val loseProbability = matcher.group(6).toDouble() / 1000.0
-                    evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability)
+                    evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability, board.whoseTurn)
                 }
                 catch (_ : Exception){
                     // extreme case where the game is already over
-                    evaluation = if(centipawns > 0) Evaluation.WON else if(centipawns == 0) Evaluation.DREW else Evaluation.LOST
+                    evaluation = if(centipawns > 0) won else if(centipawns == 0) draw else lost
                 }
             }
         }

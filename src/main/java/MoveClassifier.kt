@@ -1,12 +1,12 @@
 class MoveClassifier {
     companion object {
-        fun classify(dropInWinProbability: Double) : MoveQuality{
+        fun classify(winPercentDrop : Double) : MoveQuality{
             return when {
-                dropInWinProbability <= 0.0 -> MoveQuality.BEST
-                dropInWinProbability <= 0.02 -> MoveQuality.EXCELLENT
-                dropInWinProbability <= 0.05 -> MoveQuality.GOOD
-                dropInWinProbability <= 0.15 -> MoveQuality.INACCURACY
-                dropInWinProbability <= 0.20 -> MoveQuality.MISTAKE
+                winPercentDrop <= 0.0 -> MoveQuality.BEST
+                winPercentDrop <= 0.02 -> MoveQuality.EXCELLENT
+                winPercentDrop <= 0.05 -> MoveQuality.GOOD
+                winPercentDrop <= 0.15 -> MoveQuality.INACCURACY
+                winPercentDrop <= 0.20 -> MoveQuality.MISTAKE
                 else -> MoveQuality.BLUNDER
             }
         }

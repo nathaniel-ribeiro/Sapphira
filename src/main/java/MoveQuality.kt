@@ -5,7 +5,4 @@ enum class MoveQuality {
     INACCURACY,
     MISTAKE,
     BLUNDER,
-    // book and brilliant currently unused
-    BRILLIANT,
-    BOOK
 }
