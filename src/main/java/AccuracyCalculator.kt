@@ -19,7 +19,7 @@ class AccuracyCalculator : FeatureProvider {
     }
 
     fun window(reviewedMoves : List<ReviewedMove>) : List<List<ReviewedMove>> {
-        val windowSize = (reviewedMoves.size / 10).coerceIn(MIN_WINDOW_SIZE..MAX_WINDOW_SIZE)
+        val windowSize = (reviewedMoves.size / TARGET_NUM_WINDOWS).coerceIn(MIN_WINDOW_SIZE..MAX_WINDOW_SIZE)
         return reviewedMoves.chunked(windowSize)
     }
 
@@ -55,5 +55,6 @@ class AccuracyCalculator : FeatureProvider {
         const val MAX_WINDOW_SIZE = 8
         const val MIN_VOLATILITY_WEIGHT = 0.5
         const val MAX_VOLATILITY_WEIGHT = 12.0
+        const val TARGET_NUM_WINDOWS = 10
     }
 }
