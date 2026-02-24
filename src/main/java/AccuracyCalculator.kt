@@ -1,3 +1,4 @@
+import org.apache.commons.math3.stat.descriptive.moment.Mean
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 
 class AccuracyCalculator : FeatureProvider {
@@ -11,8 +12,8 @@ class AccuracyCalculator : FeatureProvider {
 
     fun getAccuracy(reviewedMoves : List<ReviewedMove>) : Double {
         val windows = window(reviewedMoves)
-        val volatilities = computeVolatilityWeights(windows)
-        val volatilityWeightedMeanAccuracy = computeVolatilityWeightedMeanAccuracy(windows, volatilities)
+        val volatilityPerWindow = computeVolatilityPerWindow(windows)
+        val volatilityWeightedMeanAccuracy = computeVolatilityWeightedMeanAccuracy(windows, volatilityPerWindow)
         val harmonicMeanAccuracy = computeHarmonicMeanAccuracy(reviewedMoves)
         val gameAccuracy = listOf(volatilityWeightedMeanAccuracy, harmonicMeanAccuracy).average()
         return gameAccuracy
@@ -23,24 +24,22 @@ class AccuracyCalculator : FeatureProvider {
         return reviewedMoves.chunked(windowSize)
     }
 
-    fun computeVolatilityWeights(windows : List<List<ReviewedMove>>) : List<Double> {
+    fun computeVolatilityPerWindow(windows : List<List<ReviewedMove>>) : List<Double> {
         return windows.map {
             val winPercents = it.map { reviewedMove -> reviewedMove.bestMoveEvaluation.winPercent }.toDoubleArray()
-            val stdev = StandardDeviation()
-            val rawVolatilityWeight = stdev.evaluate(winPercents)
-            return@map rawVolatilityWeight.coerceIn(MIN_VOLATILITY_WEIGHT..MAX_VOLATILITY_WEIGHT)
+            val standardDeviation = StandardDeviation()
+            val rawVolatility = standardDeviation.evaluate(winPercents)
+            return@map rawVolatility.coerceIn(MIN_VOLATILITY..MAX_VOLATILITY)
         }
     }
 
-    fun computeVolatilityWeightedMeanAccuracy(windows : List<List<ReviewedMove>>, volatilities : List<Double>) : Double {
-        val weightedAccuracySum = windows.zip(volatilities).flatMap {
-            (window, volatility) ->
-            window.map {
-                it.accuracyPercent * volatility
-            }
-        }.sum()
-        val normalizingFactor = volatilities.sum()
-        return weightedAccuracySum / normalizingFactor
+    fun computeVolatilityWeightedMeanAccuracy(windows : List<List<ReviewedMove>>, volatilityPerWindow : List<Double>) : Double {
+        val volatilityPerMove = windows.zip(volatilityPerWindow).flatMap {
+            (window, volatility) -> List(window.size) { volatility }
+        }
+        val accuracyPercents = windows.flatten().map { it.accuracyPercent }
+        val mean = Mean()
+        return mean.evaluate(accuracyPercents.toDoubleArray(), volatilityPerMove.toDoubleArray())
     }
 
     fun computeHarmonicMeanAccuracy(reviewedMoves : List<ReviewedMove>) : Double {
@@ -53,8 +52,8 @@ class AccuracyCalculator : FeatureProvider {
     companion object{
         const val MIN_WINDOW_SIZE = 2
         const val MAX_WINDOW_SIZE = 8
-        const val MIN_VOLATILITY_WEIGHT = 0.5
-        const val MAX_VOLATILITY_WEIGHT = 12.0
+        const val MIN_VOLATILITY = 0.5
+        const val MAX_VOLATILITY = 12.0
         const val TARGET_NUM_WINDOWS = 10
     }
 }

@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 
 class EvaluationTest {
     @Test
@@ -21,5 +22,12 @@ class EvaluationTest {
         val eval = Evaluation(38, 0.108, 0.885, 0.007, Alliance.RED)
         val expectedFlippedEval = Evaluation(-38, 0.007, 0.885, 0.108, Alliance.BLACK)
         assertEquals(expectedFlippedEval, eval.flip())
+    }
+
+    @Test
+    fun winPercentTest(){
+        val eval = Evaluation(38, 0.108, 0.885, 0.007, Alliance.RED)
+        val expectedWinPercent = 53.4922803954
+        assertTrue(abs(expectedWinPercent - eval.winPercent) <= 0.001)
     }
 }
