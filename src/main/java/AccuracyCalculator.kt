@@ -43,6 +43,7 @@ class AccuracyCalculator : FeatureProvider {
     }
 
     fun computeHarmonicMeanAccuracy(reviewedMoves : List<ReviewedMove>) : Double {
+        require(reviewedMoves.map { it.accuracyPercent }.all { it != 0.0 }){ "One or more accuracies was 0. Cannot take harmonic mean." }
         val reciprocalAccuracyPercents = reviewedMoves.map { 1.0 / it.accuracyPercent }
         val meanReciprocalAccuracyPercents = reciprocalAccuracyPercents.average()
         val harmonicMeanAccuracyPercent = 1.0 / meanReciprocalAccuracyPercents
