@@ -2,6 +2,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 
 class AccuracyCalculator : FeatureProvider {
+    // TODO: consult Lichess source code for whether accuracies are computed entirely independently for the two colors or if windows include moves for BOTH colors
     override fun extract(reviewedGame: ReviewedGame): Map<String, Double?> {
         val redMoves = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.RED }
         val blackMoves = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.BLACK }
@@ -15,7 +16,7 @@ class AccuracyCalculator : FeatureProvider {
         val volatilityPerWindow = computeVolatilityPerWindow(windows)
         val volatilityWeightedMeanAccuracy = computeVolatilityWeightedMeanAccuracy(windows, volatilityPerWindow)
         val harmonicMeanAccuracy = computeHarmonicMeanAccuracy(reviewedMoves)
-        val gameAccuracy = listOf(volatilityWeightedMeanAccuracy, harmonicMeanAccuracy).average()
+        val gameAccuracy = (volatilityWeightedMeanAccuracy + harmonicMeanAccuracy) / 2
         return gameAccuracy
     }
 
@@ -43,11 +44,9 @@ class AccuracyCalculator : FeatureProvider {
     }
 
     fun computeHarmonicMeanAccuracy(reviewedMoves : List<ReviewedMove>) : Double {
-        require(reviewedMoves.map { it.accuracyPercent }.all { it != 0.0 }){ "One or more accuracies was 0. Cannot take harmonic mean." }
-        val reciprocalAccuracyPercents = reviewedMoves.map { 1.0 / it.accuracyPercent }
-        val meanReciprocalAccuracyPercents = reciprocalAccuracyPercents.average()
-        val harmonicMeanAccuracyPercent = 1.0 / meanReciprocalAccuracyPercents
-        return harmonicMeanAccuracyPercent
+        val accuracies = reviewedMoves.map(ReviewedMove::accuracyPercent)
+        // borrowed from: https://github.com/lichess-org/scalalib/blob/master/lila/src/main/scala/Maths.scala
+        return accuracies.size / accuracies.fold(0.0) { acc, v -> acc + 1 / 1.0.coerceAtLeast(v) }
     }
 
     companion object{
