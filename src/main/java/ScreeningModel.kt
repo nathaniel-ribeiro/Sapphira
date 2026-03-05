@@ -1,6 +1,5 @@
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -8,30 +7,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import smile.anomaly.IsolationForest
 import smile.data.DataFrame
 import smile.feature.imputation.SimpleImputer
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.util.*
 
 val mapper: ObjectMapper = jacksonObjectMapper().apply {
     registerModule(com.fasterxml.jackson.module.paramnames.ParameterNamesModule())
     enable(SerializationFeature.INDENT_OUTPUT)
-}
-
-class SmileBase64Serializer : JsonSerializer<Any>() {
-    override fun serialize(value: Any, gen: JsonGenerator, serializers: SerializerProvider) {
-        val baos = ByteArrayOutputStream()
-        ObjectOutputStream(baos).use { it.writeObject(value) }
-        gen.writeString(Base64.getEncoder().encodeToString(baos.toByteArray()))
-    }
-}
-
-class SmileBase64Deserializer : JsonDeserializer<Any>() {
-    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Any {
-        val bytes = Base64.getDecoder().decode(p.text)
-        return ObjectInputStream(ByteArrayInputStream(bytes)).use { it.readObject() }
-    }
 }
 
 class ScreeningModel(
