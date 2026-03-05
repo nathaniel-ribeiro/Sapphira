@@ -12,7 +12,7 @@ class AccuracyCalculator : FeatureProvider {
             return (rawAccuracy + UNCERTAINTY_BONUS).coerceIn(MIN_ACCURACY_PERCENT..MAX_ACCURACY_PERCENT)
         }
     }
-    // TODO: consult Lichess source code for whether accuracies are computed entirely independently for the two colors or if windows include moves for BOTH colors
+
     override fun extract(reviewedGame: ReviewedGame): Map<String, Double?> {
         val accuracies = getAccuracy(reviewedGame.reviewedMoves)
         val redAccuracy = accuracies.first
@@ -21,6 +21,7 @@ class AccuracyCalculator : FeatureProvider {
     }
 
     fun getAccuracy(reviewedMoves : List<ReviewedMove>) : Pair<Double, Double> {
+        // TODO: compute accuracy per side, sharing volatility weights and windows
         val windows = window(reviewedMoves)
         val volatilityPerWindow = computeVolatilityPerWindow(windows)
         val volatilityWeightedMeanAccuracy = computeVolatilityWeightedMeanAccuracy(windows, volatilityPerWindow)

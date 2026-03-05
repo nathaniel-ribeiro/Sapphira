@@ -5,64 +5,6 @@ import org.junit.jupiter.api.Test
 import Alliance.*
 
 class AccuracyCalculatorTest {
-    private val game = Game(
-        uuid = "example_uuid",
-        redPlayer = Player(username = "example_red_player", isGuest = false, isBanned = false, rating = 500),
-        blackPlayer = Player(username = "example_black_player", isGuest = false, isBanned = false, rating = 500),
-        gameTimer = 10,
-        moveTimer = 2,
-        increment = 0,
-        moves = listOf(
-            // 1.
-            Move("b2", "e2", RED),
-            Move("b7", "e7", BLACK),
-            //2.
-            Move("b0", "c2", RED),
-            Move("b9", "c7", BLACK),
-            // 3.
-            Move("c3", "c4", RED),
-            Move("a9", "b9", BLACK),
-            // 4.
-            Move("h0", "g2", RED),
-            Move("g6", "g5", BLACK),
-            // 5.
-            Move("h2", "h6", RED),
-            Move("h9", "g7", BLACK),
-            // 6.
-            Move("a0", "a1", RED),
-            Move("h7", "i7", BLACK),
-            // 7.
-            Move("i0", "h0", RED),
-            Move("i9", "h9", BLACK),
-            // 8.
-            Move("a1", "f1", RED),
-            Move("b9", "b3", BLACK),
-            // 9.
-            Move("h6", "g6", RED),
-            Move("g7", "e8", BLACK),
-            // 10.
-            Move("e2", "e6", RED),
-            Move("h9", "h0", BLACK),
-            // 11.
-            Move("e6", "e5", RED),
-            Move("h0", "h6", BLACK),
-            // 12.
-            Move("f0", "e1", RED),
-            Move("h6", "g6", BLACK),
-            // 13.
-            Move("c2", "d4", RED),
-            Move("c7", "e6", BLACK),
-            // 14.
-            Move("e0", "f0", RED),
-            Move("e7", "e5", BLACK),
-            // 15.
-            Move("f1", "f9", RED),
-        ),
-        resultRed = GameResult.WON,
-        resultBlack = GameResult.LOST,
-        gameResultReason = GameResultReason.CHECKMATE
-    )
-
     private val reviewedGame = mockk<ReviewedGame>()
     private val reviewedMove1R = mockk<ReviewedMove>()
     private val reviewedMove1B = mockk<ReviewedMove>()
@@ -112,135 +54,109 @@ class AccuracyCalculatorTest {
         every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
         every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
 
-        //TODO
         // 3. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        every { reviewedMove3R.movePlayedEvaluation } returns Evaluation(centipawns=19, winProbability=0.055, drawProbability=0.93, loseProbability=0.015, perspective=RED)
+        every { reviewedMove3R.bestMoveEvaluation } returns Evaluation(centipawns=65, winProbability=0.223, drawProbability=0.774, loseProbability=0.003, perspective=RED)
 
-        //TODO
-        // 3. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 3. ... a9b9
+        every { reviewedMove3B.movePlayedEvaluation } returns Evaluation(centipawns=-27, winProbability=0.012, drawProbability=0.918, loseProbability=0.07, perspective=BLACK)
+        every { reviewedMove3B.bestMoveEvaluation } returns Evaluation(centipawns=-19, winProbability=0.015, drawProbability=0.93, loseProbability=0.055, perspective=BLACK)
 
-        //TODO
-        // 4. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 4. h0g2
+        every { reviewedMove4R.movePlayedEvaluation } returns Evaluation(centipawns=27, winProbability=0.071, drawProbability=0.918, loseProbability=0.011, perspective=RED)
+        every { reviewedMove4R.bestMoveEvaluation } returns Evaluation(centipawns=27, winProbability=0.07, drawProbability=0.918, loseProbability=0.012, perspective=RED)
 
-        //TODO
-        // 4. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 4. ... g6g5
+        every { reviewedMove4B.movePlayedEvaluation } returns Evaluation(centipawns=-35, winProbability=0.009, drawProbability=0.899, loseProbability=0.092, perspective=BLACK)
+        every { reviewedMove4B.bestMoveEvaluation } returns Evaluation(centipawns=-27, winProbability=0.011, drawProbability=0.918, loseProbability=0.071, perspective=BLACK)
 
-        //TODO
-        // 5. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 5. h2h6
+        every { reviewedMove5R.movePlayedEvaluation } returns Evaluation(centipawns=30, winProbability=0.078, drawProbability=0.912, loseProbability=0.01, perspective=RED)
+        every { reviewedMove5R.bestMoveEvaluation } returns Evaluation(centipawns=35, winProbability=0.092, drawProbability=0.899, loseProbability=0.009, perspective=RED)
 
-        //TODO
-        // 5. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 5. ... h9g7
+        every { reviewedMove5B.movePlayedEvaluation } returns Evaluation(centipawns=-40, winProbability=0.007, drawProbability=0.886, loseProbability=0.107, perspective=BLACK)
+        every { reviewedMove5B.bestMoveEvaluation } returns Evaluation(centipawns=-30, winProbability=0.01, drawProbability=0.912, loseProbability=0.078, perspective=BLACK)
 
-        //TODO
-        // 6. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 6. a0a1
+        every { reviewedMove6R.movePlayedEvaluation } returns Evaluation(centipawns=37, winProbability=0.099, drawProbability=0.893, loseProbability=0.008, perspective=RED)
+        every { reviewedMove6R.bestMoveEvaluation } returns Evaluation(centipawns=40, winProbability=0.107, drawProbability=0.886, loseProbability=0.007, perspective=RED)
 
-        //TODO
-        // 6. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 6. ... h7i7
+        every { reviewedMove6B.movePlayedEvaluation } returns Evaluation(centipawns=-114, winProbability=0.001, drawProbability=0.38, loseProbability=0.619, perspective=BLACK)
+        every { reviewedMove6B.bestMoveEvaluation } returns Evaluation(centipawns=-37, winProbability=0.008, drawProbability=0.893, loseProbability=0.099, perspective=BLACK)
 
-        //TODO
-        // 7. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 7. i0h0
+        every { reviewedMove7R.movePlayedEvaluation } returns Evaluation(centipawns=104, winProbability=0.538, drawProbability=0.461, loseProbability=0.001, perspective=RED)
+        every { reviewedMove7R.bestMoveEvaluation } returns Evaluation(centipawns=114, winProbability=0.619, drawProbability=0.38, loseProbability=0.001, perspective=RED)
 
-        //TODO
-        // 7. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 7. ... i9h9
+        every { reviewedMove7B.movePlayedEvaluation } returns Evaluation(centipawns=-112, winProbability=0.001, drawProbability=0.393, loseProbability=0.606, perspective=BLACK)
+        every { reviewedMove7B.bestMoveEvaluation } returns Evaluation(centipawns=-104, winProbability=0.001, drawProbability=0.461, loseProbability=0.538, perspective=BLACK)
 
-        //TODO
-        // 8. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 8. a1f1
+        every { reviewedMove8R.movePlayedEvaluation } returns Evaluation(centipawns=91, winProbability=0.422, drawProbability=0.577, loseProbability=0.001, perspective=RED)
+        every { reviewedMove8R.bestMoveEvaluation } returns Evaluation(centipawns=112, winProbability=0.606, drawProbability=0.393, loseProbability=0.001, perspective=RED)
 
-        //TODO
-        // 8. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 8. ... b9b3
+        every { reviewedMove8B.movePlayedEvaluation } returns Evaluation(centipawns=-99, winProbability=0.001, drawProbability=0.512, loseProbability=0.487, perspective=BLACK)
+        every { reviewedMove8B.bestMoveEvaluation } returns Evaluation(centipawns=-91, winProbability=0.001, drawProbability=0.577, loseProbability=0.422, perspective=BLACK)
 
-        //TODO
-        // 9. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 9. h6g6
+        every { reviewedMove9R.movePlayedEvaluation } returns Evaluation(centipawns=52, winProbability=0.155, drawProbability=0.84, loseProbability=0.005, perspective=RED)
+        every { reviewedMove9R.bestMoveEvaluation } returns Evaluation(centipawns=99, winProbability=0.487, drawProbability=0.512, loseProbability=0.001, perspective=RED)
 
-        //TODO
-        // 9. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 9. ... g7e8
+        every { reviewedMove9B.movePlayedEvaluation } returns Evaluation(centipawns=-1009, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=BLACK)
+        every { reviewedMove9B.bestMoveEvaluation } returns Evaluation(centipawns=-52, winProbability=0.005, drawProbability=0.84, loseProbability=0.155, perspective=BLACK)
 
-        //TODO
-        // 10. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 10. e2e6
+        every { reviewedMove10R.movePlayedEvaluation } returns Evaluation(centipawns=-481, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
+        every { reviewedMove10R.bestMoveEvaluation } returns Evaluation(centipawns=1009, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=RED)
 
-        //TODO
-        // 10. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 10. ... h9h0
+        every { reviewedMove10B.movePlayedEvaluation } returns Evaluation(centipawns=489, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
+        every { reviewedMove10B.bestMoveEvaluation } returns Evaluation(centipawns=481, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
 
-        //TODO
-        // 11. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 11. e6e5
+        every { reviewedMove11R.movePlayedEvaluation } returns Evaluation(centipawns=-568, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
+        every { reviewedMove11R.bestMoveEvaluation } returns Evaluation(centipawns=-489, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
 
-        //TODO
-        // 11. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 11. ... h0h6
+        every { reviewedMove11B.movePlayedEvaluation } returns Evaluation(centipawns=514, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
+        every { reviewedMove11B.bestMoveEvaluation } returns Evaluation(centipawns=568, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
 
-        //TODO
-        // 12. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 12. f0e1
+        every { reviewedMove12R.movePlayedEvaluation } returns Evaluation(centipawns=-686, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
+        every { reviewedMove12R.bestMoveEvaluation } returns Evaluation(centipawns=-514, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
 
-        //TODO
-        // 12. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 12. ... h6g6
+        every { reviewedMove12B.movePlayedEvaluation } returns Evaluation(centipawns=677, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
+        every { reviewedMove12B.bestMoveEvaluation } returns Evaluation(centipawns=686, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
 
-        //TODO
-        // 13. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 13. c2d4
+        every { reviewedMove13R.movePlayedEvaluation } returns Evaluation(centipawns=-716, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
+        every { reviewedMove13R.bestMoveEvaluation } returns Evaluation(centipawns=-677, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
 
-        //TODO
-        // 13. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 13. ... c7e6
+        every { reviewedMove13B.movePlayedEvaluation } returns Evaluation(centipawns=707, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
+        every { reviewedMove13B.bestMoveEvaluation } returns Evaluation(centipawns=716, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
 
-        //TODO
-        // 14. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 14. e0f0
+        every { reviewedMove14R.movePlayedEvaluation } returns Evaluation(centipawns=-759, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
+        every { reviewedMove14R.bestMoveEvaluation } returns Evaluation(centipawns=-707, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=RED)
 
-        //TODO
-        // 14. ... c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 14. ... e7e5
+        every { reviewedMove14B.movePlayedEvaluation } returns Evaluation(centipawns=-9999, winProbability=0.0, drawProbability=0.0, loseProbability=1.0, perspective=BLACK)
+        every { reviewedMove14B.bestMoveEvaluation } returns Evaluation(centipawns=759, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=BLACK)
 
-        //TODO
-        // 15. c3c4
-        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
-        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+        // 15. f1f9
+        every { reviewedMove15R.movePlayedEvaluation } returns Evaluation(centipawns=10000, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=RED)
+        every { reviewedMove15R.bestMoveEvaluation } returns Evaluation(centipawns=9999, winProbability=1.0, drawProbability=0.0, loseProbability=0.0, perspective=RED)
 
     }
     @Test
     fun reviewedGame1Test(){
-        println(reviewedGame)
         val accuracyCalculator = AccuracyCalculator()
         val accuracies = accuracyCalculator.extract(reviewedGame)
         println(accuracies)
