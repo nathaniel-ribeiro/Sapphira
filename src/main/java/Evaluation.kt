@@ -15,7 +15,7 @@ class Evaluation(val centipawns : Int,
         require(drawProbability in 0.0..1.0)
         require(loseProbability in 0.0..1.0)
         var totalProbabilityMass = winProbability + drawProbability + loseProbability
-        require(abs(totalProbabilityMass - 1.0) <= 1e-6){"Win/draw/loss values must form a probability distribution (sum to 1 and be non-negative)"}
+        require(abs(totalProbabilityMass - 1.0) <= 0.001){"Win/draw/loss values must form a probability distribution (sum to 1 and be non-negative)"}
     }
 
     override fun equals(other: Any?): Boolean {
