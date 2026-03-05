@@ -4,8 +4,13 @@ import kotlin.math.exp
 
 class AccuracyCalculator : FeatureProvider {
     fun ReviewedMove.accuracyPercent() : Double {
-        return if(movePlayedEvaluation >= bestMoveEvaluation) 100.0
-        else (103.1668 * exp(-0.04354 * (bestMoveEvaluation.winPercent - movePlayedEvaluation.winPercent)) - 3.1669).coerceIn(1.0..100.0)
+        if(movePlayedEvaluation >= bestMoveEvaluation) {
+            return MAX_ACCURACY_PERCENT
+        }
+        else {
+            val rawAccuracy = 103.1668 * exp(-0.04354 * (bestMoveEvaluation.winPercent - movePlayedEvaluation.winPercent)) - 3.1669
+            return (rawAccuracy + UNCERTAINTY_BONUS).coerceIn(MIN_ACCURACY_PERCENT..MAX_ACCURACY_PERCENT)
+        }
     }
     // TODO: consult Lichess source code for whether accuracies are computed entirely independently for the two colors or if windows include moves for BOTH colors
     override fun extract(reviewedGame: ReviewedGame): Map<String, Double?> {
@@ -49,7 +54,7 @@ class AccuracyCalculator : FeatureProvider {
         val volatilityPerMove = windows.zip(volatilityPerWindow).flatMap {
             (window, volatility) -> List(window.size) { volatility }
         }
-        val accuracyPercents = windows.flatten().map { it.accuracyPercent }
+        val accuracyPercents = windows.flatten().map { it.accuracyPercent() }
         val mean = Mean()
         return mean.evaluate(accuracyPercents.toDoubleArray(), volatilityPerMove.toDoubleArray())
     }
@@ -65,5 +70,8 @@ class AccuracyCalculator : FeatureProvider {
         const val MIN_VOLATILITY = 0.5
         const val MAX_VOLATILITY = 12.0
         const val TARGET_NUM_WINDOWS = 10
+        const val MIN_ACCURACY_PERCENT = 1.0
+        const val MAX_ACCURACY_PERCENT = 100.0
+        const val UNCERTAINTY_BONUS = 1.0
     }
 }
