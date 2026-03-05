@@ -54,7 +54,7 @@ class AccuracyCalculatorTest {
         every { reviewedMove2R.bestMoveEvaluation } returns Evaluation(centipawns=61, winProbability=0.201, drawProbability=0.795, loseProbability=0.004, perspective=RED)
 
         // 2. ... b9c7
-        every { reviewedMove2R.movePlayed } returns Move("b9", "c7", BLACK)
+        every { reviewedMove2B.movePlayed } returns Move("b9", "c7", BLACK)
         every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
         every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
 
