@@ -1,6 +1,8 @@
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.File
+import Alliance.*
 
 class AccuracyCalculatorTest {
     private val game = Game(
@@ -12,66 +14,233 @@ class AccuracyCalculatorTest {
         increment = 0,
         moves = listOf(
             // 1.
-            Move("b2", "e2", Alliance.RED),
-            Move("b7", "e7", Alliance.BLACK),
+            Move("b2", "e2", RED),
+            Move("b7", "e7", BLACK),
             //2.
-            Move("b0", "c2", Alliance.RED),
-            Move("b9", "c7", Alliance.BLACK),
+            Move("b0", "c2", RED),
+            Move("b9", "c7", BLACK),
             // 3.
-            Move("c3", "c4", Alliance.RED),
-            Move("a9", "b9", Alliance.BLACK),
+            Move("c3", "c4", RED),
+            Move("a9", "b9", BLACK),
             // 4.
-            Move("h0", "g2", Alliance.RED),
-            Move("g6", "g5", Alliance.BLACK),
+            Move("h0", "g2", RED),
+            Move("g6", "g5", BLACK),
             // 5.
-            Move("h2", "h6", Alliance.RED),
-            Move("h9", "g7", Alliance.BLACK),
+            Move("h2", "h6", RED),
+            Move("h9", "g7", BLACK),
             // 6.
-            Move("a0", "a1", Alliance.RED),
-            Move("h7", "i7", Alliance.BLACK),
+            Move("a0", "a1", RED),
+            Move("h7", "i7", BLACK),
             // 7.
-            Move("i0", "h0", Alliance.RED),
-            Move("i9", "h9", Alliance.BLACK),
+            Move("i0", "h0", RED),
+            Move("i9", "h9", BLACK),
             // 8.
-            Move("a1", "f1", Alliance.RED),
-            Move("b9", "b3", Alliance.BLACK),
+            Move("a1", "f1", RED),
+            Move("b9", "b3", BLACK),
             // 9.
-            Move("h6", "g6", Alliance.RED),
-            Move("g7", "e8", Alliance.BLACK),
+            Move("h6", "g6", RED),
+            Move("g7", "e8", BLACK),
             // 10.
-            Move("e2", "e6", Alliance.RED),
-            Move("h9", "h0", Alliance.BLACK),
+            Move("e2", "e6", RED),
+            Move("h9", "h0", BLACK),
             // 11.
-            Move("e6", "e5", Alliance.RED),
-            Move("h0", "h6", Alliance.BLACK),
+            Move("e6", "e5", RED),
+            Move("h0", "h6", BLACK),
             // 12.
-            Move("f0", "e1", Alliance.RED),
-            Move("h6", "g6", Alliance.BLACK),
+            Move("f0", "e1", RED),
+            Move("h6", "g6", BLACK),
             // 13.
-            Move("c2", "d4", Alliance.RED),
-            Move("c7", "e6", Alliance.BLACK),
+            Move("c2", "d4", RED),
+            Move("c7", "e6", BLACK),
             // 14.
-            Move("e0", "f0", Alliance.RED),
-            Move("e7", "e5", Alliance.BLACK),
+            Move("e0", "f0", RED),
+            Move("e7", "e5", BLACK),
             // 15.
-            Move("f1", "f9", Alliance.RED),
+            Move("f1", "f9", RED),
         ),
         resultRed = GameResult.WON,
         resultBlack = GameResult.LOST,
         gameResultReason = GameResultReason.CHECKMATE
     )
 
-    private val pikafish = Pikafish(File("/Volumes/External128/tempStorageContents/Kiwi Computing/Xiangqi/Pikafish/src/pikafish"), 15, 1024)
-    private val gameReviewService = GameReviewService(pikafish)
-    private val reviewedGame = gameReviewService.review(game, 1_000_000)
+    private val reviewedGame = mockk<ReviewedGame>()
+    private val reviewedMove1R = mockk<ReviewedMove>()
+    private val reviewedMove1B = mockk<ReviewedMove>()
+    private val reviewedMove2R = mockk<ReviewedMove>()
+    private val reviewedMove2B = mockk<ReviewedMove>()
+    private val reviewedMove3R = mockk<ReviewedMove>()
+    private val reviewedMove3B = mockk<ReviewedMove>()
+    private val reviewedMove4R = mockk<ReviewedMove>()
+    private val reviewedMove4B = mockk<ReviewedMove>()
+    private val reviewedMove5R = mockk<ReviewedMove>()
+    private val reviewedMove5B = mockk<ReviewedMove>()
+    private val reviewedMove6R = mockk<ReviewedMove>()
+    private val reviewedMove6B = mockk<ReviewedMove>()
+    private val reviewedMove7R = mockk<ReviewedMove>()
+    private val reviewedMove7B = mockk<ReviewedMove>()
+    private val reviewedMove8R = mockk<ReviewedMove>()
+    private val reviewedMove8B = mockk<ReviewedMove>()
+    private val reviewedMove9R = mockk<ReviewedMove>()
+    private val reviewedMove9B = mockk<ReviewedMove>()
+    private val reviewedMove10R = mockk<ReviewedMove>()
+    private val reviewedMove10B = mockk<ReviewedMove>()
+    private val reviewedMove11R = mockk<ReviewedMove>()
+    private val reviewedMove11B = mockk<ReviewedMove>()
+    private val reviewedMove12R = mockk<ReviewedMove>()
+    private val reviewedMove12B = mockk<ReviewedMove>()
+    private val reviewedMove13R = mockk<ReviewedMove>()
+    private val reviewedMove13B = mockk<ReviewedMove>()
+    private val reviewedMove14R = mockk<ReviewedMove>()
+    private val reviewedMove14B = mockk<ReviewedMove>()
+    private val reviewedMove15R = mockk<ReviewedMove>()
 
     @BeforeEach
     fun setup(){
-        // TODO: set up mocked win percents and accuracy percents
+        // 1. b2e2
+        every { reviewedMove1R.movePlayedEvaluation } returns Evaluation(centipawns=31, winProbability=0.08, drawProbability=0.91, loseProbability=0.01, perspective= RED)
+        every { reviewedMove1R.bestMoveEvaluation } returns Evaluation(centipawns=46, winProbability=0.132, drawProbability=0.862, loseProbability=0.006, perspective= RED)
+
+        // 1. ... b7e7
+        every { reviewedMove1B.movePlayedEvaluation } returns Evaluation(centipawns=-61, winProbability=0.004, drawProbability=0.795, loseProbability=0.201, perspective= BLACK)
+        every { reviewedMove1B.bestMoveEvaluation } returns Evaluation(centipawns=-31, winProbability=0.01, drawProbability=0.91, loseProbability=0.08, perspective= BLACK)
+
+        // 2. b0c2
+        every { reviewedMove2R.movePlayedEvaluation } returns Evaluation(centipawns=62, winProbability=0.206, drawProbability=0.791, loseProbability=0.003, perspective= RED)
+        every { reviewedMove2R.bestMoveEvaluation } returns Evaluation(centipawns=61, winProbability=0.201, drawProbability=0.795, loseProbability=0.004, perspective=RED)
+
+        // 2. ... b9c7
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 3. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 3. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 4. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 4. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 5. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 5. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 6. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 6. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 7. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 7. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 8. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 8. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 9. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 9. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 10. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 10. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 11. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 11. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 12. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 12. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 13. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 13. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 14. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 14. ... c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
+        //TODO
+        // 15. c3c4
+        every { reviewedMove2B.movePlayedEvaluation } returns Evaluation(centipawns=-65, winProbability=0.003, drawProbability=0.774, loseProbability=0.223, perspective=BLACK)
+        every { reviewedMove2B.bestMoveEvaluation } returns Evaluation(centipawns=-62, winProbability=0.003, drawProbability=0.791, loseProbability=0.206, perspective=BLACK)
+
     }
     @Test
     fun reviewedGame1Test(){
-        println(reviewedGame.reviewedMoves.map { it.moveQuality })
+        println(reviewedGame)
         val accuracyCalculator = AccuracyCalculator()
         val accuracies = accuracyCalculator.extract(reviewedGame)
         println(accuracies)
