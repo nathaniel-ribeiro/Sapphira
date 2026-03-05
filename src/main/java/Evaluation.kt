@@ -7,9 +7,11 @@ class Evaluation(val centipawns : Int,
                  val loseProbability : Double,
                  val perspective : Alliance) : Comparable<Evaluation>{
 
-    val expectedScore = winProbability + 0.5 * drawProbability
+    val expectedScore
+        get() = winProbability + 0.5 * drawProbability
     // formula from https://lichess.org/page/accuracy
-    val winPercent = 50 + 50 * (2 / (1 + exp(-0.00368208 * centipawns)) - 1)
+    val winPercent
+        get() = 50 + 50 * (2 / (1 + exp(-0.00368208 * centipawns)) - 1)
     init {
         require(winProbability in 0.0..1.0)
         require(drawProbability in 0.0..1.0)
