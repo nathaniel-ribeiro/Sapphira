@@ -3,63 +3,11 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import kotlin.math.abs
 
-class FeatureExtractionService {
+class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
 
-    fun getFeatures(reviewedGame: ReviewedGame) : Features{
-        val reviewedMovesRed = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.RED }
-        val reviewedMovesBlack = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == Alliance.BLACK }
-
-        // general features about the game
-        //TODO: probably refactor this, getFeatures is doing a lot
-        val gameTimer = reviewedGame.game.gameTimer
-        val moveTimer = reviewedGame.game.moveTimer
-        val increment = reviewedGame.game.increment
-        val redRating = reviewedGame.game.redPlayer.rating
-        val blackRating = reviewedGame.game.blackPlayer.rating
-        val usernameSimilarity = getUsernameSimilarity(reviewedGame.game.redPlayer.username, reviewedGame.game.blackPlayer.username)
-        val gameLength = reviewedGame.game.moves.size
-
-        // specific features about red/black's behavior and play quality
-        // TODO: probably refactor this, getFeatures is doing a lot
-        val adjustedCPLossRed = getAdjustedCPLoss(reviewedMovesRed)
-        val adjustedCPLossBlack = getAdjustedCPLoss(reviewedMovesBlack)
-        val longestBestOrExcellentStreakRed = getLongestBestOrExcellentStreak(reviewedMovesRed)
-        val longestBestOrExcellentStreakBlack = getLongestBestOrExcellentStreak(reviewedMovesBlack)
-        val blunderRateRed = getBlunderRate(reviewedMovesRed)
-        val blunderRateBlack = getBlunderRate(reviewedMovesBlack)
-        val averageBlunderInterarrivalTimeRed = getAverageBlunderInterarrivalTime(reviewedMovesRed)
-        val averageBlunderInterarrivalTimeBlack = getAverageBlunderInterarrivalTime(reviewedMovesBlack)
-        val accuracyRed = getAccuracy(reviewedMovesRed)
-        val accuracyBlack = getAccuracy(reviewedMovesBlack)
-
-        val evaluationGraph = getEvaluationGraphRedPerspective(reviewedGame.reviewedMoves)
-        val numReversals = getNumReversals(evaluationGraph)
-        val areaUnderTheEvaluationCurve = getAUC(evaluationGraph)
-        val recoveryRateRed = getRecoveryRate(reviewedMovesRed)
-        val recoveryRateBlack = getRecoveryRate(reviewedMovesBlack)
-
-
-        return Features(gameTimer,
-            moveTimer,
-            increment,
-            redRating,
-            blackRating,
-            gameLength,
-            usernameSimilarity,
-            adjustedCPLossRed ?: Double.NaN,
-            adjustedCPLossBlack ?: Double.NaN,
-            longestBestOrExcellentStreakRed,
-            longestBestOrExcellentStreakBlack,
-            blunderRateRed,
-            blunderRateBlack,
-            averageBlunderInterarrivalTimeRed,
-            averageBlunderInterarrivalTimeBlack,
-            numReversals,
-            areaUnderTheEvaluationCurve ?: Double.NaN,
-            recoveryRateRed ?: Double.NaN,
-            recoveryRateBlack ?: Double.NaN,
-            accuracyRed,
-            accuracyBlack)
+    fun getFeatures(reviewedGame: ReviewedGame) : DoubleArray{
+        val allFeatureMaps = featureProviders.map { it.extract(reviewedGame) }
+        TODO()
     }
 
     private fun getAUC(evaluationGraph: List<Evaluation>) : Double? {

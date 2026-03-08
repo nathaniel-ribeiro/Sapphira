@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import Alliance.*
 
-class AccuracyCalculatorTest {
+class AccuracyFeatureExtractorTest {
     private val reviewedGame = mockk<ReviewedGame>()
     private val reviewedMove1R = mockk<ReviewedMove>()
     private val reviewedMove1B = mockk<ReviewedMove>()
@@ -42,11 +42,15 @@ class AccuracyCalculatorTest {
         every { reviewedMove1R.movePlayed } returns Move("b2", "e2", RED)
         every { reviewedMove1R.movePlayedEvaluation } returns Evaluation(centipawns=31, winProbability=0.08, drawProbability=0.91, loseProbability=0.01, perspective= RED)
         every { reviewedMove1R.bestMoveEvaluation } returns Evaluation(centipawns=46, winProbability=0.132, drawProbability=0.862, loseProbability=0.006, perspective= RED)
+        every { reviewedMove1R.movePlayedEvaluation.winPercent } returns 52.85
+        every { reviewedMove1R.bestMoveEvaluation.winPercent } returns 54.22
 
         // 1. ... b7e7
         every { reviewedMove1B.movePlayed } returns Move("b7", "e7", BLACK)
         every { reviewedMove1B.movePlayedEvaluation } returns Evaluation(centipawns=-61, winProbability=0.004, drawProbability=0.795, loseProbability=0.201, perspective= BLACK)
         every { reviewedMove1B.bestMoveEvaluation } returns Evaluation(centipawns=-31, winProbability=0.01, drawProbability=0.91, loseProbability=0.08, perspective= BLACK)
+        every { reviewedMove1B.movePlayedEvaluation.winPercent } returns 44.41
+        every { reviewedMove1B.bestMoveEvaluation.winPercent } returns 47.15
 
         // 2. b0c2
         every { reviewedMove2R.movePlayed } returns Move("b0", "c2", RED)
@@ -201,8 +205,8 @@ class AccuracyCalculatorTest {
     }
     @Test
     fun reviewedGame1Test(){
-        val accuracyCalculator = AccuracyCalculator()
-        val accuracies = accuracyCalculator.extract(reviewedGame)
+        val accuracyFeatureExtractor = AccuracyFeatureExtractor()
+        val accuracies = accuracyFeatureExtractor.extract(reviewedGame)
         println(accuracies)
     }
 }

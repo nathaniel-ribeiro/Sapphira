@@ -2,7 +2,7 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import kotlin.math.exp
 
-class AccuracyCalculator : FeatureProvider {
+class AccuracyFeatureExtractor : IFeatureProvider {
     fun ReviewedMove.accuracyPercent() : Double {
         if(movePlayedEvaluation >= bestMoveEvaluation) {
             return MAX_ACCURACY_PERCENT
@@ -14,13 +14,13 @@ class AccuracyCalculator : FeatureProvider {
     }
 
     override fun extract(reviewedGame: ReviewedGame): Map<String, Double?> {
-        val accuracies = getAccuracy(reviewedGame.reviewedMoves)
+        val accuracies = getRedAndBlackAccuracies(reviewedGame.reviewedMoves)
         val redAccuracy = accuracies.first
         val blackAccuracy = accuracies.second
         return mapOf("Red Accuracy" to redAccuracy, "Black Accuracy" to blackAccuracy)
     }
 
-    fun getAccuracy(reviewedMoves : List<ReviewedMove>) : Pair<Double, Double> {
+    fun getRedAndBlackAccuracies(reviewedMoves : List<ReviewedMove>) : Pair<Double, Double> {
         // TODO: compute accuracy per side, sharing volatility weights and windows
         val windows = window(reviewedMoves)
         val volatilityPerWindow = computeVolatilityPerWindow(windows)

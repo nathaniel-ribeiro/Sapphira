@@ -7,7 +7,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.math.abs
 
-class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMiB : Int = DEFAULT_HASH_SIZE_MIB) {
+class XiangqiEngine(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMiB : Int = DEFAULT_HASH_SIZE_MIB) {
     private val reader: BufferedReader
     private val writer: PrintWriter
 
