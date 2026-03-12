@@ -12,8 +12,7 @@ class GameImportingService {
             val uuid = row["game_uuid"] as String
             val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)
             val blackPlayer = Player(row["black_username"] as String, row["black_is_guest"] as Boolean, row["black_is_banned"] as Boolean, row["black_rating"] as Int)
-            val movesWithThinkTime = this.convertToListOfMoves(row["moves_raw"] as String)
-            val moves = movesWithThinkTime.map { it.first }
+            val moves = this.convertToListOfMoves(row["moves_raw"] as String)
             val gameTimer = row["game_timer"] as Int
             val moveTimer = row["move_timer"] as Int
             val increment = row["increment"] as Int
@@ -32,7 +31,7 @@ class GameImportingService {
      * Assumes that each move is followed by three fractions (possibly all 0 for untimed games) denoting time usage
      * Assumes moves are stored in a comma-delimited list.
      */
-    fun convertToListOfMoves(movesRaw : String) : List<MoveWithThinkTime>{
+    fun convertToListOfMoves(movesRaw : String) : List<Move>{
         val movesListRaw = movesRaw.removePrefix("[")
                                    .removeSuffix("]")
                                    .split(',')
@@ -42,10 +41,11 @@ class GameImportingService {
         return movesListRaw.mapIndexed{ i, moveRaw ->
             val matcher = MOVE_WITH_TIME_USAGE_PATTERN.matcher(moveRaw)
             require(matcher.matches()){"$moveRaw did not match pattern $MOVE_WITH_TIME_USAGE_PATTERN"}
+            // TODO: account for untimed games
             val thinkTime = matcher.group(7).toInt()
-            val moveOneIndexed = OneIndexedMove(matcher.group(1), matcher.group(3), if(i.mod(2) == 0) Alliance.RED else Alliance.BLACK)
+            val moveOneIndexed = OneIndexedMove(matcher.group(1), matcher.group(3), if(i.mod(2) == 0) Alliance.RED else Alliance.BLACK, thinkTime)
             val moveZeroIndexed = moveOneIndexed.toZeroIndexedMove()
-            MoveWithThinkTime(moveZeroIndexed, thinkTime)
+            return@mapIndexed moveZeroIndexed
         }.toList()
     }
     companion object{
