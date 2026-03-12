@@ -52,7 +52,8 @@ class Trainer : CliktCommand() {
             games.mapIndexed { i, game ->
                 async(Dispatchers.Default) {
                     val pikafish = pool.receive()
-                    val reviewed = GameReviewService(pikafish).review(game, nodesToSearchPerMove)
+                    val gameReviewService = GameReviewService(pikafish, MoveAccuracyCalculator(), MoveClassifier())
+                    val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                     pikafish.clear()
                     pool.send(pikafish)
                     return@async reviewed
@@ -93,8 +94,9 @@ class Server : CliktCommand() {
                     val pikafish = pool.receive()
                     try {
                         val game = call.receive<Game>()
-                        val reviewedGame = GameReviewService(pikafish).review(game, nodesToSearchPerMove)
-                        val data = featureService.getFeatures(reviewedGame)
+                        val gameReviewService = GameReviewService(pikafish, MoveAccuracyCalculator(), MoveClassifier())
+                        val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
+                        val data = featureService.getFeatures(reviewed)
                         val score = model.predict(arrayOf(data)).firstOrNull() ?: Double.NaN
 
                         call.respond(mapOf("status" to "success", "anomaly_score" to score))
