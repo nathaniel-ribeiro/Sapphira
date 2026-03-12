@@ -34,7 +34,9 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         send("uci")
         send("setoption name Threads value $numThreads")
         send("setoption name Hash value $hashSizeMiB")
-        send("setoption name UCI_ShowWDL value true")
+        // NOTE: this option is only present for the stable release version of Pikafish (downloaded from Pikafish website/Baidu)!
+        // Preview versions (compiled off GitHub source code) will not recognize this option!
+        send("setoption name ScoreType value PawnValueNormalized")
         readyUp()
         send("ucinewgame")
     }
@@ -94,8 +96,6 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
     fun evaluate(board: Board, nodesToSearch : Int): Evaluation {
         val won = if(board.whoseTurn == Alliance.RED) Evaluation.RED_WON else Evaluation.BLACK_WON
         val lost = if(board.whoseTurn == Alliance.RED) Evaluation.RED_LOST else Evaluation.BLACK_LOST
-        val draw = if(board.whoseTurn == Alliance.RED) Evaluation.RED_DRAW else Evaluation.BLACK_DRAW
-
         send("position fen ${board.fen}")
         send("go nodes $nodesToSearch")
         lateinit var evaluation : Evaluation
@@ -108,23 +108,11 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                 val centipawns : Int
                 if (checkmateSoon) {
                     val pliesTilMateUnnormalized = matcher.group(2).toInt()
-                    val pliesTilMate = abs(pliesTilMateUnnormalized)
                     val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
-                    // prefer haste if we are checkmating, prefer stalling if we are getting checkmated
-                    centipawns = if (checkmating) won.centipawns - pliesTilMate else lost.centipawns + pliesTilMate
+                    centipawns = if (checkmating) won.centipawns else lost.centipawns
                 }
                 else centipawns = matcher.group(2).toInt()
-                try{
-                    // the wdl groups will be missing if the game is already over (goes to catch block)
-                    val winProbability = matcher.group(4).toDouble() / 1000.0
-                    val drawProbability = matcher.group(5).toDouble() / 1000.0
-                    val loseProbability = matcher.group(6).toDouble() / 1000.0
-                    evaluation = Evaluation(centipawns, winProbability, drawProbability, loseProbability, board.whoseTurn)
-                }
-                catch (_ : Exception){
-                    // extreme case where the game is already over
-                    evaluation = if(centipawns > 0) won else if(centipawns == 0) draw else lost
-                }
+                evaluation = Evaluation(centipawns, board.whoseTurn)
             }
         }
         return evaluation
@@ -157,10 +145,10 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
     }
 
     companion object {
-        private const val MIN_THREADS = 1
-        private const val MAX_THREADS = 1024
-        private const val MIN_HASH_SIZE_MIB = 1
-        private const val MAX_HASH_SIZE_MIB = 33554432
+        const val MIN_THREADS = 1
+        const val MAX_THREADS = 1024
+        const val MIN_HASH_SIZE_MIB = 1
+        const val MAX_HASH_SIZE_MIB = 33554432
 
         const val DEFAULT_THREADS = 1
         const val DEFAULT_HASH_SIZE_MIB = 16
@@ -168,7 +156,6 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
         private val LEGAL_MOVE_PATTERN: Pattern = Pattern.compile("([a-i]\\d)([a-i]\\d): 1")
-        // if one side is already checkmated/stalemated, the WDL will not show, even if the show wdl option has been sent
-        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+)( wdl (\\d+) (\\d+) (\\d+))?.*")
+        private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+).*")
     }
 }
