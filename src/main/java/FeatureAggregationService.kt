@@ -10,15 +10,15 @@ class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
         TODO()
     }
 
-    private fun getAUC(evaluationGraph: List<Evaluation>) : Double? {
-        if (evaluationGraph.size < 5) return null
-        val x = DoubleArray(evaluationGraph.size) { it.toDouble() }
-        val y = DoubleArray(evaluationGraph.size) { evaluationGraph[it].expectedScore }
-        val interpolator = SplineInterpolator()
-        val spline = interpolator.interpolate(x, y)
-        val integrator = SimpsonIntegrator()
-        return integrator.integrate(10_000, spline, x.first(), x.last())
-    }
+//    private fun getAUC(evaluationGraph: List<Evaluation>) : Double? {
+//        if (evaluationGraph.size < 5) return null
+//        val x = DoubleArray(evaluationGraph.size) { it.toDouble() }
+//        val y = DoubleArray(evaluationGraph.size) { evaluationGraph[it].expectedScore }
+//        val interpolator = SplineInterpolator()
+//        val spline = interpolator.interpolate(x, y)
+//        val integrator = SimpsonIntegrator()
+//        return integrator.integrate(10_000, spline, x.first(), x.last())
+//    }
 
     private fun getEvaluationGraphRedPerspective(reviewedMoves: List<ReviewedMove>) : List<Evaluation> {
         val evaluationGraphRedPerspective = reviewedMoves
@@ -64,23 +64,23 @@ class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
         return jwSimilarity.apply(redUsername, blackUsername)
     }
 
-    private fun getAdjustedCPLoss(reviewedMovesForAlliance : List<ReviewedMove>) : Double?{
-        val adjustedAllianceMoves = reviewedMovesForAlliance
-            .filterIndexed { index, _ ->  index >= NUMBER_OF_TURNS_TO_EXCLUDE}
-            .filter {
-                abs(it.bestMoveEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS &&
-                        abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
-            }
-            .filter {
-                it.bestMoveEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                        it.bestMoveEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                        it.movePlayedEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                        it.movePlayedEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY
-            }
-
-        if(adjustedAllianceMoves.isEmpty()) return null
-        return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
-    }
+//    private fun getAdjustedCPLoss(reviewedMovesForAlliance : List<ReviewedMove>) : Double?{
+//        val adjustedAllianceMoves = reviewedMovesForAlliance
+//            .filterIndexed { index, _ ->  index >= NUMBER_OF_TURNS_TO_EXCLUDE}
+//            .filter {
+//                abs(it.bestMoveEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS &&
+//                        abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
+//            }
+//            .filter {
+//                it.bestMoveEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+//                        it.bestMoveEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+//                        it.movePlayedEvaluation.winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
+//                        it.movePlayedEvaluation.flip().winProbability <= WINNING_ADVANTAGE_WIN_PROBABILITY
+//            }
+//
+//        if(adjustedAllianceMoves.isEmpty()) return null
+//        return adjustedAllianceMoves.map(ReviewedMove::centipawnLoss).average()
+//    }
 
     private fun getLongestBestOrExcellentStreak(reviewedMovesForAlliance: List<ReviewedMove>) : Int {
         val streakQualities = setOf(MoveQuality.BEST, MoveQuality.EXCELLENT)
