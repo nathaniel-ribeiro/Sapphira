@@ -1,14 +1,14 @@
-class GameReviewService(val xiangqiEngine: XiangqiEngine) {
+class GameReviewService(val pikafish: Pikafish) {
     fun review(game: Game, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
         if(nodesToSearchPerMove < 1) throw IllegalArgumentException()
         var curBoard = Board.STARTING_BOARD
-        val reviewedMoves = ArrayList<ReviewedMove>()
+        val reviewedMoves = mutableListOf<ReviewedMove>()
         for((i, move) in game.moves.withIndex()){
             val bestMoveEvaluation =
-                if(i == 0) xiangqiEngine.evaluate(curBoard, nodesToSearchPerMove)
+                if(i == 0) pikafish.evaluate(curBoard, nodesToSearchPerMove)
                 else reviewedMoves.map(ReviewedMove::movePlayedEvaluation)[i-1].flip()
-            curBoard = xiangqiEngine.makeMove(curBoard, move)
-            val movePlayedEvaluation = xiangqiEngine.evaluate(curBoard, nodesToSearchPerMove).flip()
+            curBoard = pikafish.makeMove(curBoard, move)
+            val movePlayedEvaluation = pikafish.evaluate(curBoard, nodesToSearchPerMove).flip()
             reviewedMoves.add(ReviewedMove(move, movePlayedEvaluation, bestMoveEvaluation))
         }
         return ReviewedGame(game, reviewedMoves)

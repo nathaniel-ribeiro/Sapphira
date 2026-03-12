@@ -8,6 +8,7 @@ class AccuracyFeatureExtractor : IFeatureProvider {
             return MAX_ACCURACY_PERCENT
         }
         else {
+            //TODO: change back
             val rawAccuracy = 103.1668 * exp(-0.04354 * (bestMoveEvaluation.winPercent - movePlayedEvaluation.winPercent)) - 3.1669
             return (rawAccuracy + UNCERTAINTY_BONUS).coerceIn(MIN_ACCURACY_PERCENT..MAX_ACCURACY_PERCENT)
         }
@@ -66,6 +67,7 @@ class AccuracyFeatureExtractor : IFeatureProvider {
     }
 
     companion object{
+        //TODO: clip win% to 10 - 90%
         const val MIN_WINDOW_SIZE = 2
         const val MAX_WINDOW_SIZE = 8
         const val MIN_VOLATILITY = 0.5
@@ -73,6 +75,6 @@ class AccuracyFeatureExtractor : IFeatureProvider {
         const val TARGET_NUM_WINDOWS = 10
         const val MIN_ACCURACY_PERCENT = 1.0
         const val MAX_ACCURACY_PERCENT = 100.0
-        const val UNCERTAINTY_BONUS = 1.0
+        const val UNCERTAINTY_BONUS = 0.0
     }
 }

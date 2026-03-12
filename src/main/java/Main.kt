@@ -23,6 +23,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
+val FEATURE_PROVIDERS = listOf(
+    GameInfoFeatureExtractor(),
+    AccuracyFeatureExtractor()
+)
+
 class Sapphira : CliktCommand() {
     override fun run() = Unit
 }
@@ -31,16 +36,16 @@ class Trainer : CliktCommand() {
     val csvFilePath by argument("--data", help="Path to the CSV file of user games to train on. Must be formatted like the data sample!").file()
     val pikafishExecutable by argument("--exe", help="Path to Pikafish executable.").file()
     val pikafishPoolSize by option("--pool", help="Number of concurrent Pikafish instances that will be used for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(1)
-    val numThreads by option("--threads", help="Number of threads for EACH Pikafish instance in the pool.").int().default(XiangqiEngine.DEFAULT_THREADS)
-    val hashSizeMiB by option("--hash", help="Hash table size in MiB for EACH Pikafish instance in the pool.").int().default(XiangqiEngine.DEFAULT_HASH_SIZE_MIB)
+    val numThreads by option("--threads", help="Number of threads for EACH Pikafish instance in the pool.").int().default(Pikafish.DEFAULT_THREADS)
+    val hashSizeMiB by option("--hash", help="Hash table size in MiB for EACH Pikafish instance in the pool.").int().default(Pikafish.DEFAULT_HASH_SIZE_MIB)
     val nodesToSearchPerMove by option("--nodes", help="Minimum number of leaf nodes to search in each position for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
 
     override fun run() {
         val games = GameImportingService().importFromCSV(csvFilePath)
             .filter { !it.blackPlayer.isGuest && !it.redPlayer.isGuest }
 
-        val pool = Channel<XiangqiEngine>(pikafishPoolSize).apply {
-            repeat(pikafishPoolSize) { runBlocking{ send(XiangqiEngine(pikafishExecutable, numThreads, hashSizeMiB)) }}
+        val pool = Channel<Pikafish>(pikafishPoolSize).apply {
+            repeat(pikafishPoolSize) { runBlocking{ send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
         }
 
         val allReviewedGames = runBlocking {
@@ -55,9 +60,8 @@ class Trainer : CliktCommand() {
             }.awaitAll()
         }
 
-        val encoder = Encoder()
-        val featureService = FeatureAggregationService()
-        val data = allReviewedGames.map { encoder.encode(featureService.getFeatures(it)) }.toTypedArray()
+        val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
+        val data = allReviewedGames.map { featureService.getFeatures(it) }.toTypedArray()
         val screeningModel = ScreeningModel().fit(data)
         File("model.json").writeText(screeningModel.toJson())
     }
@@ -67,19 +71,18 @@ class Server : CliktCommand() {
     val pikafishExecutable by argument("--exe", help="Path to Pikafish executable.").file()
     val modelFile by argument("--model", help="Path to pretrained screening model. Run the trainer first if you don't have a model yet").file()
     val pikafishPoolSize by option("--pool", help="Number of concurrent Pikafish instances that will be used for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(1)
-    val numThreads by option("--threads", help="Number of threads for EACH Pikafish instance in the pool.").int().default(XiangqiEngine.DEFAULT_THREADS)
-    val hashSizeMiB by option("--hash", help="Hash table size in MiB for EACH Pikafish instance in the pool.").int().default(XiangqiEngine.DEFAULT_HASH_SIZE_MIB)
+    val numThreads by option("--threads", help="Number of threads for EACH Pikafish instance in the pool.").int().default(Pikafish.DEFAULT_THREADS)
+    val hashSizeMiB by option("--hash", help="Hash table size in MiB for EACH Pikafish instance in the pool.").int().default(Pikafish.DEFAULT_HASH_SIZE_MIB)
     val nodesToSearchPerMove by option("--nodes", help="Minimum number of leaf nodes to search in each position for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
     val port by option("--port", help="What port the webservice should use.").int().default(8080)
 
     override fun run() {
-        val pool = Channel<XiangqiEngine>(pikafishPoolSize).apply {
-            repeat(pikafishPoolSize) { runBlocking { send(XiangqiEngine(pikafishExecutable, numThreads, hashSizeMiB)) }}
+        val pool = Channel<Pikafish>(pikafishPoolSize).apply {
+            repeat(pikafishPoolSize) { runBlocking { send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
         }
 
         val model = ScreeningModel.fromJson(modelFile.readText())
-        val featureService = FeatureAggregationService()
-        val encoder = Encoder()
+        val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
 
         embeddedServer(Netty, port = port) {
             install(ContentNegotiation) {
@@ -91,8 +94,8 @@ class Server : CliktCommand() {
                     try {
                         val game = call.receive<Game>()
                         val reviewedGame = GameReviewService(pikafish).review(game, nodesToSearchPerMove)
-                        val encoded = encoder.encode(featureService.getFeatures(reviewedGame))
-                        val score = model.predict(arrayOf(encoded)).firstOrNull() ?: 0.0
+                        val data = featureService.getFeatures(reviewedGame)
+                        val score = model.predict(arrayOf(data)).firstOrNull() ?: Double.NaN
 
                         call.respond(mapOf("status" to "success", "anomaly_score" to score))
                     } catch (e: Exception) {
