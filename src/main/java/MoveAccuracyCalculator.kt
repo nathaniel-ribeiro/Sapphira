@@ -7,6 +7,6 @@ class MoveAccuracyCalculator {
         return rawAccuracy.coerceAtLeast(MIN_MOVE_ACCURACY)
     }
     companion object {
-        const val MIN_MOVE_ACCURACY = 30.0
+        const val MIN_MOVE_ACCURACY = 1.0
     }
 }
