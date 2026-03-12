@@ -70,7 +70,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         if (!b) throw RuntimeException()
         val srcSquare = matcher.group(1)
         val destSquare = matcher.group(2)
-        return Move(srcSquare, destSquare, board.whoseTurn)
+        return Move(srcSquare, destSquare, board.whoseTurn, null)
     }
 
     fun makeMove(board: Board, move: Move): Board {
