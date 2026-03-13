@@ -63,8 +63,10 @@ class GameplayConsistencyProvider : IFeatureProvider {
         val gameEnd = moveQualities.size
         // NOTE: forcing a pseudo-blunder at the end is not statistically rigorous but ensures we have
         // *some* lower bound on blunder rates for players who didn't blunder at all during their game
-        val willPseudoBlunderIncreaseAverage = blunderMoveNumbers.max() <= (moveQualities.size / 2)
-        val timeline = listOf(gameStart) + blunderMoveNumbers + (if(willPseudoBlunderIncreaseAverage) listOf(gameEnd) else emptyList())
+        val willPseudoBlunderIncreaseAverage = blunderMoveNumbers.isEmpty() || blunderMoveNumbers.max() <= moveQualities.size / 2
+        val timeline = if(willPseudoBlunderIncreaseAverage) listOf(gameStart) + blunderMoveNumbers + listOf(gameEnd)
+                       else listOf(gameStart) + blunderMoveNumbers
+
         return timeline.zipWithNext { a, b -> b - a }.average()
     }
 
