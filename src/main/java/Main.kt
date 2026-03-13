@@ -24,8 +24,8 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 val FEATURE_PROVIDERS = listOf(
-    GameInfoFeatureExtractor(),
-    GameAccuracyFeatureExtractor()
+    GameInfoProvider(),
+    GameAccuracyProvider()
 )
 
 class Sapphira : CliktCommand() {

@@ -1,7 +1,7 @@
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.math3.stat.descriptive.rank.Median
 
-class ClockUsageFeatureExtractor : IFeatureProvider {
+class TimeUsageProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame, alliance : Alliance): Map<String, Double?> {
         val thinkTimes = reviewedGame.reviewedMoves.map { it.movePlayed }.filter { it.whoMoved == alliance }.map { it.thinkTime }
         val thinkTimeMedian = median(thinkTimes)

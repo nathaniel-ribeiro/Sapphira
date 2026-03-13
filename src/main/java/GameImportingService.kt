@@ -3,7 +3,6 @@ import org.jetbrains.kotlinx.dataframe.io.readCsv
 import java.io.File
 import java.util.regex.Pattern
 
-typealias MoveWithThinkTime = Pair<Move, Int>
 class GameImportingService {
     fun importFromCSV(csvFilePath : File) : List<Game>{
         val df = DataFrame.readCsv(csvFilePath)

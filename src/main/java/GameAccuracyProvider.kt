@@ -1,4 +1,4 @@
-class GameAccuracyFeatureExtractor : IFeatureProvider {
+class GameAccuracyProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame, alliance : Alliance): Map<String, Double?> {
         val movesForAlliance = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
         // NOTE: a simple average is used here for legacy/compatibility reasons with Xiangqi.com's source code.

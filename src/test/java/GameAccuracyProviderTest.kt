@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import Alliance.*
 
-class GameAccuracyFeatureExtractorTest {
+class GameAccuracyProviderTest {
     private val reviewedGame = mockk<ReviewedGame>()
     private val reviewedMove1R = mockk<ReviewedMove>()
     private val reviewedMove1B = mockk<ReviewedMove>()
@@ -201,8 +201,8 @@ class GameAccuracyFeatureExtractorTest {
     }
     @Test
     fun reviewedGame1Test(){
-        val gameAccuracyFeatureExtractor = GameAccuracyFeatureExtractor()
-        val accuracies = gameAccuracyFeatureExtractor.extract(reviewedGame)
+        val gameAccuracyProvider = GameAccuracyProvider()
+        val accuracies = gameAccuracyProvider.extract(reviewedGame)
         println(accuracies)
     }
 }

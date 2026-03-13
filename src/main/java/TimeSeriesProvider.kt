@@ -4,7 +4,7 @@ import java.util.PriorityQueue
 import kotlin.math.abs
 import kotlin.math.pow
 
-class TimeSeriesFeatureExtractor : IFeatureProvider {
+class TimeSeriesProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame): Map<String, Double?> {
         TODO("Not yet implemented")
     }

@@ -1,4 +1,4 @@
-class GameInfoFeatureExtractor : IFeatureProvider {
+class GameInfoProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame, alliance : Alliance): Map<String, Double?> {
         val player = if(alliance == Alliance.RED) reviewedGame.game.redPlayer else reviewedGame.game.blackPlayer
         return mapOf(
