@@ -2,7 +2,7 @@ class GameReviewService(val pikafish: Pikafish,
                         val moveAccuracyCalculator: MoveAccuracyCalculator,
                         val moveClassifier: MoveClassifier) {
     fun review(game: Game, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
-        if(nodesToSearchPerMove < 1) throw IllegalArgumentException()
+        if(nodesToSearchPerMove < MIN_NODES_TO_SEARCH_PER_MOVE) throw IllegalArgumentException()
         var curBoard = Board.STARTING_BOARD
         val reviewedMoves = mutableListOf<ReviewedMove>()
         for((i, move) in game.moves.withIndex()){
@@ -17,5 +17,6 @@ class GameReviewService(val pikafish: Pikafish,
     }
     companion object{
         const val DEFAULT_NODES_TO_SEARCH_PER_MOVE = 3_500_000
+        const val MIN_NODES_TO_SEARCH_PER_MOVE = 1
     }
 }
