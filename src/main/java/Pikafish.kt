@@ -123,14 +123,14 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         // It is NOT a command guaranteed by the UCI protocol.
         // For compatibility with other UCI engines, this code should be changed.
         send("go perft 1")
-        val moves = ArrayList<Move>()
+        val moves = mutableListOf<Move>()
         var line: String
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
             if (line.contains("Nodes searched")) break
             if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn, null))
         }
-        return ImmutableList.copyOf(moves)
+        return moves
     }
 
     private fun readyUp(){
