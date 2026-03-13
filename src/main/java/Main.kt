@@ -25,7 +25,9 @@ import java.io.File
 
 val FEATURE_PROVIDERS = listOf(
     GameInfoProvider(),
-    GameAccuracyProvider()
+    GameAccuracyProvider(),
+    GameplayConsistencyProvider(),
+    TimeUsageProvider()
 )
 
 class Sapphira : CliktCommand() {
