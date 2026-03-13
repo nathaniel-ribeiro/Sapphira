@@ -202,7 +202,9 @@ class GameAccuracyProviderTest {
     @Test
     fun reviewedGame1Test(){
         val gameAccuracyProvider = GameAccuracyProvider()
-        val accuracies = gameAccuracyProvider.extract(reviewedGame)
-        println(accuracies)
+        val redAccuracy = gameAccuracyProvider.extract(reviewedGame, RED)
+        val blackAccuracy = gameAccuracyProvider.extract(reviewedGame, BLACK)
+        println(redAccuracy)
+        println(blackAccuracy)
     }
 }
