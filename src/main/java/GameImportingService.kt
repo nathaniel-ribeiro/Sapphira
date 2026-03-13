@@ -40,7 +40,7 @@ class GameImportingService {
         return movesListRaw.mapIndexed{ i, moveRaw ->
             val matcher = MOVE_WITH_TIME_USAGE_PATTERN.matcher(moveRaw)
             require(matcher.matches()){"$moveRaw did not match pattern $MOVE_WITH_TIME_USAGE_PATTERN"}
-            val isUntimedGame = matcher.group(5).toInt() == 0 && matcher.group(6).toInt() == 0 && matcher.group(7).toInt() == 0
+            val isUntimedGame = matcher.group(5) == "0" && matcher.group(6) == "0" && matcher.group(7) == "0"
             val thinkTime = if(isUntimedGame) null else matcher.group(7).toInt()
             val moveOneIndexed = if(isUntimedGame) OneIndexedMove(matcher.group(1), matcher.group(3), if(i.mod(2) == 0) Alliance.RED else Alliance.BLACK)
                                  else OneIndexedMove(matcher.group(1), matcher.group(3), if(i.mod(2) == 0) Alliance.RED else Alliance.BLACK, thinkTime)
