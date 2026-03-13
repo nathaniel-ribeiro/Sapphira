@@ -5,7 +5,6 @@ import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.math.abs
 
 class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMiB : Int = DEFAULT_HASH_SIZE_MIB) {
     private val reader: BufferedReader
@@ -108,8 +107,8 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                 val centipawns : Int
                 if (checkmateSoon) {
                     val pliesTilMateUnnormalized = matcher.group(2).toInt()
-                    val checkmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
-                    centipawns = if (checkmating) won.centipawns else lost.centipawns
+                    val isSideToMoveCheckmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
+                    centipawns = if (isSideToMoveCheckmating) won.centipawns else lost.centipawns
                 }
                 else centipawns = matcher.group(2).toInt()
                 evaluation = Evaluation(centipawns, board.whoseTurn)
@@ -129,7 +128,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
             if (line.contains("Nodes searched")) break
-            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn))
+            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn, null))
         }
         return ImmutableList.copyOf(moves)
     }
