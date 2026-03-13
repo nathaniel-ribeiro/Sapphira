@@ -1,6 +1,6 @@
 import java.util.regex.Pattern
 
-class OneIndexedMove(val srcSquare : String, val destSquare : String, val whoMoved : Alliance, val timeSpent : Int?) {
+class OneIndexedMove(val srcSquare : String, val destSquare : String, val whoMoved : Alliance, val timeSpent : Int? = null) {
     init {
         //NOTE: this is a necessary but insufficient check for legal moves
         require(SQUARE_PATTERN.matcher(srcSquare).matches())

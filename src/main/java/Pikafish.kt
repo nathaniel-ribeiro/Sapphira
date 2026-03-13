@@ -69,7 +69,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         if (!b) throw RuntimeException()
         val srcSquare = matcher.group(1)
         val destSquare = matcher.group(2)
-        return Move(srcSquare, destSquare, board.whoseTurn, null)
+        return Move(srcSquare, destSquare, board.whoseTurn)
     }
 
     fun makeMove(board: Board, move: Move): Board {
@@ -128,7 +128,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         while ((reader.readLine().also { line = it }) != null) {
             val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
             if (line.contains("Nodes searched")) break
-            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn, null))
+            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn))
         }
         return moves
     }
