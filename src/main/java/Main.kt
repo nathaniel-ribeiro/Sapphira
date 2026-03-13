@@ -62,7 +62,9 @@ class Trainer : CliktCommand() {
         }
 
         val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
-        val data = allReviewedGames.map { featureService.getFeatures(it) }.toTypedArray()
+        val redData = allReviewedGames.map { featureService.getFeatures(it, Alliance.RED) }.toTypedArray()
+        val blackData = allReviewedGames.map { featureService.getFeatures(it, Alliance.BLACK) }.toTypedArray()
+        val data = redData.plus(blackData)
         val screeningModel = ScreeningModel().fit(data)
         File("model.json").writeText(screeningModel.toJson())
     }
@@ -96,10 +98,13 @@ class Server : CliktCommand() {
                         val game = call.receive<Game>()
                         val gameReviewService = GameReviewService(pikafish, MoveAccuracyCalculator(), MoveClassifier())
                         val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
-                        val data = featureService.getFeatures(reviewed)
-                        val score = model.predict(arrayOf(data)).firstOrNull() ?: Double.NaN
+                        val redData = featureService.getFeatures(reviewed, Alliance.RED)
+                        val blackData = featureService.getFeatures(reviewed, Alliance.BLACK)
 
-                        call.respond(mapOf("status" to "success", "anomaly_score" to score))
+                        val redAnomalyScore = model.predict(arrayOf(redData))
+                        val blackAnomalyScore = model.predict(arrayOf(blackData))
+
+                        call.respond(mapOf("status" to "success", "red_anomaly_score" to redAnomalyScore, "black_anomaly_score" to blackAnomalyScore))
                     } catch (e: Exception) {
                         call.respond(mapOf("status" to "failure", "message" to (e.message ?: "Server Error")))
                     } finally {

@@ -5,8 +5,8 @@ import kotlin.math.abs
 
 class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
 
-    fun getFeatures(reviewedGame: ReviewedGame) : DoubleArray{
-        val allFeatureMaps = featureProviders.map { it.extract(reviewedGame) }
+    fun getFeatures(reviewedGame: ReviewedGame, alliance: Alliance) : DoubleArray{
+        val allFeatureMaps = featureProviders.map { it.extract(reviewedGame, alliance) }
         TODO()
     }
 

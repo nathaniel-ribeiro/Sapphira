@@ -1,3 +1,3 @@
 interface IFeatureProvider {
-    fun extract(reviewedGame : ReviewedGame) : Map<String, Double?>
+    fun extract(reviewedGame : ReviewedGame, alliance : Alliance) : Map<String, Double?>
 }
