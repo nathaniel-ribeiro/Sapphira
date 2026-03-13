@@ -40,10 +40,10 @@ class GameplayConsistencyProvider : IFeatureProvider {
                 abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
             }
             .filter {
-                it.bestMoveEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                it.bestMoveEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                it.movePlayedEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PROBABILITY &&
-                it.movePlayedEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PROBABILITY
+                it.bestMoveEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
+                it.bestMoveEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
+                it.movePlayedEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
+                it.movePlayedEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT
             }
 
         if(adjustedAllianceMoves.isEmpty()) return null
@@ -83,6 +83,6 @@ class GameplayConsistencyProvider : IFeatureProvider {
     companion object{
         const val NUMBER_OF_TURNS_TO_EXCLUDE = 7
         const val WINNING_ADVANTAGE_CENTIPAWNS = 300
-        const val WINNING_ADVANTAGE_WIN_PROBABILITY = 0.90
+        const val WINNING_ADVANTAGE_WIN_PERCENT = 90.0
     }
 }
