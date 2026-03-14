@@ -8,12 +8,14 @@ class GameplayConsistencyProvider : IFeatureProvider {
         val blunderRate = getBlunderRate(reviewedMovesForAlliance)
         val averageBlunderInterArrivalTime = getAverageBlunderInterarrivalTime(reviewedMovesForAlliance)
         val longestStreakBestOrExcellentPastOpening = getLongestStreakBestOrExcellentPastOpening(reviewedMovesForAlliance)
+        val evaluationAfterOpening = evaluationAfterOpening(reviewedMovesForAlliance)
         return mapOf(
             "Recovery Rate" to recoveryRate,
             "Adjusted Centipawn Loss" to adjustedCPLoss,
             "Blunder Rate" to blunderRate,
             "Average Blunder Inter-Arrival Time" to averageBlunderInterArrivalTime,
             "Longest Streak of Best/Excellent Moves Past Opening" to longestStreakBestOrExcellentPastOpening.toDouble(),
+            "Evaluation After Opening" to evaluationAfterOpening?.toDouble()
         )
     }
 
@@ -80,6 +82,11 @@ class GameplayConsistencyProvider : IFeatureProvider {
             .joinToString("")
             .split(" ")
             .maxOfOrNull { it.length } ?: 0
+    }
+
+    private fun evaluationAfterOpening(reviewedMovesForAlliance: List<ReviewedMove>) : Int? {
+        if(reviewedMovesForAlliance.size <= NUMBER_OF_TURNS_TO_EXCLUDE) return null
+        return reviewedMovesForAlliance[NUMBER_OF_TURNS_TO_EXCLUDE].bestMoveEvaluation.centipawns
     }
 
     companion object{
