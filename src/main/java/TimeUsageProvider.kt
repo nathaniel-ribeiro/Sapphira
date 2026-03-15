@@ -44,4 +44,10 @@ class TimeUsageProvider : IFeatureProvider {
         val numOutliers = valuesWithoutNulls.count { it !in tukeyFenceLowerBound..tukeyFenceUpperBound }
         return numOutliers / valuesWithoutNulls.size.toDouble()
     }
+
+    private fun accuracyOfLongestThink(reviewedMovesForAlliance : List<ReviewedMove>) : Double? {
+        val thinkTimes = reviewedMovesForAlliance.map { it.movePlayed.thinkTime }
+        if (thinkTimes.all { it == null }) return null
+        return reviewedMovesForAlliance.maxByOrNull { it.movePlayed.thinkTime ?: Int.MIN_VALUE }?.moveAccuracy
+    }
 }
