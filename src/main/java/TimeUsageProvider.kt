@@ -14,11 +14,14 @@ class TimeUsageProvider : IFeatureProvider {
         }
         @Suppress("UNCHECKED_CAST")
         val thinkTimesNonNull = reviewedMovesForAlliance.map { it.movePlayed.thinkTime } as List<Int>
+        @Suppress("UNCHECKED_CAST")
+        val moveAccuraciesWithThinkTimes = reviewedMovesForAlliance.map { Pair(it.moveAccuracy, it.movePlayed.thinkTime) } as List<Pair<Double, Int>>
+
         val median = getMedian(thinkTimesNonNull)
         val interquartileRange = getInterQuartileRange(thinkTimesNonNull)
         val outlierFraction = getOutlierFraction(thinkTimesNonNull)
         val moveNumberOfLongestThink = getMoveNumberOfLongestThink(thinkTimesNonNull)
-        val accuracyOfLongestThink = getAccuracyOfLongestThink(reviewedMovesForAlliance)
+        val accuracyOfLongestThink = getAccuracyOfLongestThink(moveAccuraciesWithThinkTimes)
 
         return mapOf(
             "Think Time Median" to median,
@@ -56,9 +59,8 @@ class TimeUsageProvider : IFeatureProvider {
         return numOutliers / values.size.toDouble()
     }
 
-    private fun getAccuracyOfLongestThink(reviewedMovesForAlliance : List<ReviewedMove>) : Double? {
-        val thinkTimes = reviewedMovesForAlliance.map { it.movePlayed.thinkTime }
-        return reviewedMovesForAlliance.maxByOrNull { it.movePlayed.thinkTime ?: Int.MIN_VALUE }?.moveAccuracy
+    private fun getAccuracyOfLongestThink(moveAccuraciesWithThinkTimes : List<Pair<Double, Int>>) : Double {
+        return moveAccuraciesWithThinkTimes.maxBy { it.second }.first
     }
 
     private fun getMoveNumberOfLongestThink(thinkTimes : List<Int>) : Int {
