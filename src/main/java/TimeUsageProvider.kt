@@ -3,8 +3,7 @@ import org.apache.commons.math3.stat.descriptive.rank.Median
 
 class TimeUsageProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame, alliance : Alliance): Map<String, Double?> {
-        val reviewedMovesForAlliance = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
-        if (reviewedMovesForAlliance.any { it.movePlayed.thinkTime == null }){
+        if (reviewedGame.game.isUntimed){
             return mapOf(
                 "Think Time Median" to null,
                 "Think Time IQR" to null,
@@ -12,6 +11,8 @@ class TimeUsageProvider : IFeatureProvider {
                 "Move Number of Longest Think" to null
             )
         }
+
+        val reviewedMovesForAlliance = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
         @Suppress("UNCHECKED_CAST")
         val thinkTimesNonNull = reviewedMovesForAlliance.map { it.movePlayed.thinkTime } as List<Int>
         @Suppress("UNCHECKED_CAST")

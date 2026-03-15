@@ -49,7 +49,7 @@ class Trainer : CliktCommand() {
         games = games.filter { trainingDataCleaningService.shouldRetain(it) }
         val newTrainingDataCount = games.size
 
-        println("Training data pruned from $oldTrainingDataCount examples to $newTrainingDataCount")
+        println("Training data pruned from $oldTrainingDataCount examples to $newTrainingDataCount examples")
 
         val pool = Channel<Pikafish>(pikafishPoolSize).apply {
             repeat(pikafishPoolSize) { runBlocking{ send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
@@ -108,8 +108,8 @@ class Server : CliktCommand() {
                         val redData = featureService.getFeatures(reviewed, Alliance.RED)
                         val blackData = featureService.getFeatures(reviewed, Alliance.BLACK)
 
-                        val redAnomalyScore = model.predict(arrayOf(redData))
-                        val blackAnomalyScore = model.predict(arrayOf(blackData))
+                        val redAnomalyScore = model.predict(arrayOf(redData)).first()
+                        val blackAnomalyScore = model.predict(arrayOf(blackData)).first()
 
                         call.respond(mapOf("status" to "success", "red_anomaly_score" to redAnomalyScore, "black_anomaly_score" to blackAnomalyScore))
                     } catch (e: Exception) {

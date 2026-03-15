@@ -11,9 +11,12 @@ data class Game(
     val gameResultReason: GameResultReason
 )
 {
+    val isUntimed
+        get() = moves.map { it.thinkTime }.all { it == null }
     init{
         require(gameTimer > 0)
         require(moveTimer > 0)
         require(increment >= 0)
+        require(moves.all { it.thinkTime != null } || moves.all { it.thinkTime == null })
     }
 }
