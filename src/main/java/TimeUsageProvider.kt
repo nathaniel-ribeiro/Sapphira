@@ -3,51 +3,65 @@ import org.apache.commons.math3.stat.descriptive.rank.Median
 
 class TimeUsageProvider : IFeatureProvider {
     override fun extract(reviewedGame: ReviewedGame, alliance : Alliance): Map<String, Double?> {
-        val thinkTimes = reviewedGame.reviewedMoves.map { it.movePlayed }.filter { it.whoMoved == alliance }.map { it.thinkTime }
-        val thinkTimeMedian = median(thinkTimes)
-        val thinkTimeIQR = iqr(thinkTimes)
-        val thinkTimeOutlierFraction = outlierFraction(thinkTimes)
+        val reviewedMovesForAlliance = reviewedGame.reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
+        if (reviewedMovesForAlliance.any { it.movePlayed.thinkTime == null }){
+            return mapOf(
+                "Think Time Median" to null,
+                "Think Time IQR" to null,
+                "Think Time Outlier Fraction" to null,
+                "Move Number of Longest Think" to null
+            )
+        }
+        @Suppress("UNCHECKED_CAST")
+        val thinkTimesNonNull = reviewedMovesForAlliance.map { it.movePlayed.thinkTime } as List<Int>
+        val median = getMedian(thinkTimesNonNull)
+        val interquartileRange = getInterQuartileRange(thinkTimesNonNull)
+        val outlierFraction = getOutlierFraction(thinkTimesNonNull)
+        val moveNumberOfLongestThink = getMoveNumberOfLongestThink(thinkTimesNonNull)
+        val accuracyOfLongestThink = getAccuracyOfLongestThink(reviewedMovesForAlliance)
 
         return mapOf(
-            "Think Time Median" to thinkTimeMedian,
-            "Think Time IQR" to thinkTimeIQR,
-            "Think Time Outlier Fraction" to thinkTimeOutlierFraction,
+            "Think Time Median" to median,
+            "Think Time IQR" to interquartileRange,
+            "Think Time Outlier Fraction" to outlierFraction,
+            "Move Number of Longest Think" to moveNumberOfLongestThink.toDouble(),
+            "Accuracy of Longest Think" to accuracyOfLongestThink
         )
     }
 
-    private fun median(values : List<Int?>) : Double? {
-        if(values.any { it == null }) return null
+    private fun getMedian(thinkTimes : List<Int>) : Double {
         val median = Median()
-        val valuesWithoutNulls = values.filterNotNull().map { it.toDouble() }.toDoubleArray()
+        val valuesWithoutNulls = thinkTimes.map { it.toDouble() }.toDoubleArray()
         return median.evaluate(valuesWithoutNulls)
     }
 
-    private fun iqr(values : List<Int?>) : Double? {
-        if(values.any { it == null }) return null
-        val valuesWithoutNulls = values.filterNotNull().map { it.toDouble() }.toDoubleArray()
-        val descriptiveStatistics = DescriptiveStatistics(valuesWithoutNulls)
+    private fun getInterQuartileRange(thinkTimes : List<Int>) : Double {
+        val values = thinkTimes.map { it.toDouble() }.toDoubleArray()
+        val descriptiveStatistics = DescriptiveStatistics(values)
         val q3 = descriptiveStatistics.getPercentile(75.0)
         val q1 = descriptiveStatistics.getPercentile(25.0)
         val iqr = q3 - q1
         return iqr
     }
 
-    private fun outlierFraction(values : List<Int?>) : Double? {
-        if(values.all { it == null }) return null
-        val valuesWithoutNulls = values.filterNotNull().map { it.toDouble() }.toDoubleArray()
-        val descriptiveStatistics = DescriptiveStatistics(valuesWithoutNulls)
+    private fun getOutlierFraction(thinkTimes : List<Int>) : Double {
+        val values = thinkTimes.map { it.toDouble() }.toDoubleArray()
+        val descriptiveStatistics = DescriptiveStatistics(values)
         val q3 = descriptiveStatistics.getPercentile(75.0)
         val q1 = descriptiveStatistics.getPercentile(25.0)
         val iqr = q3 - q1
         val tukeyFenceLowerBound = q1 - 1.5 * iqr
         val tukeyFenceUpperBound = q3 + 1.5 * iqr
-        val numOutliers = valuesWithoutNulls.count { it !in tukeyFenceLowerBound..tukeyFenceUpperBound }
-        return numOutliers / valuesWithoutNulls.size.toDouble()
+        val numOutliers = values.count { it !in tukeyFenceLowerBound..tukeyFenceUpperBound }
+        return numOutliers / values.size.toDouble()
     }
 
-    private fun accuracyOfLongestThink(reviewedMovesForAlliance : List<ReviewedMove>) : Double? {
+    private fun getAccuracyOfLongestThink(reviewedMovesForAlliance : List<ReviewedMove>) : Double? {
         val thinkTimes = reviewedMovesForAlliance.map { it.movePlayed.thinkTime }
-        if (thinkTimes.all { it == null }) return null
         return reviewedMovesForAlliance.maxByOrNull { it.movePlayed.thinkTime ?: Int.MIN_VALUE }?.moveAccuracy
+    }
+
+    private fun getMoveNumberOfLongestThink(thinkTimes : List<Int>) : Int {
+        return thinkTimes.indices.maxBy { thinkTimes[it] } + 1
     }
 }
