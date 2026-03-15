@@ -43,8 +43,13 @@ class Trainer : CliktCommand() {
     val nodesToSearchPerMove by option("--nodes", help="Minimum number of leaf nodes to search in each position for analysis.").int().restrictTo(1..Int.MAX_VALUE).default(GameReviewService.DEFAULT_NODES_TO_SEARCH_PER_MOVE)
 
     override fun run() {
-        val games = GameImportingService().importFromCSV(csvFilePath)
-            .filter { !it.blackPlayer.isGuest && !it.redPlayer.isGuest }
+        var games = GameImportingService().importFromCSV(csvFilePath)
+        val oldTrainingDataCount = games.size
+        val trainingDataCleaningService = TrainingDataCleaningService()
+        games = games.filter { trainingDataCleaningService.shouldRetain(it) }
+        val newTrainingDataCount = games.size
+
+        println("Training data pruned from $oldTrainingDataCount examples to $newTrainingDataCount")
 
         val pool = Channel<Pikafish>(pikafishPoolSize).apply {
             repeat(pikafishPoolSize) { runBlocking{ send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
