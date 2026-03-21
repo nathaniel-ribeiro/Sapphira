@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.core.StreamReadConstraints
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -9,6 +10,11 @@ import smile.data.DataFrame
 import smile.feature.imputation.SimpleImputer
 
 val mapper: ObjectMapper = jacksonObjectMapper().apply {
+    factory.setStreamReadConstraints(
+        StreamReadConstraints.builder()
+            .maxStringLength(Int.MAX_VALUE)
+            .build()
+    )
     registerModule(com.fasterxml.jackson.module.paramnames.ParameterNamesModule())
     enable(SerializationFeature.INDENT_OUTPUT)
 }
