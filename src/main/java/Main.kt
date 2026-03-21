@@ -55,7 +55,7 @@ class Trainer : CliktCommand() {
             repeat(pikafishPoolSize) { runBlocking{ send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
         }
 
-        val allReviewedGames = runBlocking {
+        val reviewedGames = runBlocking {
             games.mapIndexed { i, game ->
                 async(Dispatchers.Default) {
                     val pikafish = pool.receive()
@@ -63,15 +63,21 @@ class Trainer : CliktCommand() {
                     val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                     pikafish.clear()
                     pool.send(pikafish)
+                    if (i.mod(100) == 0) println("Finished processing game #$i of $newTrainingDataCount")
                     return@async reviewed
                 }
             }.awaitAll()
         }
 
         val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
-        val redData = allReviewedGames.map { featureService.getFeatures(it, Alliance.RED) }.toTypedArray()
-        val blackData = allReviewedGames.map { featureService.getFeatures(it, Alliance.BLACK) }.toTypedArray()
+        val redData = reviewedGames.map { featureService.getFeatures(it, Alliance.RED) }.toTypedArray()
+        val blackData = reviewedGames.map { featureService.getFeatures(it, Alliance.BLACK) }.toTypedArray()
         val data = redData.plus(blackData)
+
+        val dataExportService = DataExportService()
+        val headers = featureService.getFeatureNames()
+        dataExportService.saveToCsv("processed_training_data.csv", headers, data)
+
         val screeningModel = ScreeningModel().fit(data)
         File("model.json").writeText(screeningModel.toJson())
     }

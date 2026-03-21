@@ -33,6 +33,10 @@ class TimeUsageProvider : IFeatureProvider {
         )
     }
 
+    override fun getFeatureNames(): List<String> {
+        return listOf("Think Time Median", "Think Time IQR", "Think Time Outlier Fraction", "Move Number of Longest Think", "Accuracy of Longest Think")
+    }
+
     private fun getMedian(thinkTimes : List<Int>) : Double {
         val median = Median()
         val valuesWithoutNulls = thinkTimes.map { it.toDouble() }.toDoubleArray()

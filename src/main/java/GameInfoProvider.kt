@@ -9,4 +9,8 @@ class GameInfoProvider : IFeatureProvider {
             "Increment" to reviewedGame.game.increment.toDouble()
         )
     }
+
+    override fun getFeatureNames(): List<String> {
+        return listOf("Game Length", "Rating", "Game Timer", "Move Timer", "Increment")
+    }
 }

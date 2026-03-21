@@ -6,4 +6,8 @@ class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
             .map { it ?: Double.NaN }
             .toDoubleArray()
     }
+
+    fun getFeatureNames() : List<String> {
+        return featureProviders.flatMap { it.getFeatureNames() }
+    }
 }

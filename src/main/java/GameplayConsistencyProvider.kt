@@ -19,6 +19,11 @@ class GameplayConsistencyProvider : IFeatureProvider {
         )
     }
 
+    override fun getFeatureNames(): List<String> {
+        return listOf("Recovery Rate", "Adjusted Centipawn Loss", "Blunder Rate", "Average Blunder Inter-Arrival Time",
+                        "Longest Streak of Best/Excellent Moves Past Opening", "Evaluation After Opening")
+    }
+
     private fun getRecoveryRate(reviewedMovesForAlliance: List<ReviewedMove>) : Double? {
         // what fraction of the time was a MISTAKE or BLUNDER followed by the BEST or an EXCELLENT move?
         if(reviewedMovesForAlliance.size < 2) return null

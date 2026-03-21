@@ -6,4 +6,8 @@ class GameAccuracyProvider : IFeatureProvider {
         val accuracy = movesForAlliance.map { it.moveAccuracy }.average()
         return mapOf("Accuracy" to accuracy)
     }
+
+    override fun getFeatureNames(): List<String> {
+        return listOf("Accuracy")
+    }
 }
