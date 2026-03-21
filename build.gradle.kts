@@ -20,8 +20,7 @@ dependencies {
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:dataframe:1.0.0-Beta4")
-    // downgraded to be compatible with Java 17
-    implementation("com.github.haifengl:smile-core:3.1.1")
+    implementation("com.github.haifengl:smile-core:5.2.1")
     implementation("org.apache.commons:commons-text:1.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.github.ajalt.clikt:clikt:5.0.1")
@@ -52,7 +51,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 val compileKotlin: KotlinCompile by tasks

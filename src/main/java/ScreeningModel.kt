@@ -33,7 +33,9 @@ class ScreeningModel(
         val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
         val fittedImputer = SimpleImputer.fit(df)
         val imputedData = fittedImputer.apply(df).toArray()
-        val fittedForest = IsolationForest.fit(imputedData)
+        val computedSubsamplingRate = TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()
+        val options = IsolationForest.Options(N_TREES, MAX_DEPTH, computedSubsamplingRate, EXTENSION_LEVEL)
+        val fittedForest = IsolationForest.fit(imputedData, options)
         return ScreeningModel(fittedImputer, fittedForest, true)
     }
 
@@ -51,5 +53,9 @@ class ScreeningModel(
 
     companion object{
         fun fromJson(json : String) : ScreeningModel = mapper.readValue(json)
+        const val N_TREES = 100
+        const val MAX_DEPTH = Int.MAX_VALUE
+        const val TARGET_NUM_TRAINING_SAMPLES_PER_TREE = 256
+        const val EXTENSION_LEVEL = 0
     }
 }
