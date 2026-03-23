@@ -23,13 +23,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
-val FEATURE_PROVIDERS = listOf(
-    GameInfoProvider(),
-    GameAccuracyProvider(),
-    GameplayConsistencyProvider(),
-    TimeUsageProvider()
-)
-
 class Sapphira : CliktCommand() {
     override fun run() = Unit
 }
@@ -69,7 +62,7 @@ class Trainer : CliktCommand() {
             }.awaitAll()
         }
 
-        val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
+        val featureService = FeatureAggregationService(Feature.entries)
         val redData = reviewedGames.map { featureService.getFeatures(it, Alliance.RED) }.toTypedArray()
         val blackData = reviewedGames.map { featureService.getFeatures(it, Alliance.BLACK) }.toTypedArray()
         val data = redData.plus(blackData)
@@ -98,7 +91,7 @@ class Server : CliktCommand() {
         }
 
         val model = ScreeningModel.fromJson(modelFile.readText())
-        val featureService = FeatureAggregationService(FEATURE_PROVIDERS)
+        val featureService = FeatureAggregationService(Feature.entries)
 
         embeddedServer(Netty, port = port) {
             install(ContentNegotiation) {

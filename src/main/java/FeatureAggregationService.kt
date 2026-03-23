@@ -1,13 +1,12 @@
-class FeatureAggregationService(val featureProviders : List<IFeatureProvider>) {
+class FeatureAggregationService(val features: List<Feature>) {
     fun getFeatures(reviewedGame: ReviewedGame, alliance: Alliance) : DoubleArray{
-        return featureProviders
-            .map { it.extract(reviewedGame, alliance) }
-            .flatMap { it.values }
-            .map { it ?: Double.NaN }
+        return features
+            .map { it.calculate(reviewedGame, alliance) }
+            .map { it?.toDouble() ?: Double.NaN }
             .toDoubleArray()
     }
 
     fun getFeatureNames() : List<String> {
-        return featureProviders.flatMap { it.getFeatureNames() }
+        return features.map { it.name }
     }
 }

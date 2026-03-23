@@ -1,8 +1,7 @@
-import kotlin.math.abs
 import kotlin.math.exp
 
-class Evaluation(val centipawns : Int,
-                 val perspective : Alliance) : Comparable<Evaluation>{
+class Evaluation (private val _centipawnsRaw : Int,
+                  val perspective : Alliance) : Comparable<Evaluation>{
 
     // formula from https://lichess.org/page/accuracy, modified for the inherent dynamism of Xiangqi
     val winPercent : Double
@@ -10,6 +9,8 @@ class Evaluation(val centipawns : Int,
             val rawWinPercent = 50 + 50 * (2 / (1 + exp(-0.0011 * centipawns)) - 1)
             return rawWinPercent.coerceIn(MIN_WIN_PERCENT..MAX_WIN_PERCENT)
         }
+
+    val centipawns : Int get() = _centipawnsRaw.coerceIn(-1 * MAX_CENTIPAWNS..MAX_CENTIPAWNS)
 
     override fun equals(other: Any?): Boolean {
         if(this === other) return true

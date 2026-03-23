@@ -1,3 +1,3 @@
 interface IFeature {
-    fun extract(reviewedGame : ReviewedGame, alliance : Alliance) : Double?
+    fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Number?
 }
