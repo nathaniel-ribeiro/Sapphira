@@ -28,10 +28,6 @@ class Evaluation(val centipawns : Int,
         return Evaluation(-1 * centipawns, perspective.flip())
     }
 
-    fun toPawns() : Double{
-        return this.centipawns / 100.0
-    }
-
     override fun toString(): String {
         return "Evaluation(centipawns=$centipawns, perspective=$perspective)"
     }
@@ -41,12 +37,13 @@ class Evaluation(val centipawns : Int,
     }
 
     companion object{
-        val RED_LOST = Evaluation(-2_000, Alliance.RED)
+        val RED_LOST = Evaluation(-MAX_CENTIPAWNS, Alliance.RED)
         val RED_DRAW = Evaluation(0, Alliance.RED)
-        val RED_WON = Evaluation(2_000, Alliance.RED)
+        val RED_WON = Evaluation(MAX_CENTIPAWNS, Alliance.RED)
         val BLACK_LOST = RED_WON.flip()
         val BLACK_DRAW = RED_DRAW.flip()
         val BLACK_WON = RED_LOST.flip()
+        const val MAX_CENTIPAWNS = 2_000
         const val MIN_WIN_PERCENT = 9.97505
         const val MAX_WIN_PERCENT = 90.02495
     }
