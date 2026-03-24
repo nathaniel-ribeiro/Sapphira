@@ -33,7 +33,7 @@ class ScreeningModel(
         val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
         val fittedImputer = SimpleImputer.fit(df)
         val imputedData = fittedImputer.apply(df).toArray()
-        val computedSubsamplingRate = (TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()).coerceIn(0.0..1.00)
+        val computedSubsamplingRate = (TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()).coerceIn(MIN_SAMPLING_RATE..MAX_SAMPLING_RATE)
         val options = IsolationForest.Options(N_TREES, MAX_DEPTH, computedSubsamplingRate, EXTENSION_LEVEL)
         val fittedForest = IsolationForest.fit(imputedData, options)
         return ScreeningModel(fittedImputer, fittedForest, true)
@@ -57,5 +57,7 @@ class ScreeningModel(
         const val MAX_DEPTH = Int.MAX_VALUE
         const val TARGET_NUM_TRAINING_SAMPLES_PER_TREE = 256
         const val EXTENSION_LEVEL = 0
+        const val MIN_SAMPLING_RATE = 1e-6
+        const val MAX_SAMPLING_RATE = 1.0 - MIN_SAMPLING_RATE
     }
 }
