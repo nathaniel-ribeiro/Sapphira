@@ -52,7 +52,7 @@ class Trainer : CliktCommand() {
             games.mapIndexed { i, game ->
                 async(Dispatchers.Default) {
                     val pikafish = pool.receive()
-                    val gameReviewService = GameReviewService(pikafish, MoveAccuracyCalculator(), MoveClassifier())
+                    val gameReviewService = GameReviewService(pikafish)
                     val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                     pikafish.clear()
                     pool.send(pikafish)
@@ -102,7 +102,7 @@ class Server : CliktCommand() {
                     val pikafish = pool.receive()
                     try {
                         val game = call.receive<Game>()
-                        val gameReviewService = GameReviewService(pikafish, MoveAccuracyCalculator(), MoveClassifier())
+                        val gameReviewService = GameReviewService(pikafish)
                         val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                         val redData = featureService.getFeatures(reviewed, Alliance.RED)
                         val blackData = featureService.getFeatures(reviewed, Alliance.BLACK)

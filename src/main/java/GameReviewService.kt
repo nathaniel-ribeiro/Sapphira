@@ -1,6 +1,4 @@
-class GameReviewService(val pikafish: Pikafish,
-                        val moveAccuracyCalculator: MoveAccuracyCalculator,
-                        val moveClassifier: MoveClassifier) {
+class GameReviewService(val pikafish: Pikafish) {
     fun review(game: Game, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
         if(nodesToSearchPerMove < MIN_NODES_TO_SEARCH_PER_MOVE) throw IllegalArgumentException()
         var curBoard = Board.STARTING_BOARD
@@ -11,7 +9,7 @@ class GameReviewService(val pikafish: Pikafish,
                 else reviewedMoves.map(ReviewedMove::movePlayedEvaluation)[i-1].flip()
             curBoard = pikafish.makeMove(curBoard, move)
             val movePlayedEvaluation = pikafish.evaluate(curBoard, nodesToSearchPerMove).flip()
-            reviewedMoves.add(ReviewedMove(move, movePlayedEvaluation, bestMoveEvaluation, moveAccuracyCalculator, moveClassifier))
+            reviewedMoves.add(ReviewedMove(move, movePlayedEvaluation, bestMoveEvaluation))
         }
         return ReviewedGame(game, reviewedMoves)
     }

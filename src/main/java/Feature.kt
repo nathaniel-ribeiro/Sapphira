@@ -28,13 +28,13 @@ enum class Feature : IFeature {
                 .filterIndexed { index, _ ->  index >= NUM_OPENING_FULL_MOVES}
                 .filter {
                     abs(it.bestMoveEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS &&
-                            abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
+                    abs(it.movePlayedEvaluation.centipawns) <= WINNING_ADVANTAGE_CENTIPAWNS
                 }
                 .filter {
                     it.bestMoveEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
-                            it.bestMoveEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
-                            it.movePlayedEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
-                            it.movePlayedEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT
+                    it.bestMoveEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
+                    it.movePlayedEvaluation.winPercent <= WINNING_ADVANTAGE_WIN_PERCENT &&
+                    it.movePlayedEvaluation.flip().winPercent <= WINNING_ADVANTAGE_WIN_PERCENT
                 }
 
             if(adjustedAllianceMoves.isEmpty()) return null
