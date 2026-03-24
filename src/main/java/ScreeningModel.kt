@@ -8,6 +8,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import smile.anomaly.IsolationForest
 import smile.data.DataFrame
 import smile.feature.imputation.SimpleImputer
+import kotlin.math.ceil
+import kotlin.math.log2
+import kotlin.math.min
 
 val mapper: ObjectMapper = jacksonObjectMapper().apply {
     factory.setStreamReadConstraints(
@@ -34,7 +37,8 @@ class ScreeningModel(
         val fittedImputer = SimpleImputer.fit(df)
         val imputedData = fittedImputer.apply(df).toArray()
         val computedSubsamplingRate = (TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()).coerceIn(MIN_SAMPLING_RATE..MAX_SAMPLING_RATE)
-        val options = IsolationForest.Options(N_TREES, MAX_DEPTH, computedSubsamplingRate, EXTENSION_LEVEL)
+        val maxDepth = ceil(log2(min(TARGET_NUM_TRAINING_SAMPLES_PER_TREE, data.size).toDouble())).toInt()
+        val options = IsolationForest.Options(N_TREES, maxDepth, computedSubsamplingRate, EXTENSION_LEVEL)
         val fittedForest = IsolationForest.fit(imputedData, options)
         return ScreeningModel(fittedImputer, fittedForest, true)
     }
@@ -54,7 +58,6 @@ class ScreeningModel(
     companion object{
         fun fromJson(json : String) : ScreeningModel = mapper.readValue(json)
         const val N_TREES = 100
-        const val MAX_DEPTH = Int.MAX_VALUE
         const val TARGET_NUM_TRAINING_SAMPLES_PER_TREE = 256
         const val EXTENSION_LEVEL = 0
         const val MIN_SAMPLING_RATE = 1e-6
