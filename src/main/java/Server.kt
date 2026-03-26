@@ -16,6 +16,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class Server : CliktCommand() {
     val pikafishExecutable by argument("--exe", help="Path to Pikafish executable.").file()
@@ -53,12 +55,16 @@ class Server : CliktCommand() {
 
                         call.respond(mapOf("status" to "success", "red_anomaly_score" to redAnomalyScore, "black_anomaly_score" to blackAnomalyScore))
                     } catch (e: Exception) {
-                        call.respond(mapOf("status" to "failure", "message" to (e.message ?: "Server Error")))
+                        log.log(Level.SEVERE, e.message)
+                        call.respond(mapOf("status" to "failure", "message" to "Internal Server Error"))
                     } finally {
                         pool.send(pikafish)
                     }
                 }
             }
         }.start(wait = true)
+    }
+    companion object {
+        val log : Logger = Logger.getLogger(this::class.java.simpleName)
     }
 }

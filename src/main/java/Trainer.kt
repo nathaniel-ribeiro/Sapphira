@@ -11,6 +11,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class Trainer : CliktCommand() {
     val csvFilePath by argument("--data", help="Path to the CSV file of user games to train on. Must be formatted like the data sample!").file()
@@ -27,7 +29,7 @@ class Trainer : CliktCommand() {
         games = games.filter { trainingDataCleaningService.shouldRetain(it) }
         val newTrainingDataCount = games.size
 
-        println("Training data pruned from $oldTrainingDataCount examples to $newTrainingDataCount examples")
+        log.log(Level.INFO, "Training data pruned from $oldTrainingDataCount examples to $newTrainingDataCount examples")
 
         val pool = Channel<Pikafish>(pikafishPoolSize).apply {
             repeat(pikafishPoolSize) { runBlocking{ send(Pikafish(pikafishExecutable, numThreads, hashSizeMiB)) }}
@@ -41,7 +43,7 @@ class Trainer : CliktCommand() {
                     val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                     pikafish.clear()
                     pool.send(pikafish)
-                    if (i.mod(100) == 0) println("Finished processing game #$i of $newTrainingDataCount")
+                    log.log(Level.FINEST, "Finished processing game #$i of $newTrainingDataCount")
                     return@async reviewed
                 }
             }.awaitAll()
@@ -55,8 +57,13 @@ class Trainer : CliktCommand() {
         val dataExportService = DataExportService()
         val headers = featureService.getFeatureNames()
         dataExportService.saveToCsv("processed_training_data.csv", headers, data)
+        log.log(Level.INFO, "Saved training data as CSV")
 
         val screeningModel = ScreeningModel().fit(data)
         File("model.json").writeText(screeningModel.toJson())
+        log.log(Level.INFO, "Saved trained screening model to JSON file")
+    }
+    companion object {
+        val log : Logger = Logger.getLogger(this::class.java.simpleName)
     }
 }
