@@ -1,15 +1,9 @@
 import kotlin.math.exp
 
-class Evaluation (private val _centipawnsRaw : Int,
-                  val perspective : Alliance) : Comparable<Evaluation>{
+class Evaluation (private val _centipawnsRaw : Int, val perspective : Alliance){
 
     // formula from https://lichess.org/page/accuracy, modified for the inherent dynamism of Xiangqi
-    val winPercent : Double
-        get() {
-            val rawWinPercent = 50 + 50 * (2 / (1 + exp(-0.0011 * centipawns)) - 1)
-            return rawWinPercent.coerceIn(MIN_WIN_PERCENT..MAX_WIN_PERCENT)
-        }
-
+    val winPercent : Double get() = 50 + 50 * (2 / (1 + exp(-0.0011 * centipawns)) - 1)
     val centipawns : Int get() = _centipawnsRaw.coerceIn(-1 * MAX_CENTIPAWNS..MAX_CENTIPAWNS)
 
     override fun equals(other: Any?): Boolean {
@@ -33,19 +27,11 @@ class Evaluation (private val _centipawnsRaw : Int,
         return "Evaluation(centipawns=$centipawns, perspective=$perspective)"
     }
 
-    override fun compareTo(other: Evaluation): Int {
-        return centipawns.compareTo(other.centipawns)
-    }
-
     companion object{
         val RED_LOST = Evaluation(-MAX_CENTIPAWNS, Alliance.RED)
-        val RED_DRAW = Evaluation(0, Alliance.RED)
         val RED_WON = Evaluation(MAX_CENTIPAWNS, Alliance.RED)
         val BLACK_LOST = RED_WON.flip()
-        val BLACK_DRAW = RED_DRAW.flip()
         val BLACK_WON = RED_LOST.flip()
         const val MAX_CENTIPAWNS = 2_000
-        const val MIN_WIN_PERCENT = 9.97505
-        const val MAX_WIN_PERCENT = 90.02495
     }
 }
