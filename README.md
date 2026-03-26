@@ -29,7 +29,7 @@ This project seeks to strike down duplicitous players just as Ananias and Sapphi
 Online Xiangqi differs from OTB Xiangqi in that players can play *themselves* with throw-away/alt/elevator accounts in order to artificially boost their ELO. 
 Sapphira detects these accounts using text similarity metrics, which should be sufficient to catch most such accounts.
 ### Platform-agnostic. 
-Sapphira and all its dependencies are written in pure Java and Kotlin, meaning it can be run on any platform with a JRE supporting Java 17+ 
+Sapphira and all its dependencies are written in pure Java and Kotlin, meaning it can be run on any platform with a JRE supporting Java 25+ 
 (Windows, Mac, Linux, and many more!). Building from source requires the full JDK, but you can run a fat JAR with just the JRE.
 ### Compatible with top-rated Xiangqi engine Pikafish.
 Since Sapphira is NOT a Xiangqi engine, it offloads the task of evaluating positions and understanding the game's logic 
