@@ -93,8 +93,6 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
     }
 
     fun evaluate(board: Board, nodesToSearch : Int): Evaluation {
-        val won = if(board.whoseTurn == Alliance.RED) Evaluation.RED_WON else Evaluation.BLACK_WON
-        val lost = if(board.whoseTurn == Alliance.RED) Evaluation.RED_LOST else Evaluation.BLACK_LOST
         send("position fen ${board.fen}")
         send("go nodes $nodesToSearch")
         lateinit var evaluation : Evaluation
@@ -108,6 +106,8 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                 if (checkmateSoon) {
                     val pliesTilMateUnnormalized = matcher.group(2).toInt()
                     val isSideToMoveCheckmating = matcher.group(1) == "mate" && (pliesTilMateUnnormalized > 0)
+                    val won = if(board.whoseTurn == Alliance.RED) Evaluation.RED_WON else Evaluation.BLACK_WON
+                    val lost = if(board.whoseTurn == Alliance.RED) Evaluation.RED_LOST else Evaluation.BLACK_LOST
                     centipawns = if (isSideToMoveCheckmating) won.centipawns else lost.centipawns
                 }
                 else centipawns = matcher.group(2).toInt()
