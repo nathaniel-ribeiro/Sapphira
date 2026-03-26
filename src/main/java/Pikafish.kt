@@ -1,4 +1,3 @@
-import com.google.common.collect.ImmutableList
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -60,18 +59,6 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
     }
 
-    fun getBestMove(board: Board, nodesToSearch: Int): Move {
-        send("position fen ${board.fen}")
-        send("go nodes $nodesToSearch")
-        val bestMoveLine = waitForResponseContaining("bestmove")
-        val matcher: Matcher = BEST_MOVE_PATTERN.matcher(bestMoveLine)
-        val b = matcher.matches()
-        if (!b) throw RuntimeException()
-        val srcSquare = matcher.group(1)
-        val destSquare = matcher.group(2)
-        return Move(srcSquare, destSquare, board.whoseTurn)
-    }
-
     fun makeMove(board: Board, move: Move): Board {
         return makeMoves(board, listOf(move))
     }
@@ -117,22 +104,6 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         return evaluation
     }
 
-    fun getLegalMoves(board: Board): List<Move> {
-        send("position fen ${board.fen}")
-        // NOTE: this is a Stockfish/Pikafish specific command to display the board/get the final FEN.
-        // It is NOT a command guaranteed by the UCI protocol.
-        // For compatibility with other UCI engines, this code should be changed.
-        send("go perft 1")
-        val moves = mutableListOf<Move>()
-        var line: String
-        while ((reader.readLine().also { line = it }) != null) {
-            val matcher: Matcher = LEGAL_MOVE_PATTERN.matcher(line)
-            if (line.contains("Nodes searched")) break
-            if (matcher.matches()) moves.add(Move(matcher.group(1), matcher.group(2), board.whoseTurn))
-        }
-        return moves
-    }
-
     private fun readyUp(){
         send("isready")
         waitForResponseContaining("readyok")
@@ -152,9 +123,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
         const val DEFAULT_THREADS = 1
         const val DEFAULT_HASH_SIZE_MIB = 16
 
-        private val BEST_MOVE_PATTERN: Pattern = Pattern.compile("bestmove ([a-i]\\d)([a-i]\\d)(?:\\s+.*)?")
         private val FEN_EXTRACTOR_PATTERN: Pattern = Pattern.compile("Fen: (.+)")
-        private val LEGAL_MOVE_PATTERN: Pattern = Pattern.compile("([a-i]\\d)([a-i]\\d): 1")
         private val EVALUATION_PATTERN: Pattern = Pattern.compile(".*score (mate|cp) (-?\\d+).*")
     }
 }
