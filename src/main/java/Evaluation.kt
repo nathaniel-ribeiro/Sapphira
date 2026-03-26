@@ -9,8 +9,10 @@ class Evaluation (private val _centipawnsRaw : Int, val perspective : Alliance){
     override fun equals(other: Any?): Boolean {
         if(this === other) return true
         if(other !is Evaluation) return false
-        return this.centipawns == other.centipawns &&
-                this.perspective == other.perspective
+        val perspectiveCorrectedOtherEvaluation = if(other.perspective != this.perspective) other.flip() else other
+
+        return this.centipawns == perspectiveCorrectedOtherEvaluation.centipawns &&
+                this.perspective == perspectiveCorrectedOtherEvaluation.perspective
     }
 
     override fun hashCode(): Int {

@@ -43,8 +43,24 @@ class EvaluationTest {
     }
 
     @Test
-    fun comparison_evaluation_test() {
-        val evaluation1 = Evaluation()
+    fun equivalent_evaluation2_test(){
+        val evaluation1 = Evaluation(-2_000, Alliance.RED)
+        val evaluation2 = Evaluation(-9_999, Alliance.RED)
+        assert(evaluation1 == evaluation2)
+    }
+
+    @Test
+    fun same_centipawns_different_perspective_test(){
+        val evaluation1 = Evaluation(38, Alliance.RED)
+        val evaluation2 = Evaluation(38, Alliance.BLACK)
+        assert(evaluation1 != evaluation2)
+    }
+
+    @Test
+    fun equivalent_evaluations_different_perspective_test(){
+        val evaluation1 = Evaluation(38, Alliance.RED)
+        val evaluation2 = Evaluation(-38, Alliance.BLACK)
+        assert(evaluation1 == evaluation2)
     }
 
     private fun isClose(a : Double, b : Double) : Boolean {
