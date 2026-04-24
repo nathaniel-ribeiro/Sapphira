@@ -26,7 +26,7 @@ Sapphira and all its dependencies are written in pure Java and Kotlin, meaning i
 (Windows, Mac, Linux, and many more!). Building from source requires the full JDK, but you can run a fat JAR with just the JRE.
 ### Compatible with top-rated Xiangqi engine Pikafish.
 Since Sapphira is NOT a Xiangqi engine, it offloads the task of evaluating positions and understanding the game's logic 
-to tried and tested external software. (You'll need to download [Pikafish](https://github.com/official-pikafish/Pikafish](https://drive.google.com/drive/folders/16-1o_vKzpcGMG3cy5uSfmEfhPght9tMV?usp=drive_link)).
+to tried and tested external software. (i.e. you'll need to [download Pikafish](https://drive.google.com/drive/folders/16-1o_vKzpcGMG3cy5uSfmEfhPght9tMV?usp=drive_link))
 Sapphira was originally intended to be compliant with *any* UCI-compliant engine, but currently relies on Pikafish-specific commands 
 that are not part of the UCI protocol. Future work may change this, but as of writing, Pikafish is the strongest and fastest engine, so there is really no reason to use anything else.
 
