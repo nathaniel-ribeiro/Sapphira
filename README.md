@@ -3,11 +3,8 @@
 ## Overview
 This project is a webservice designed to flag anomalous Xiangqi player behavior. 
 
-### Anomaly Detection by Isolation Forest
-Due to the high volume of online games played per day, a screening model is used to avoid wasting compute on analyzing the games of non-suspicious players.
-We use an Isolation Forest (iForest) to detect unusual (but not necessarily cheating) behaviors. An major advantage of iForests over statistical anomaly detection is that iForests
-tolerate contamination of the training data and do not require the proportion of contaminated values to be known a priori. The intuition of iForest is that if we recursively split our dataset with random hyperplanes, it would require
-fewer splits to isolate the outliers. At inference time, the forest detects anomalous games which can then be selected for deeper analysis.
+### Anomaly Detection
+Sapphira uses 12 handcrafted features to identify whether red and/or black played "anomalously" during their game. Rather than rely on a simple rule-based criteria for flagging players, Sapphira uses machine learning (isolation forest) to produce more complex criteria. The key advantages of this approach are a) isolation forests tolerate contaminated training data and b) the resulting ensemble model is difficult to effectively reverse-engineer.
 
 ### Where does the name come from?
 > Now a man named Ananias, together with his wife Sapphira, also sold a piece of property. With his wife’s full knowledge he kept back part of the money for himself, but brought the rest and put it at the apostles’ feet.
@@ -16,7 +13,7 @@ fewer splits to isolate the outliers. At inference time, the forest detects anom
 > About three hours later his wife came in, not knowing what had happened. Peter asked her, “Tell me, is this the price you and Ananias got for the land?”
 >“Yes,” she said, “that is the price.”
 > Peter said to her, “How could you conspire to test the Spirit of the Lord? Listen! The feet of the men who buried your husband are at the door, and they will carry you out also.”
-> At that moment she fell down at his feet and died. Then the young men came in and, finding her dead, carried her out and buried her beside her husband. 11 Great fear seized the whole church and all who heard about these events.
+> At that moment she fell down at his feet and died. Then the young men came in and, finding her dead, carried her out and buried her beside her husband. Great fear seized the whole church and all who heard about these events.
 
 This project seeks to strike down duplicitous players just as Ananias and Sapphira were struck down for their deceit!
 
@@ -38,6 +35,9 @@ full use of the hardware available. Horizontal scaling is also possible as the A
 
 ## Terms of Use
 Sapphira is free and distributed under the GNU General Public License version 3 (GPL v3). Essentially, this means you are free to do almost exactly what you want with the program, including distributing it among your friends, making it available for download from your website, selling it (either by itself or as part of some bigger software package), or using it as the starting point for a software project of your own. The only real limitation is that whenever you distribute Sapphira in some way, you MUST always include the license and the full source code (or a pointer to where the source code can be found) to generate the exact binary you are distributing. If you make any changes to the source code, these changes must also be made available under GPL v3.
+
+## Contributing
+Please feel free to open an issue or pull request if you want to contribute! I will not accept code from coding agents such as Claude or Codex.
 
 ## Acknowledgements
 This work would not have been possible without the advice and support of [@DavidK](https://play.xiangqi.com/@DavidK) and [@inlandtaipan](https://play.xiangqi.com/@inlandtaipan)
