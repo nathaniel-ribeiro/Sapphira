@@ -5,7 +5,7 @@ import kotlin.math.abs
 fun ReviewedGame.reviewedMovesForAlliance(alliance: Alliance) : List<ReviewedMove> =
     reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
 
-enum class Feature : IFeature {
+enum class Feature {
     ACCURACY {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesForAlliance(alliance)
@@ -137,6 +137,7 @@ enum class Feature : IFeature {
                    else reviewedGame.game.resultBlack.score
         }
     };
+    abstract fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Number?
 
     companion object {
         const val NUM_OPENING_FULL_MOVES = 7
