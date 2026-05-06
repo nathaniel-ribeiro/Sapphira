@@ -130,6 +130,12 @@ enum class Feature : IFeature {
             val moveNumberOfLongestThink = indexOfLongestThink + 1
             return moveNumberOfLongestThink
         }
+    },
+    GAME_SCORE {
+        override fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Double {
+            return if(alliance == Alliance.RED) reviewedGame.game.resultRed.score
+                   else reviewedGame.game.resultBlack.score
+        }
     };
 
     companion object {
