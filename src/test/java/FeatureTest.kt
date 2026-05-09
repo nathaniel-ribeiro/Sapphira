@@ -1,3 +1,4 @@
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
@@ -57,5 +58,13 @@ class FeatureTest {
     @Test
     fun move_number_of_longest_think_test(){
         //TODO
+    }
+
+    @Test
+    fun expectedGameScore_400PointDifference_Test(){
+        val mockRedPlayer = mockk<Player>()
+        val mockBlackPlayer = mockk<Player>()
+        every { mockRedPlayer.rating } returns 1500
+        every { mockBlackPlayer.rating } returns 1100
     }
 }

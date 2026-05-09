@@ -1,15 +1,15 @@
 data class Game(
-    val uuid : String,
-    val redPlayer: Player,
-    val blackPlayer: Player,
-    val gameTimer: Int,
-    val moveTimer: Int,
-    val increment: Int,
-    val moves: List<Move>,
-    val resultRed: GameResult,
-    val resultBlack: GameResult,
-    val gameResultReason: GameResultReason
-)
+    override val uuid : String,
+    override val redPlayer: Player,
+    override val blackPlayer: Player,
+    override val gameTimer: Int,
+    override val moveTimer: Int,
+    override val increment: Int,
+    override val moves: List<Move>,
+    override val resultRed: GameResult,
+    override val resultBlack: GameResult,
+    override val gameResultReason: GameResultReason
+) : IGame
 {
     val isUntimed
         get() = moves.map { it.thinkTime }.all { it == null }

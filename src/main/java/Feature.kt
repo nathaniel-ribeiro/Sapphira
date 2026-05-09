@@ -4,7 +4,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 fun ReviewedGame.reviewedMovesForAlliance(alliance: Alliance) : List<ReviewedMove> =
-    reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
+    reviewedMoves.filter { it.whoMoved == alliance }
 
 enum class Feature {
     ACCURACY {
@@ -73,7 +73,7 @@ enum class Feature {
     THINK_TIME_MEDIAN {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(reviewedGame.game.isUntimed) return null
-            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.movePlayed.thinkTime }
+            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             require(thinkTimes.all { it != null })
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
@@ -84,7 +84,7 @@ enum class Feature {
     THINK_TIME_IQR {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(reviewedGame.game.isUntimed) return null
-            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.movePlayed.thinkTime }
+            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
             val ds = DescriptiveStatistics(thinkTimesNonNull)
@@ -97,7 +97,7 @@ enum class Feature {
     THINK_TIME_HIGH_OUTLIER_FRACTION {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(reviewedGame.game.isUntimed) return null
-            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.movePlayed.thinkTime }
+            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
             val ds = DescriptiveStatistics(thinkTimesNonNull)
@@ -114,7 +114,7 @@ enum class Feature {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(reviewedGame.game.isUntimed) return null
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesForAlliance(alliance)
-            val moveAccuraciesWithThinkTimes = reviewedMovesForAlliance.map { Pair(it.moveAccuracy, it.movePlayed.thinkTime) }
+            val moveAccuraciesWithThinkTimes = reviewedMovesForAlliance.map { Pair(it.moveAccuracy, it.thinkTime) }
             @Suppress("UNCHECKED_CAST")
             val moveAccuraciesWithThinkTimesNonNull = moveAccuraciesWithThinkTimes as List<Pair<Double, Int>>
             return moveAccuraciesWithThinkTimesNonNull.maxBy { it.second }.first
@@ -123,7 +123,7 @@ enum class Feature {
     MOVE_NUMBER_OF_LONGEST_THINK {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Int? {
             if(reviewedGame.game.isUntimed) return null
-            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.movePlayed.thinkTime }
+            val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
             val indexOfLongestThink = thinkTimesNonNull.indices.maxBy { thinkTimesNonNull[it] }

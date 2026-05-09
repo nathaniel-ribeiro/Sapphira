@@ -4,7 +4,7 @@ data class ReviewedMove(
     val movePlayed : Move,
     val movePlayedEvaluation: Evaluation,
     val bestMoveEvaluation: Evaluation
-){
+) : IMove by movePlayed{
     val centipawnLoss: Int
         get() = (bestMoveEvaluation.centipawns - movePlayedEvaluation.centipawns).coerceAtLeast(MIN_CENTIPAWN_LOSS)
     val winPercentDrop : Double

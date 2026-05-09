@@ -1,6 +1,9 @@
 import java.util.regex.Pattern
 
-data class Move(val srcSquare: String, val destSquare: String, val whoMoved : Alliance, val thinkTime : Int? = null) {
+data class Move(override val srcSquare: String,
+                override val destSquare: String,
+                override val whoMoved : Alliance,
+                override val thinkTime : Int? = null) : IMove {
     init {
         //NOTE: this is a necessary but insufficient check for legal moves
         require(SQUARE_PATTERN.matcher(srcSquare).matches())
