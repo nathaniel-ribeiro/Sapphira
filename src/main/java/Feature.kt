@@ -1,6 +1,7 @@
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics
 import org.apache.commons.math3.stat.descriptive.rank.Median
 import kotlin.math.abs
+import kotlin.math.pow
 
 fun ReviewedGame.reviewedMovesForAlliance(alliance: Alliance) : List<ReviewedMove> =
     reviewedMoves.filter { it.movePlayed.whoMoved == alliance }
@@ -93,7 +94,7 @@ enum class Feature {
             return iqr
         }
     },
-    THINK_TIME_OUTLIER_FRACTION {
+    THINK_TIME_HIGH_OUTLIER_FRACTION {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(reviewedGame.game.isUntimed) return null
             val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.movePlayed.thinkTime }
@@ -103,9 +104,8 @@ enum class Feature {
             val q1 = ds.getPercentile(25.0)
             val q3 = ds.getPercentile(75.0)
             val iqr = q3 - q1
-            val tukeyFenceLowerBound = q1 - TUKEY_FENCE_MULTIPLIER * iqr
             val tukeyFenceUpperBound = q3 + TUKEY_FENCE_MULTIPLIER * iqr
-            val numOutliers = thinkTimesNonNull.count { it !in tukeyFenceLowerBound..tukeyFenceUpperBound }
+            val numOutliers = thinkTimesNonNull.count { it > tukeyFenceUpperBound }
             val outlierFraction = numOutliers / thinkTimesNonNull.size.toDouble()
             return outlierFraction
         }
@@ -131,10 +131,18 @@ enum class Feature {
             return moveNumberOfLongestThink
         }
     },
-    GAME_SCORE {
+    ACTUAL_GAME_SCORE {
         override fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Double {
             return if(alliance == Alliance.RED) reviewedGame.game.resultRed.score
                    else reviewedGame.game.resultBlack.score
+        }
+    },
+    EXPECTED_GAME_SCORE {
+        override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
+            val thisPlayer = if(alliance == Alliance.RED) reviewedGame.game.redPlayer else reviewedGame.game.blackPlayer
+            val opponentPlayer = if(alliance == Alliance.RED) reviewedGame.game.blackPlayer else reviewedGame.game.redPlayer
+            val expectedScore = 1 / (1 + 10.0.pow((thisPlayer.rating - opponentPlayer.rating) / 400))
+            return expectedScore
         }
     };
     abstract fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Number?
