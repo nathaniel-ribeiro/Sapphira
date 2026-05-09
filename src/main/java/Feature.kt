@@ -141,7 +141,7 @@ enum class Feature {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
             val thisPlayer = if(alliance == Alliance.RED) reviewedGame.game.redPlayer else reviewedGame.game.blackPlayer
             val opponentPlayer = if(alliance == Alliance.RED) reviewedGame.game.blackPlayer else reviewedGame.game.redPlayer
-            val expectedScore = 1 / (1 + 10.0.pow((thisPlayer.rating - opponentPlayer.rating) / 400))
+            val expectedScore = 1 / (1 + 10.0.pow((opponentPlayer.rating - thisPlayer.rating) / 400))
             return expectedScore
         }
     };
