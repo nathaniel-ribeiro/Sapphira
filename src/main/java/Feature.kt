@@ -7,13 +7,21 @@ fun ReviewedGame.reviewedMovesForAlliance(alliance: Alliance) : List<ReviewedMov
     reviewedMoves.filter { it.whoMoved == alliance }
 
 enum class Feature {
-    ACCURACY {
+    ARITHMETIC_MEAN_GAME_ACCURACY {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesForAlliance(alliance)
             // NOTE: a simple average is used here for legacy/compatibility reasons with Xiangqi.com's source code.
             // a more robust calculation is described here: https://lichess.org/page/accuracy
             val accuracy = reviewedMovesForAlliance.map { it.moveAccuracy }.average()
             return accuracy
+        }
+    },
+    HARMONIC_MEAN_GAME_ACCURACY {
+        override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
+            val reviewedMovesForAlliance = reviewedGame.reviewedMovesForAlliance(alliance)
+            val denominator = reviewedMovesForAlliance.sumOf { 1.0 / it.moveAccuracy }
+            val numerator = reviewedMovesForAlliance.size
+            return numerator / denominator
         }
     },
     RATING {
