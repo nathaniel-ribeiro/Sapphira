@@ -1,8 +1,8 @@
 data class ReviewedGame(
-    val game : Game,
+    private val game : Game,
     val reviewedMoves : List<ReviewedMove>
 ) : IGame by game {
     init {
-        require(this.reviewedMoves.map(ReviewedMove::movePlayed).toList() == this.game.moves )
+        require(this.reviewedMoves.map{ it.movePlayed }.toList() == this.game.moves )
     }
 }

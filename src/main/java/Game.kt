@@ -11,8 +11,6 @@ data class Game(
     override val gameResultReason: GameResultReason
 ) : IGame
 {
-    val isUntimed
-        get() = moves.map { it.thinkTime }.all { it == null }
     init{
         require(gameTimer > 0)
         require(moveTimer > 0)

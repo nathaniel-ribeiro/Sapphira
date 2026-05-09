@@ -18,7 +18,7 @@ enum class Feature {
     },
     RATING {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Int {
-            val player = if (alliance == Alliance.RED) reviewedGame.game.redPlayer else reviewedGame.game.blackPlayer
+            val player = if (alliance == Alliance.RED) reviewedGame.redPlayer else reviewedGame.blackPlayer
             return player.rating
         }
     },
@@ -72,7 +72,7 @@ enum class Feature {
     },
     THINK_TIME_MEDIAN {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
-            if(reviewedGame.game.isUntimed) return null
+            if(reviewedGame.isUntimed) return null
             val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             require(thinkTimes.all { it != null })
             @Suppress("UNCHECKED_CAST")
@@ -83,7 +83,7 @@ enum class Feature {
     },
     THINK_TIME_IQR {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
-            if(reviewedGame.game.isUntimed) return null
+            if(reviewedGame.isUntimed) return null
             val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
@@ -96,7 +96,7 @@ enum class Feature {
     },
     THINK_TIME_HIGH_OUTLIER_FRACTION {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
-            if(reviewedGame.game.isUntimed) return null
+            if(reviewedGame.isUntimed) return null
             val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
@@ -112,7 +112,7 @@ enum class Feature {
     },
     ACCURACY_OF_LONGEST_THINK {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
-            if(reviewedGame.game.isUntimed) return null
+            if(reviewedGame.isUntimed) return null
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesForAlliance(alliance)
             val moveAccuraciesWithThinkTimes = reviewedMovesForAlliance.map { Pair(it.moveAccuracy, it.thinkTime) }
             @Suppress("UNCHECKED_CAST")
@@ -122,7 +122,7 @@ enum class Feature {
     },
     MOVE_NUMBER_OF_LONGEST_THINK {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Int? {
-            if(reviewedGame.game.isUntimed) return null
+            if(reviewedGame.isUntimed) return null
             val thinkTimes = reviewedGame.reviewedMovesForAlliance(alliance).map { it.thinkTime }
             @Suppress("UNCHECKED_CAST")
             val thinkTimesNonNull = (thinkTimes as List<Int>).map { it.toDouble() }.toDoubleArray()
@@ -133,14 +133,14 @@ enum class Feature {
     },
     ACTUAL_GAME_SCORE {
         override fun calculate(reviewedGame : ReviewedGame, alliance : Alliance) : Double {
-            return if(alliance == Alliance.RED) reviewedGame.game.resultRed.score
-                   else reviewedGame.game.resultBlack.score
+            return if(alliance == Alliance.RED) reviewedGame.resultRed.score
+                   else reviewedGame.resultBlack.score
         }
     },
     EXPECTED_GAME_SCORE {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
-            val thisPlayer = if(alliance == Alliance.RED) reviewedGame.game.redPlayer else reviewedGame.game.blackPlayer
-            val opponentPlayer = if(alliance == Alliance.RED) reviewedGame.game.blackPlayer else reviewedGame.game.redPlayer
+            val thisPlayer = if(alliance == Alliance.RED) reviewedGame.redPlayer else reviewedGame.blackPlayer
+            val opponentPlayer = if(alliance == Alliance.RED) reviewedGame.blackPlayer else reviewedGame.redPlayer
             val expectedScore = 1 / (1 + 10.0.pow((opponentPlayer.rating - thisPlayer.rating) / 400))
             return expectedScore
         }

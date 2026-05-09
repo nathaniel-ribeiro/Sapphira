@@ -9,4 +9,5 @@ interface IGame {
     val resultRed: GameResult
     val resultBlack: GameResult
     val gameResultReason: GameResultReason
+    val isUntimed get() = moves.map { it.thinkTime }.all { it == null }
 }
