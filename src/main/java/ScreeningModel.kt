@@ -7,7 +7,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import smile.anomaly.IsolationForest
 import smile.data.DataFrame
-import smile.feature.imputation.SimpleImputer
+import smile.data.transform.InvertibleColumnTransform
+import smile.feature.imputation.KNNImputer
+import smile.feature.transform.Standardizer
 import kotlin.math.ceil
 import kotlin.math.log2
 import kotlin.math.min
@@ -22,45 +24,44 @@ val mapper: ObjectMapper = jacksonObjectMapper().apply {
     enable(SerializationFeature.INDENT_OUTPUT)
 }
 
-class ScreeningModel(
+class ScreeningModel private constructor(
     @JsonSerialize(using = SmileBase64Serializer::class)
     @JsonDeserialize(using = SmileBase64Deserializer::class)
-    val imputer : SimpleImputer? = null,
+    val scaler : InvertibleColumnTransform,
+    val imputer : KNNImputer,
     @JsonSerialize(using = SmileBase64Serializer::class)
     @JsonDeserialize(using = SmileBase64Deserializer::class)
-    val forest : IsolationForest? = null,
-    val isFitted : Boolean = false
+    val forest : IsolationForest,
 ) {
-    fun fit(data: Array<DoubleArray>) : ScreeningModel{
-        val numCols = data[0].size
-        val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
-        val fittedImputer = SimpleImputer.fit(df)
-        val imputedData = fittedImputer.apply(df).toArray()
-        val computedSubsamplingRate = (TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()).coerceIn(MIN_SAMPLING_RATE..MAX_SAMPLING_RATE)
-        val maxDepth = ceil(log2(min(TARGET_NUM_TRAINING_SAMPLES_PER_TREE, data.size).toDouble())).toInt()
-        val options = IsolationForest.Options(N_TREES, maxDepth, computedSubsamplingRate, EXTENSION_LEVEL)
-        val fittedForest = IsolationForest.fit(imputedData, options)
-        return ScreeningModel(fittedImputer, fittedForest, true)
-    }
-
     fun predict(data : Array<DoubleArray>) : DoubleArray{
-        requireNotNull(imputer){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
-        requireNotNull(forest){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
-        require(isFitted){"Must call fit() before predict(). Are you sure you are using a fitted ScreeningModel?"}
-        val numCols = data[0].size
-        val df = DataFrame.of(data, *(0 until numCols).map { "feature_$it" }.toTypedArray())
-        val imputedData = imputer.apply(df).toArray()
-        return forest.score(imputedData)
+        val df = DataFrame.of(data)
+        val scaledDf = scaler.apply(df)
+        val imputedDf = imputer.apply(scaledDf).toArray()
+        return forest.score(imputedDf)
     }
 
     fun toJson() : String = mapper.writeValueAsString(this)
 
     companion object{
-        fun fromJson(json : String) : ScreeningModel = mapper.readValue(json)
         const val N_TREES = 100
         const val TARGET_NUM_TRAINING_SAMPLES_PER_TREE = 256
         const val EXTENSION_LEVEL = 0
         const val MIN_SAMPLING_RATE = 1e-6
         const val MAX_SAMPLING_RATE = 1.0 - MIN_SAMPLING_RATE
+
+        fun fit(data: Array<DoubleArray>) : ScreeningModel{
+            val df = DataFrame.of(data)
+            val scaler = Standardizer.fit(df)
+            val scaledDf = scaler.apply(df)
+            val imputer = KNNImputer(scaledDf, 5)
+            val imputedData = imputer.apply(scaledDf).toArray()
+            val computedSubsamplingRate = (TARGET_NUM_TRAINING_SAMPLES_PER_TREE / data.size.toDouble()).coerceIn(MIN_SAMPLING_RATE..MAX_SAMPLING_RATE)
+            val maxDepth = ceil(log2(min(TARGET_NUM_TRAINING_SAMPLES_PER_TREE, data.size).toDouble())).toInt()
+            val options = IsolationForest.Options(N_TREES, maxDepth, computedSubsamplingRate, EXTENSION_LEVEL)
+            val forest = IsolationForest.fit(imputedData, options)
+            return ScreeningModel(scaler, imputer, forest)
+        }
+
+        fun fromJson(json : String) : ScreeningModel = mapper.readValue(json)
     }
 }
