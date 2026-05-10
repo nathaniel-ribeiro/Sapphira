@@ -127,7 +127,7 @@ enum class Feature {
     MOVE_NUMBER_OF_LONGEST_THINK {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Int? {
             if(!reviewedGame.isTimed) return null
-            val thinkTimes = reviewedGame.getThinkTimesFor()
+            val thinkTimes = reviewedGame.getThinkTimesFor(alliance)
             val indexOfLongestThink = thinkTimes.indices.maxBy { thinkTimes[it] }
             val moveNumberOfLongestThink = indexOfLongestThink + 1
             return moveNumberOfLongestThink
