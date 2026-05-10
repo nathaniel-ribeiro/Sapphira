@@ -3,10 +3,16 @@ import org.apache.commons.math3.stat.descriptive.rank.Median
 import kotlin.math.abs
 import kotlin.math.pow
 
-fun IGame.getThinkTimesFor(alliance: Alliance) : List<Int> {
+fun IGame.thinkTimesFor(alliance: Alliance) : List<Int> {
     require(this.isTimed)
-    val thinkTimes = this.moves.map { it.thinkTime }.requireNoNulls()
+    val thinkTimes = this.moves
+                         .filter { it.whoMoved == alliance }
+                         .map { it.thinkTime }.requireNoNulls()
     return thinkTimes
+}
+
+fun ReviewedGame.reviewedMovesFor(alliance: Alliance) : List<ReviewedMove> {
+    return reviewedMoves.filter { it.whoMoved == alliance }
 }
 
 enum class Feature {
@@ -22,8 +28,8 @@ enum class Feature {
     HARMONIC_MEAN_GAME_ACCURACY {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesFor(alliance)
-            val denominator = reviewedMovesForAlliance.sumOf { 1.0 / it.moveAccuracy }
             val numerator = reviewedMovesForAlliance.size
+            val denominator = reviewedMovesForAlliance.sumOf { 1.0 / it.moveAccuracy }
             return numerator / denominator
         }
     },
@@ -84,7 +90,7 @@ enum class Feature {
     THINK_TIME_MEDIAN {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(!reviewedGame.isTimed) return null
-            val thinkTimes = reviewedGame.getThinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
+            val thinkTimes = reviewedGame.thinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
             val median = Median()
             return median.evaluate(thinkTimes)
         }
@@ -92,7 +98,7 @@ enum class Feature {
     THINK_TIME_IQR {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(!reviewedGame.isTimed) return null
-            val thinkTimes = reviewedGame.getThinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
+            val thinkTimes = reviewedGame.thinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
             val ds = DescriptiveStatistics(thinkTimes)
             val q1 = ds.getPercentile(25.0)
             val q3 = ds.getPercentile(75.0)
@@ -103,7 +109,7 @@ enum class Feature {
     THINK_TIME_HIGH_OUTLIER_FRACTION {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(!reviewedGame.isTimed) return null
-            val thinkTimes = reviewedGame.getThinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
+            val thinkTimes = reviewedGame.thinkTimesFor(alliance).map { it.toDouble() }.toDoubleArray()
             val ds = DescriptiveStatistics(thinkTimes)
             val q1 = ds.getPercentile(25.0)
             val q3 = ds.getPercentile(75.0)
@@ -118,7 +124,7 @@ enum class Feature {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double? {
             if(!reviewedGame.isTimed) return null
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesFor(alliance)
-            val thinkTimes = reviewedGame.getThinkTimesFor(alliance)
+            val thinkTimes = reviewedGame.thinkTimesFor(alliance)
             val indexOfLongestThink = thinkTimes.indices.maxBy { thinkTimes[it] }
             val accuracyOfLongestThink = reviewedMovesForAlliance[indexOfLongestThink].moveAccuracy
             return accuracyOfLongestThink
@@ -127,7 +133,7 @@ enum class Feature {
     MOVE_NUMBER_OF_LONGEST_THINK {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Int? {
             if(!reviewedGame.isTimed) return null
-            val thinkTimes = reviewedGame.getThinkTimesFor(alliance)
+            val thinkTimes = reviewedGame.thinkTimesFor(alliance)
             val indexOfLongestThink = thinkTimes.indices.maxBy { thinkTimes[it] }
             val moveNumberOfLongestThink = indexOfLongestThink + 1
             return moveNumberOfLongestThink
