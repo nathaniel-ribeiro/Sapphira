@@ -56,7 +56,7 @@ class Pikafish(executable : File, numThreads : Int = DEFAULT_THREADS, hashSizeMi
                 return line
             }
         }
-        throw RuntimeException("Process terminated before keyword: '${keyword}' was received.")
+        error("Process terminated before keyword: '${keyword}' was received.")
     }
 
     fun makeMove(board: Board, move: Move): Board {
