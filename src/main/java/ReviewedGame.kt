@@ -1,5 +1,5 @@
 data class ReviewedGame(
-    private val game : Game,
+    private val game : IGame,
     val reviewedMoves : List<ReviewedMove>
 ) : IGame by game {
     init {

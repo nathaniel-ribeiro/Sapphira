@@ -34,7 +34,7 @@ class Server : CliktCommand() {
         }
 
         val model = ScreeningModel.fromJson(modelFile.readText())
-        val featureService = FeatureAggregationService(Feature.entries)
+        val featureService = FeatureAggregationService(Features.entries)
 
         embeddedServer(Netty, port = port) {
             install(ContentNegotiation) {
@@ -44,7 +44,7 @@ class Server : CliktCommand() {
                 post("/screen-game") {
                     val pikafish = pool.receive()
                     try {
-                        val game = call.receive<Game>()
+                        val game = call.receive<IGame>()
                         val gameReviewService = GameReviewService(pikafish)
                         val reviewed = gameReviewService.review(game, nodesToSearchPerMove)
                         val redData = featureService.getFeatures(reviewed, Alliance.RED)

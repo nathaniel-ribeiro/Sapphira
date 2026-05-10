@@ -49,7 +49,7 @@ class Trainer : CliktCommand() {
             }.awaitAll()
         }
 
-        val featureService = FeatureAggregationService(Feature.entries)
+        val featureService = FeatureAggregationService(Features.entries)
         val redData = reviewedGames.map { featureService.getFeatures(it, Alliance.RED) }.toTypedArray()
         val blackData = reviewedGames.map { featureService.getFeatures(it, Alliance.BLACK) }.toTypedArray()
         val data = redData.plus(blackData)

@@ -4,9 +4,9 @@ import java.io.File
 import java.util.regex.Pattern
 
 class GameImportingService {
-    fun importFromCSV(csvFilePath : File) : List<Game>{
+    fun importFromCSV(csvFilePath : File) : List<IGame>{
         val df = DataFrame.readCsv(csvFilePath)
-        val games = ArrayList<Game>()
+        val games = ArrayList<IGame>()
         for(row in df){
             val uuid = row["game_uuid"] as String
             val redPlayer = Player(row["red_username"] as String, row["red_is_guest"] as Boolean, row["red_is_banned"] as Boolean, row["red_rating"] as Int)

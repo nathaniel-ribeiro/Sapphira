@@ -2,7 +2,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 
-class FeatureTest {
+class FeaturesTest {
     private val reviewedGame = mockk<ReviewedGame>()
 
     @Test

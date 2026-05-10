@@ -7,7 +7,8 @@ fun IGame.thinkTimesFor(alliance: Alliance) : List<Int> {
     require(this.isTimed)
     val thinkTimes = this.moves
                          .filter { it.whoMoved == alliance }
-                         .map { it.thinkTime }.requireNoNulls()
+                         .map { it.thinkTime }
+                         .requireNoNulls()
     return thinkTimes
 }
 
@@ -15,7 +16,7 @@ fun ReviewedGame.reviewedMovesFor(alliance: Alliance) : List<ReviewedMove> {
     return reviewedMoves.filter { it.whoMoved == alliance }
 }
 
-enum class Feature {
+enum class Features {
     ARITHMETIC_MEAN_GAME_ACCURACY {
         override fun calculate(reviewedGame: ReviewedGame, alliance: Alliance): Double {
             val reviewedMovesForAlliance = reviewedGame.reviewedMovesFor(alliance)

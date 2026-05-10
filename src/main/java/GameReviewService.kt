@@ -1,5 +1,5 @@
 class GameReviewService(val pikafish: Pikafish) {
-    fun review(game: Game, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
+    fun review(game: IGame, nodesToSearchPerMove : Int = DEFAULT_NODES_TO_SEARCH_PER_MOVE): ReviewedGame {
         if(nodesToSearchPerMove < MIN_NODES_TO_SEARCH_PER_MOVE) throw IllegalArgumentException()
         var curBoard = Board.STARTING_BOARD
         val reviewedMoves = mutableListOf<ReviewedMove>()
