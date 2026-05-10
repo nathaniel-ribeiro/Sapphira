@@ -15,6 +15,7 @@ data class Game(
         require(gameTimer > 0)
         require(moveTimer > 0)
         require(increment >= 0)
+        // TODO: create separate TimedMove and/or TimedGame classes, untimed moves and games have no use for this field
         require(moves.all { it.thinkTime != null } || moves.all { it.thinkTime == null })
     }
 }
