@@ -55,7 +55,7 @@ class Trainer : CliktCommand() {
         val data = redData.plus(blackData)
 
         val dataExportService = DataExportService()
-        val headers = featureService.getFeatureNames()
+        val headers = featureService.featureNames
         dataExportService.saveToCsv("processed_training_data.csv", headers, data)
         log.log(Level.INFO, "Saved training data as CSV")
 

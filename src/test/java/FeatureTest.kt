@@ -61,10 +61,7 @@ class FeatureTest {
     }
 
     @Test
-    fun expectedGameScore_400PointDifference_Test(){
-        val mockRedPlayer = mockk<Player>()
-        val mockBlackPlayer = mockk<Player>()
-        every { mockRedPlayer.rating } returns 1500
-        every { mockBlackPlayer.rating } returns 1100
+    fun expected_score_test(){
+        //TODO
     }
 }
