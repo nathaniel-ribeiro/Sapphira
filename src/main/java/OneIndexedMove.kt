@@ -22,18 +22,6 @@ data class OneIndexedMove(
         return this.srcSquare + this.destSquare
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is OneIndexedMove) return false
-        return this.srcSquare == other.srcSquare && this.destSquare == other.destSquare
-    }
-
-    override fun hashCode(): Int {
-        var result = srcSquare.hashCode()
-        result = 31 * result + destSquare.hashCode()
-        return result
-    }
-
     companion object {
         private val SQUARE_PATTERN : Pattern = Pattern.compile("[a-i]([1-9]|10)")
     }
