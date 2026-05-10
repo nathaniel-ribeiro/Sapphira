@@ -59,7 +59,7 @@ class Trainer : CliktCommand() {
         dataExportService.saveToCsv("processed_training_data.csv", headers, data)
         log.log(Level.INFO, "Saved training data as CSV")
 
-        val screeningModel = ScreeningModel().fit(data)
+        val screeningModel = ScreeningModel.fit(data)
         File("model.json").writeText(screeningModel.toJson())
         log.log(Level.INFO, "Saved trained screening model to JSON file")
     }
